@@ -68,7 +68,6 @@ struct TexturePacker {
         // Cache padding
         uint padding = this.config.padding;
 
-        uint goalX = 0;
         uint goalY = 0;
 
         // Cache widths
