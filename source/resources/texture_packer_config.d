@@ -20,13 +20,13 @@ struct TexturePackerConfig {
      * Trim alpha space out of textures to shrink them
      * This will create a new object in memory for each texture trimmed!
      */
-    bool trim = true;
+    bool trim = false;
 
     /*
      * Enables the edge debug, with the color specified
      * Please note: This will overwrite the edge pixels in your texture!
      */
-    bool showDebugEdge = true;
+    bool showDebugEdge = false;
 
     // The width of the texture packer's canvas
     uint width = 400;
