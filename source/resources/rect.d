@@ -18,4 +18,12 @@ struct Rect {
     bool isEdge(uint x, uint y) {
         return x == this.x || x == this.x + this.width - 1 || y == this.y || y == this.y + this.height - 1;
     }
+
+    // Inverse AABB check, best cast: 1 cpu cycle, worst cast: 4 cpu cycles
+    bool collides(Rect AABB) {
+        return !(AABB.x + AABB.width < this.x ||
+                 AABB.x > this.x + this.width ||
+                 AABB.y + AABB.height < this.y ||
+                 AABB.y > this.y + this.height );
+    }
 }
