@@ -1,0 +1,5 @@
+The textures 1 through 10 do not have any documented licensing that are specific to images.
+So the assumption is that the images are MIT? Even though that does not fit image licensing.
+
+This is where the images come from:
+https://github.com/PistonDevelopers/texture_packer
