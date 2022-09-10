@@ -10,8 +10,8 @@ struct TexturePackerConfig {
     // Blank pixel border around each texture
     uint border = 0;
 
-    // The border color. Default is red
-    Color borderColor = Color(255,0,0,255);
+    // The edge color. Default is red
+    Color edgeColor = Color(255,0,0,255);
 
     // The blank space border. Default is nothing
     Color blankSpaceColor = Color(0,0,0,0);
@@ -23,10 +23,10 @@ struct TexturePackerConfig {
     bool trim = true;
 
     /*
-     * Enables the border debug, with the color specified
+     * Enables the edge debug, with the color specified
      * Please note: This will overwrite the edge pixels in your texture!
      */
-    bool showDebugBorder = true;
+    bool showDebugEdge = true;
 
     // The width of the texture packer's canvas
     uint width = 400;
@@ -40,12 +40,12 @@ struct TexturePackerConfig {
      * Please note: The fields in this structure are left public so you can create a blank slate
      * with defaults, then piecemeal your changes in if you don't like the defaults!
      */
-    this(uint border, Color borderColor, Color blankSpaceColor, bool trim, bool showDebugBorder, uint width, uint height) {
+    this(uint border, Color edgeColor, Color blankSpaceColor, bool trim, bool showDebugEdge, uint width, uint height) {
         this.border = border;
-        this.borderColor = borderColor;
+        this.edgeColor = edgeColor;
         this.blankSpaceColor = blankSpaceColor;
         this.trim = trim;
-        this.showDebugBorder = showDebugBorder;
+        this.showDebugEdge = showDebugEdge;
         this.height = height;
         this.width = width;
     }
