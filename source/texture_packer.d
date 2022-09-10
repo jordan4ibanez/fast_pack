@@ -1,5 +1,7 @@
 module texture_packer;
 
+import std.stdio;
+
 import image;
 
 import resources.rect;
@@ -32,6 +34,106 @@ struct TexturePacker {
      * This allows game developers to handle a lot less boilerplate
      */
     void uploadTexture(string fileLocation) {
-        TrueColorImage tempImageObject = loadImageFromFile(fileLocation).getAsTrueColorImage();
+        TrueColorImage tempTextureObject = loadImageFromFile(fileLocation).getAsTrueColorImage();
+
+        // Trim it and generate a new trimmed texture
+        if (this.config.trim) {
+            tempTextureObject = this.trimTexture(tempTextureObject);
+        }
+    }
+
+    /*
+     * Trims and creates a new texture in memory, then returns it
+     */
+    TrueColorImage trimTexture(TrueColorImage untrimmedTexture) {
+
+        uint textureWidth = untrimmedTexture.width();
+        uint textureHeight = untrimmedTexture.height();
+
+        uint minX = 0;
+
+        // Scan rows for alpha
+        for (int x = 0; x < textureWidth; x++) {
+            bool found = false;
+            for (int y = 0; y < textureHeight; y++) {
+                if (untrimmedTexture.getPixel(x,y).a > 0) {
+                    minX = x;
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                break;
+            }
+        }
+
+        uint maxX = 0;
+
+        // Scan rows for alpha
+        for (int x = textureWidth - 1; x >= 0; x--) {
+            bool found = false;
+            for (int y = 0; y < textureHeight; y++) {
+                if (untrimmedTexture.getPixel(x,y).a > 0) {
+                    maxX = x + 1;
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                break;
+            }
+        }
+
+        uint minY = 0;
+
+        // Scan columns for alpha
+        for (int y = 0; y < textureHeight; y++) {
+            bool found = false;
+            for (int x = 0; x < textureWidth; x++) {
+                if (untrimmedTexture.getPixel(x,y).a > 0) {
+                    minY = y;
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                break;
+            }
+        }
+
+        uint maxY = 0;
+
+        // Scan columns for alpha
+        for (int y = textureHeight - 1; y >= 0; y--) {
+            bool found = false;
+            for (int x = 0; x < textureWidth; x++) {
+                if (untrimmedTexture.getPixel(x,y).a > 0) {
+                    maxY = y + 1;
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                break;
+            }
+        }
+
+        uint newSizeX = maxX - minX;
+        uint newSizeY = maxY - minY;
+
+        writeln(newSizeY);
+
+        TrueColorImage trimmedTexture = new TrueColorImage(newSizeX, newSizeY);
+
+        for (uint x = 0; x < newSizeX; x++) {
+            for (uint y = 0; y < newSizeY; y++) {
+                trimmedTexture.setPixel(x,y, untrimmedTexture.getPixel(x + minX, y + minY));
+            }
+        }
+        
+        writeImageToPngFile("test.png", trimmedTexture);
+
+
+        return untrimmedTexture;
     }
 }
