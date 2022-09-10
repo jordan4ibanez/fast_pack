@@ -14,10 +14,10 @@ struct TexturePackerConfig {
     uint padding = 0;
 
     // The edge color. Default is red
-    Color edgeColor = Color(255,0,0,255);
+    Color edgeColor = *new Color(255,0,0,255);
 
     // The blank space border. Default is nothing
-    Color blankSpaceColor = Color(0,0,0,0);
+    Color blankSpaceColor = *new Color(0,0,0,0);
 
     /*
      * Trim alpha space out of textures to shrink them
