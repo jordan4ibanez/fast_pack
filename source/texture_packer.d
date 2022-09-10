@@ -5,7 +5,7 @@ import std.stdio;
 import image;
 
 import resources.rect;
-import resources.texture_packer_config;
+import texture_packer_config;
 import std.typecons: tuple, Tuple;
 import std.math: sqrt;
 
@@ -162,9 +162,8 @@ struct TexturePacker {
         return returningColor;
     }
 
-    // Construct the components of the texture packer into a usable image, then save it to file
-    void saveToFile(string fileName) {
-
+    // Constructs a memory image of the current canvas
+    TrueColorImage saveToTrueColorImage() {
         uint width = this.getWidth();
         uint height = this.getHeight();
 
@@ -177,6 +176,14 @@ struct TexturePacker {
                 constructingImage.setPixel(x, y, this.getPixel(x,y));
             }
         }
+
+        return constructingImage;
+    }
+
+    // Construct the components of the texture packer into a usable image, then save it to file
+    void saveToFile(string fileName) {
+
+        TrueColorImage constructingImage = this.saveToTrueColorImage();
 
         // Use in asdr built in api to save it to a file for debugging
         writeImageToPngFile(fileName, constructingImage);
@@ -212,7 +219,7 @@ struct TexturePacker {
      * Uploads a texture into the associative arrays of the texture packer.
      * This allows game developers to handle a lot less boilerplate
      */
-    void uploadTexture(string key, string fileLocation) {
+    private void uploadTexture(string key, string fileLocation) {
         TrueColorImage tempTextureObject = loadImageFromFile(fileLocation).getAsTrueColorImage();
 
         // Trim it and generate a new trimmed texture
