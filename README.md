@@ -39,10 +39,9 @@ void main() {
     packer.saveToFile("imagePack.png");
 
     // Or you use it to work with OpenGL like so
-    // (This is using Mike's awesome bindbc OpenGL library)
+    // (This is using Mike Parker's awesome bindbc OpenGL library)
     TrueColorImage myTextureAtlas = packer.saveToTrueColorImage();
 
-    /*
     GLuint width = myTextureAtlas.width();
     GLuint height = myTextureAtlas.height();
     ubyte[] tempData = myTextureAtlas.imageData.bytes;
@@ -52,7 +51,6 @@ void main() {
     glBindTexture(GL_TEXTURE_2D, id);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tempData.ptr);
-    */
 
     /*
 
