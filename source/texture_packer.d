@@ -49,6 +49,7 @@ struct TexturePacker {
         // Grab the AABB. ( Note: Not a direct dictionary object reference )
         Rect AABB = this.collisionBoxes[key];
 
+        // Do a tetris pack bottom right to top left
         tetrisPack(key, AABB);
 
         // Finally, set the position in the texture packer's dictionary
@@ -77,6 +78,7 @@ struct TexturePacker {
         uint bestX = uint.max;
         uint bestY = uint.max;
 
+        // Cached fail state
         bool failed = false;
 
         // 64 bit long to cover uint max
@@ -110,6 +112,7 @@ struct TexturePacker {
                     }
                 }
 
+                // If it successfully found a new position, update the best X and Y
                 if (!failed) {
                     uint newScore = AABB.y - goalY;
                     if (newScore <= score) {
