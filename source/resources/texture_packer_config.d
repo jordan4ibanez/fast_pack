@@ -21,10 +21,18 @@ struct TexturePackerConfig {
      */
     bool showDebugBorder = true;
 
-    this(uint border, Color borderColor, bool trim, bool showDebugBorder) {
+    // The width of the texture packer's canvas
+    uint width = 400;
+
+    // The height of the texture packer's canvas
+    uint height = 400;
+
+    this(uint border, Color borderColor, bool trim, bool showDebugBorder, uint width, uint height) {
         this.border = border;
         this.borderColor = borderColor;
         this.trim = trim;
         this.showDebugBorder = showDebugBorder;
+        this.height = height;
+        this.width = width;
     }
 }
