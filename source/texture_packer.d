@@ -32,6 +32,6 @@ struct TexturePacker {
      * This allows game developers to handle a lot less boilerplate
      */
     void uploadTexture(string fileLocation) {
-        
+        TrueColorImage tempImageObject = loadImageFromFile(fileLocation).getAsTrueColorImage();
     }
 }
