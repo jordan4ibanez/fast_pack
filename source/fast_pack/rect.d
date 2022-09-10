@@ -46,11 +46,13 @@ struct Rect {
  */
 
 struct GLRectDouble {
-    /// Top left
+    /// Left
     double minX = 0.0;
+    /// Top
     double minY = 0.0;
-    /// Bottom right
+    /// Right
     double maxX = 0.0;
+    /// Bottom
     double maxY = 0.0;
 }
 
@@ -60,10 +62,12 @@ struct GLRectDouble {
  * This has different variables because it is easier to understand when mapping textures
  */
 struct GLRectFloat {
-    /// Top left
+    /// Left
     float minX = 0.0;
+    /// Top
     float minY = 0.0;
-    /// Bottom right
+    /// Right
     float maxX = 0.0;
+    /// Bottom
     float maxY = 0.0;
 }
