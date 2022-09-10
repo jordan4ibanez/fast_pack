@@ -2,10 +2,14 @@ module resources.texture_packer_config;
 
 import image;
 
+/*
+ * The configuration for the texture packer with (currently debugging) defaults
+ */
 struct TexturePackerConfig {
 
     // Blank pixel border around each texture
     uint border = 0;
+
     // The border color. Default is red
     Color borderColor = Color(255,0,0,255);
 
