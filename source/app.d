@@ -13,13 +13,13 @@ void main() {
     }
 
 
-    writeln("packer width = ", packer.getWidth());
-    writeln("packer height = ", packer.getHeight());
+    // writeln("packer width = ", packer.getWidth());
+    // writeln("packer height = ", packer.getHeight());
 
-    writeln(packer.getPixel(0,0));
+    // writeln(packer.getPixel(0,0));
 
     packer.saveToFile("test.png");
 
     // Only use the best debug info when testing 
-    writeln("it worked");
+    // writeln("it worked");
 }
