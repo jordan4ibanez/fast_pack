@@ -22,6 +22,21 @@ struct TexturePackerConfig {
     /// The blank space border. Default is nothing
     Color blankSpaceColor = *new Color(0,0,0,0);
 
+    /** 
+     * Enables the auto resizer algorithm. This will expand the canvas when it runs out of room.
+     * You can combine this with a starting width and height of the canvas to your liking!
+     * Default is: false
+     */
+    bool autoResize = false;
+    
+    /**
+     * The auto resizer algorithm's resize amount.
+     * When the canvas runs out of space, it will expand it by this many pixels.
+     * It may have to loop a few times if this is too small to pack a new texture if this is too small.
+     * Default is: 50
+     */
+    uint expansionAmount = 50;
+
     /**
      * Trim alpha space out of textures to shrink them
      * This will create a new object in memory for each texture trimmed!
@@ -42,17 +57,29 @@ struct TexturePackerConfig {
 
     /**
      * Customized constructor
-     *
      * Please note: The fields in this structure are left public so you can create a blank slate
      * with defaults, then piecemeal your changes in if you don't like the defaults!
      */
-    this(uint padding, Color edgeColor, Color blankSpaceColor, bool trim, bool showDebugEdge, uint width, uint height) {
+    this(
+        uint padding,
+        Color edgeColor,
+        Color blankSpaceColor,
+        bool autoResize,
+        uint expansionAmount,
+        bool trim,
+        bool showDebugEdge,
+        uint width,
+        uint height ) {
+
         this.padding = padding;
         this.edgeColor = edgeColor;
         this.blankSpaceColor = blankSpaceColor;
+        this.autoResize = autoResize;
+        this.expansionAmount = expansionAmount;
         this.trim = trim;
         this.showDebugEdge = showDebugEdge;
         this.height = height;
         this.width = width;
+
     }
 }
