@@ -3,7 +3,7 @@
 		"jordan4ibanez"
 	],
 	"copyright": "Copyright © 2022, jordan4ibanez",
-	"description": "A minimal D application.",
+	"description": "A fast texture packer for D",
 	"license": "MIT",
 	"name": "fast_pack"
 }
