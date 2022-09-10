@@ -26,6 +26,12 @@ struct TexturePacker {
     // This holds the actual texture data
     private TrueColorImage[string] textures;
 
+    // The current width of the canvas
+    private uint width = 0;
+
+    // The current height of the canvas
+    private uint height = 0;
+
     /*
      * A constructor with a predefined configuration
      */
@@ -52,8 +58,11 @@ struct TexturePacker {
         // Do a tetris pack bottom right to top left
         tetrisPack(key, AABB);
 
-        // Finally, set the position in the texture packer's dictionary
+        // Set the position in the texture packer's dictionary
         this.collisionBoxes[key] = AABB;
+
+        // Finally, update the canvas's size in memory
+        this.updateCanvasSize();
     }
 
     /*
@@ -164,9 +173,6 @@ struct TexturePacker {
 
     // Constructs a memory image of the current canvas
     TrueColorImage saveToTrueColorImage() {
-        uint width = this.getWidth();
-        uint height = this.getHeight();
-
         // Creates a blank image with the current canvas size
         TrueColorImage constructingImage = new TrueColorImage(width, height);
 
@@ -189,30 +195,19 @@ struct TexturePacker {
         writeImageToPngFile(fileName, constructingImage);
     }
 
-    // Get the width of the texture packer's canvas
-    uint getWidth() {
-        uint width = 0;
+    // Update the width of the texture packer's canvas
+    void updateCanvasSize() {
         // Iterate through each texture's collision box to see if it's wider than the current calculation
         foreach (Rect collisionBox; this.collisionBoxes) {
             uint newMaxWidth = collisionBox.x + collisionBox.width;
-            if (newMaxWidth > width) {
-                width = newMaxWidth;
-            }
-        }
-        return width + this.config.padding;
-    }
-
-    // Get the height of the texture packer's canvas
-    uint getHeight() {
-        uint height = 0;
-        // Iterate through each texture's collision box to see if it's taller than the current calculation
-        foreach (Rect collisionBox; this.collisionBoxes) {
             uint newMaxHeight = collisionBox.y + collisionBox.height;
+            if (newMaxWidth > width) {
+                width = newMaxWidth + this.config.padding;
+            }
             if (newMaxHeight > height) {
-                height = newMaxHeight;
+                height = newMaxHeight + this.config.padding;
             }
         }
-        return height + this.config.padding;
     }
 
     /*
