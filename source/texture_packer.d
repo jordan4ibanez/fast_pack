@@ -7,6 +7,7 @@ import image;
 import resources.rect;
 import resources.texture_packer_config;
 import std.typecons: tuple, Tuple;
+import std.math: sqrt;
 
 /*
  * The texture packer structure, can also be allocated to heap via:
@@ -48,7 +49,7 @@ struct TexturePacker {
         // Grab the AABB. ( Note: Not a direct dictionary object reference )
         Rect AABB = this.collisionBoxes[key];
 
-        tetrisPack(AABB);
+        tetrisPack(key, AABB);
 
         // Finally, set the position in the texture packer's dictionary
         this.collisionBoxes[key] = AABB;
@@ -57,8 +58,70 @@ struct TexturePacker {
     /*
      * Internal pixel by pixel inverse tetris scan with scoring algorithm
      */
-    private void tetrisPack(ref Rect AABB) {
+    private void tetrisPack(string key, ref Rect AABB) {
 
+        // Start the score at the max value possible for reduction formula
+        double score = double.max;
+
+        bool found = false;
+
+        uint goalX = 0;
+        uint goalY = 0;
+
+        uint maxX = this.config.width;
+        uint maxY = this.config.height;
+
+        uint bestX = uint.max;
+        uint bestY = uint.max;
+
+        bool failed = false;
+
+        // 64 bit long to cover uint max
+        for (long x = maxX; x >= 0; x--) {
+            for (long y = maxY; y >= 0; y--) {
+
+                failed = false;
+
+                AABB.x = cast(uint)x;
+                AABB.y = cast(uint)y;
+
+                // out of bounds failure
+                if (AABB.x + AABB.width >= maxX || AABB.y + AABB.height >= maxY) {
+                    failed = true;
+                }
+
+                // Collided with other box failure
+                // Index each collision box to check if within
+                foreach (data; this.collisionBoxes.byKeyValue()){
+                    Rect otherAABB = data.value;
+                    if (data.key != key && AABB.collides(otherAABB)) {
+                        failed = true;
+                    }
+                }
+
+                if (!failed) {
+                    double newScore = sqrt(
+                        (cast(double)(AABB.y - goalY) * 
+                        cast(double)(AABB.y - goalY)) + 
+                        (cast(double)(AABB.x - goalX) * 
+                        cast(double)(AABB.x - goalX))
+                    );
+                    if (newScore <= score) {
+                        found = true;
+                        score = newScore;
+                        bestX = cast(uint)x;
+                        bestY = cast(uint)y;
+                    }
+                }
+            }
+        }
+
+        if (!found) {
+            throw new Exception("Not enough room for texture! Make the packer canvas bigger!");
+        }
+
+        AABB.x = bestX;
+        AABB.y = bestY;
     }
 
 
