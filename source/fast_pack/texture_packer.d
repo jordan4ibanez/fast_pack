@@ -65,6 +65,28 @@ struct TexturePacker {
         this.updateCanvasSize();
     }
 
+    // Get texture coordinates for working with OpenGL with double floating point precision
+    GLRectDouble getTextureCoordinatesDouble(string key) {
+        Rect AABB = collisionBoxes[key];
+        return GLRectDouble(
+            cast(double) AABB.x / cast(double) width,
+            cast(double) AABB.y / cast(double) height,
+            (cast(double) AABB.x + cast(double) AABB.width) / cast(double) width,
+            (cast(double) AABB.y + cast(double) AABB.height) / cast(double) height            
+        );
+    }
+
+    // Get texture coordinates for working with OpenGL with double floating point precision
+    GLRectFloat getTextureCoordinatesFloat(string key) {
+        Rect AABB = collisionBoxes[key];
+        return GLRectFloat(
+            cast(float) AABB.x / cast(float) width,
+            cast(float) AABB.y / cast(float) height,
+            (cast(float) AABB.x + cast(float) AABB.width) / cast(float) width,
+            (cast(float) AABB.y + cast(float) AABB.height) / cast(float) height            
+        );
+    }
+
     /*
      * Internal pixel by pixel inverse tetris scan with scoring algorithm
      */
