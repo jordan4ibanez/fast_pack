@@ -15,13 +15,13 @@ import std.typecons: tuple, Tuple;
 struct TexturePacker {
 
     // The configuration of the texture packer
-    TexturePackerConfig config = *new TexturePackerConfig();
+    private TexturePackerConfig config = *new TexturePackerConfig();
 
     // This holds the collision boxes of the textures
-    Rect[string] collisionBoxes;
+    private Rect[string] collisionBoxes;
 
     // This holds the actual texture data
-    TrueColorImage[string] textures;
+    private TrueColorImage[string] textures;
 
     /*
      * A constructor with a predefined configuration
@@ -31,15 +31,38 @@ struct TexturePacker {
     }
 
     /*
+     * This allows game developers to tell the texture packer what to upload as simply as possible
+     */
+    void pack(string key, string fileLocation) {
+
+        // Automate upload internally
+        this.uploadTexture(key, fileLocation);
+
+        // Throw exception if key is not in the internal library
+        if (!(key in this.collisionBoxes)) {
+            throw new Exception("Something has gone wrong getting collision box from internal library!");   
+        }
+
+        // Grab the AABB. ( Note: Not a direct dictionary object reference )
+        Rect AABB = this.collisionBoxes[key];
+
+        
+        
+    }
+
+    void debugIt(string key) {
+        writeln(this.collisionBoxes[key]);
+    }
+
+    /*
      * Uploads a texture into the associative arrays of the texture packer.
      * This allows game developers to handle a lot less boilerplate
      */
-    Tuple!(Rect, TrueColorImage) uploadTexture(string fileLocation) {
+    private void uploadTexture(string key, string fileLocation) {
         TrueColorImage tempTextureObject = loadImageFromFile(fileLocation).getAsTrueColorImage();
 
         // Trim it and generate a new trimmed texture
         if (this.config.trim) {
-            writeln("trimmed");
             tempTextureObject = this.trimTexture(tempTextureObject);
         }
 
@@ -51,14 +74,23 @@ struct TexturePacker {
             throw new Exception("Tried to upload a completely transparent texture!");
         }
 
-        // Return both data types
-        return tuple(AABB, tempTextureObject);
+        // Throw exception if something crazy happens
+        if (tempTextureObject is null) {
+            throw new Exception("An unkown error has occurred on upload!");
+        }
+
+        // Plop it into the internal keys
+        this.collisionBoxes[key] = AABB;
+        this.textures[key] = tempTextureObject;
+
     }
 
     /*
      * Trims and creates a new texture in memory, then returns it
      */
-    TrueColorImage trimTexture(TrueColorImage untrimmedTexture) {
+    private TrueColorImage trimTexture(TrueColorImage untrimmedTexture) {
+
+        // This is basically the worlds lamest linear 2d voxel raycast
 
         uint textureWidth = untrimmedTexture.width();
         uint textureHeight = untrimmedTexture.height();
