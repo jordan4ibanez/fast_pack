@@ -35,18 +35,31 @@ struct Rect {
     }
 }
 
-// A double based struct to directly map textures to vertices in OpenGL
+/*
+ * A double based struct to directly map textures to vertices in OpenGL
+ * 
+ * This has different variables because it is easier to understand when mapping textures
+ */
+
 struct GLRectDouble {
-    double x = 0;
-    double y = 0;
-    double width = 0;
-    double height = 0;
+    // Top left
+    double minX = 0.0;
+    double minY = 0.0;
+    // Bottom right
+    double maxX = 0.0;
+    double maxY = 0.0;
 }
 
-// A float based struct to directly map textures to vertices in OpenGL
+/*
+ * A float based struct to directly map textures to vertices in OpenGL
+ *
+ * This has different variables because it is easier to understand when mapping textures
+ */
 struct GLRectFloat {
-    float x = 0;
-    float y = 0;
-    float width = 0;
-    float height = 0;
+    // Top left
+    float minX = 0.0;
+    float minY = 0.0;
+    // Bottom right
+    float maxX = 0.0;
+    float maxY = 0.0;
 }
