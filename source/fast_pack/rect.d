@@ -1,3 +1,7 @@
+/** 
+ * The texture packer collision detection & OpenGL worker structs.
+ */
+
 module fast_pack.rect;
 
 /**

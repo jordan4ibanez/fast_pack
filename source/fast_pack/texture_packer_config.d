@@ -1,3 +1,6 @@
+/** 
+ * The texture packer configuration struct.
+ */
 module fast_pack.texture_packer_config;
 
 import image;

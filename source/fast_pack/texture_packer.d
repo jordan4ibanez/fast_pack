@@ -1,3 +1,7 @@
+/** 
+ * The texture packer struct.
+ */
+
 module fast_pack.texture_packer;
 
 import std.stdio;
@@ -10,7 +14,7 @@ import std.typecons: tuple, Tuple;
 import std.math: sqrt;
 
 /**
- * The texture packer structure, can also be allocated to heap via:
+ * The texture packer structure. Can also be allocated to heap via:
  * TexturePacker blah = *new TexturePacker();
  */
 struct TexturePacker {
