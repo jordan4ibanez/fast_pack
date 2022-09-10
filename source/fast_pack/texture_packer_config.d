@@ -2,7 +2,7 @@ module fast_pack.texture_packer_config;
 
 import image;
 
-/*
+/**
  * The configuration for the texture packer with defaults
  *
  * Please note: The fields in this structure are left public so you can create a blank slate
@@ -10,34 +10,34 @@ import image;
  */
 struct TexturePackerConfig {
 
-    // Blank pixel border padding around each texture
+    /// Blank pixel border padding around each texture
     uint padding = 0;
 
-    // The edge color. Default is red
+    /// The edge color. Default is red
     Color edgeColor = *new Color(255,0,0,255);
 
-    // The blank space border. Default is nothing
+    /// The blank space border. Default is nothing
     Color blankSpaceColor = *new Color(0,0,0,0);
 
-    /*
+    /**
      * Trim alpha space out of textures to shrink them
      * This will create a new object in memory for each texture trimmed!
      */
     bool trim = false;
 
-    /*
+    /**
      * Enables the edge debug, with the color specified
      * Please note: This will overwrite the edge pixels in your texture!
      */
     bool showDebugEdge = false;
 
-    // The width of the texture packer's canvas
+    /// The width of the texture packer's canvas
     uint width = 400;
 
-    // The height of the texture packer's canvas
+    /// The height of the texture packer's canvas
     uint height = 400;
 
-    /*
+    /**
      * Customized constructor
      *
      * Please note: The fields in this structure are left public so you can create a blank slate
