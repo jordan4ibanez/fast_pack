@@ -34,3 +34,19 @@ struct Rect {
                  AABB.y > this.y + this.height + padding);
     }
 }
+
+// A double based struct to directly map textures to vertices in OpenGL
+struct GLRectDouble {
+    double x = 0;
+    double y = 0;
+    double width = 0;
+    double height = 0;
+}
+
+// A float based struct to directly map textures to vertices in OpenGL
+struct GLRectFloat {
+    float x = 0;
+    float y = 0;
+    float width = 0;
+    float height = 0;
+}
