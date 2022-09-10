@@ -7,8 +7,8 @@ import image;
  */
 struct TexturePackerConfig {
 
-    // Blank pixel border around each texture
-    uint border = 0;
+    // Blank pixel border padding around each texture
+    uint padding = 3;
 
     // The edge color. Default is red
     Color edgeColor = Color(255,0,0,255);
@@ -40,8 +40,8 @@ struct TexturePackerConfig {
      * Please note: The fields in this structure are left public so you can create a blank slate
      * with defaults, then piecemeal your changes in if you don't like the defaults!
      */
-    this(uint border, Color edgeColor, Color blankSpaceColor, bool trim, bool showDebugEdge, uint width, uint height) {
-        this.border = border;
+    this(uint padding, Color edgeColor, Color blankSpaceColor, bool trim, bool showDebugEdge, uint width, uint height) {
+        this.padding = padding;
         this.edgeColor = edgeColor;
         this.blankSpaceColor = blankSpaceColor;
         this.trim = trim;
