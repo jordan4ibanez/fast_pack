@@ -1,4 +1,4 @@
-module texture_packer_config;
+module fast_pack.texture_packer_config;
 
 import image;
 

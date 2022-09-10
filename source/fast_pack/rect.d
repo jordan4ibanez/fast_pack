@@ -1,4 +1,4 @@
-module resources.rect;
+module fast_pack.rect;
 
 /*
  * AABB bounding box for textures

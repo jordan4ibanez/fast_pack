@@ -1,11 +1,11 @@
-module texture_packer;
+module fast_pack.texture_packer;
 
 import std.stdio;
 
 import image;
 
-import resources.rect;
-import texture_packer_config;
+import fast_pack.rect;
+import fast_pack.texture_packer_config;
 import std.typecons: tuple, Tuple;
 import std.math: sqrt;
 
