@@ -35,7 +35,7 @@ void main() {
     }
 
     // You can save the texture packer as a raw image
-    // The image below is what this saves to
+    // The image below is what this saves to. It uses the /assets/ textures.
     packer.saveToFile("imagePack.png");
 
     // Or you use it to work with OpenGL like so
