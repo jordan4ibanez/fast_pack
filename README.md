@@ -38,8 +38,11 @@ void main() {
     // The image below is what this saves to. It uses the /assets/ textures.
     packer.saveToFile("imagePack.png");
 
-    // Or you use it to work with OpenGL like so
-    // (This is using Mike Parker's awesome bindbc OpenGL library)
+    /*
+    Or you use it to work with OpenGL like this:
+    Note: This is using Mike Parker's awesome bindbc OpenGL library.
+    You can find this here: https://code.dlang.org/packages/bindbc-opengl
+    */
     TrueColorImage myTextureAtlas = packer.saveToTrueColorImage();
 
     GLuint width = myTextureAtlas.width();
