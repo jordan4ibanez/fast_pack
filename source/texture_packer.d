@@ -118,21 +118,20 @@ struct TexturePacker {
             }
         }
 
+        // Create a new texture with trimmed size
+
         uint newSizeX = maxX - minX;
         uint newSizeY = maxY - minY;
 
-        writeln(newSizeY);
-
         TrueColorImage trimmedTexture = new TrueColorImage(newSizeX, newSizeY);
+
+        // Blit the old pixels into the new texture with modified location
 
         for (uint x = 0; x < newSizeX; x++) {
             for (uint y = 0; y < newSizeY; y++) {
                 trimmedTexture.setPixel(x,y, untrimmedTexture.getPixel(x + minX, y + minY));
             }
         }
-        
-        writeImageToPngFile("test.png", trimmedTexture);
-
 
         return untrimmedTexture;
     }
