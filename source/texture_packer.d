@@ -65,9 +65,13 @@ struct TexturePacker {
 
         bool found = false;
 
+        // Cache padding
+        uint padding = this.config.padding;
+
         uint goalX = 0;
         uint goalY = 0;
 
+        // Cache widths
         uint maxX = this.config.width;
         uint maxY = this.config.height;
 
@@ -86,7 +90,8 @@ struct TexturePacker {
                 AABB.y = cast(uint)y;
 
                 // out of bounds failure
-                if (AABB.x + AABB.width >= maxX || AABB.y + AABB.height >= maxY) {
+                if (AABB.x + AABB.width + padding >= maxX ||
+                    AABB.y + AABB.height + padding >= maxY) {
                     failed = true;
                 }
 
@@ -94,8 +99,9 @@ struct TexturePacker {
                 // Index each collision box to check if within
                 foreach (data; this.collisionBoxes.byKeyValue()){
                     Rect otherAABB = data.value;
-                    if (data.key != key && AABB.collides(otherAABB)) {
+                    if (data.key != key && AABB.collides(otherAABB, padding)) {
                         failed = true;
+                        break;
                     }
                 }
 
@@ -183,7 +189,7 @@ struct TexturePacker {
                 width = newMaxWidth;
             }
         }
-        return width;
+        return width + this.config.padding;
     }
 
     // Get the height of the texture packer's canvas
@@ -196,7 +202,7 @@ struct TexturePacker {
                 height = newMaxHeight;
             }
         }
-        return height;
+        return height + this.config.padding;
     }
 
     /*
