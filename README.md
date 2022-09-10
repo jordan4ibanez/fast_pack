@@ -5,6 +5,11 @@ This uses an algorithm I call "inverse tetris". It tries to find the best spot, 
 
 This relies on Adam D. Ruppe's awesome image library: https://code.dlang.org/packages/arsd-official%3Aimage_files
 
+
+This is the texture atlas that the code below saved:
+
+![Fancy texture atlas](https://raw.githubusercontent.com/jordan4ibanez/fast_pack/main/github_assets/imagePack.png)
+
 Here is a simple tutorial on how to use it:
 
 ```d
@@ -35,7 +40,7 @@ void main() {
     }
 
     // You can save the texture packer as a raw image
-    // The image below is what this saves to. It uses the /assets/ textures.
+    // The image above is what this saves to. It uses the /assets/ textures.
     packer.saveToFile("imagePack.png");
 
     /*
