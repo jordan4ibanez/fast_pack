@@ -2,6 +2,11 @@
 	"authors": [
 		"jordan4ibanez"
 	],
+    "dependencies": {
+		"arsd-official:color_base": "~>10.9.2",
+		"arsd-official:image_files": "~>10.9.2",
+		"arsd-official:png": "~>10.9.2"
+	},
 	"copyright": "Copyright © 2022, jordan4ibanez",
 	"description": "A fast texture packer for D",
 	"license": "MIT",
