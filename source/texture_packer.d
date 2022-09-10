@@ -51,7 +51,6 @@ struct TexturePacker {
             throw new Exception("Tried to upload a completely transparent texture!");
         }
 
-
         // Return both data types
         return tuple(AABB, tempTextureObject);
     }
