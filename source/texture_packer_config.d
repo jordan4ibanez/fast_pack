@@ -1,4 +1,4 @@
-module resources.texture_packer_config;
+module texture_packer_config;
 
 import image;
 
