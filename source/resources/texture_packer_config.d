@@ -13,6 +13,9 @@ struct TexturePackerConfig {
     // The border color. Default is red
     Color borderColor = Color(255,0,0,255);
 
+    // The blank space border. Default is nothing
+    Color blankSpaceColor = Color(0,0,0,0);
+
     /*
      * Trim alpha space out of textures to shrink them
      * This will create a new object in memory for each texture trimmed!
@@ -37,9 +40,10 @@ struct TexturePackerConfig {
      * Please note: The fields in this structure are left public so you can create a blank slate
      * with defaults, then piecemeal your changes in if you don't like the defaults!
      */
-    this(uint border, Color borderColor, bool trim, bool showDebugBorder, uint width, uint height) {
+    this(uint border, Color borderColor, Color blankSpaceColor, bool trim, bool showDebugBorder, uint width, uint height) {
         this.border = border;
         this.borderColor = borderColor;
+        this.blankSpaceColor = blankSpaceColor;
         this.trim = trim;
         this.showDebugBorder = showDebugBorder;
         this.height = height;

@@ -63,8 +63,8 @@ struct TexturePacker {
      */
     Color getPixel(uint x, uint y) {
 
-        // Starts off as transparent
-        Color returningColor = Color(0,0,0,0);
+        // Starts off as blank space
+        Color returningColor = this.config.blankSpaceColor;
         
         // Index each collision box to check if within
         foreach (data; this.collisionBoxes.byKeyValue()){
