@@ -6,6 +6,7 @@ import image;
 
 import resources.rect;
 import resources.texture_packer_config;
+import std.typecons: tuple, Tuple;
 
 /*
  * The texture packer structure, can also be allocated to heap via:
@@ -33,13 +34,20 @@ struct TexturePacker {
      * Uploads a texture into the associative arrays of the texture packer.
      * This allows game developers to handle a lot less boilerplate
      */
-    void uploadTexture(string fileLocation) {
+    Tuple!(Rect, TrueColorImage) uploadTexture(string fileLocation) {
         TrueColorImage tempTextureObject = loadImageFromFile(fileLocation).getAsTrueColorImage();
 
         // Trim it and generate a new trimmed texture
         if (this.config.trim) {
+            writeln("trimmed");
             tempTextureObject = this.trimTexture(tempTextureObject);
         }
+
+        // Get an AABB of the texture
+        Rect AABB = Rect(0,0,tempTextureObject.width(), tempTextureObject.height());
+
+        // Return both data types
+        return tuple(AABB, tempTextureObject);
     }
 
     /*
@@ -133,6 +141,6 @@ struct TexturePacker {
             }
         }
 
-        return untrimmedTexture;
+        return trimmedTexture;
     }
 }
