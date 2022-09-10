@@ -224,7 +224,7 @@ struct TexturePacker {
     }
 
     /// Update the width of the texture packer's canvas
-    void updateCanvasSize() {
+    private void updateCanvasSize() {
         /// Iterate through each texture's collision box to see if it's wider than the current calculation
         foreach (Rect collisionBox; this.collisionBoxes) {
             uint newMaxWidth = collisionBox.x + collisionBox.width;
