@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/fast_pack
+fast_pack.so
+fast_pack.dylib
+fast_pack.dll
+fast_pack.a
+fast_pack.lib
+fast_pack-test-*
+*.exe
+*.o
+*.obj
+*.lst

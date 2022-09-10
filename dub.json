@@ -1,0 +1,9 @@
+{
+	"authors": [
+		"jordan4ibanez"
+	],
+	"copyright": "Copyright © 2022, jordan4ibanez",
+	"description": "A minimal D application.",
+	"license": "MIT",
+	"name": "fast_pack"
+}
