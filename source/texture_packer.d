@@ -1,15 +1,18 @@
 module texture_packer;
 
 import image;
-import resources.rectangle;
+
+import resources.rect;
+import resources.texture_packer_config;
 
 struct TexturePacker {
+
+    TexturePackerConfig config = *new TexturePackerConfig();
+
     Rectangle[string] collisionBoxes;
     TrueColorImage[string] textures;
 
-    uint border = 0;
-    Color borderColor;
-
-
-
+    this(TexturePackerConfig config) {
+        this.config = config;
+    }
 }
