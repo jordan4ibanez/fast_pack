@@ -46,6 +46,12 @@ struct TexturePacker {
         // Get an AABB of the texture
         Rect AABB = Rect(0,0,tempTextureObject.width(), tempTextureObject.height());
 
+        // Throw exception if the texture size is 0 on x or y axis
+        if (AABB.width == 0 || AABB.height == 0) {
+            throw new Exception("Tried to upload a completely transparent texture!");
+        }
+
+
         // Return both data types
         return tuple(AABB, tempTextureObject);
     }
