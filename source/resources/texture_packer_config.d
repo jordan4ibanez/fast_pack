@@ -13,7 +13,7 @@ struct TexturePackerConfig {
      * Trim alpha space out of textures to shrink them
      * This will create a new object in memory for each texture trimmed!
      */
-    bool trim = false;
+    bool trim = true;
 
     /*
      * Enables the border debug, with the color specified
@@ -27,6 +27,12 @@ struct TexturePackerConfig {
     // The height of the texture packer's canvas
     uint height = 400;
 
+    /*
+     * Customized constructor
+     *
+     * Please note: The fields in this structure are left public so you can create a blank slate
+     * with defaults, then piecemeal your changes in if you don't like the defaults!
+     */
     this(uint border, Color borderColor, bool trim, bool showDebugBorder, uint width, uint height) {
         this.border = border;
         this.borderColor = borderColor;
