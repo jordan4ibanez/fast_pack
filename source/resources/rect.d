@@ -27,10 +27,10 @@ struct Rect {
     }
 
     // Inverse AABB check, best cast: 1 cpu cycle, worst cast: 4 cpu cycles
-    bool collides(Rect AABB) {
-        return !(AABB.x + AABB.width - 1 < this.x ||
-                 AABB.x > this.x + this.width ||
-                 AABB.y + AABB.height - 1 < this.y ||
-                 AABB.y > this.y + this.height );
+    bool collides(Rect AABB, uint padding) {
+        return !(AABB.x + AABB.width - 1 + padding < this.x ||
+                 AABB.x + padding > this.x + this.width ||
+                 AABB.y + AABB.height - 1 + padding < this.y ||
+                 AABB.y + padding > this.y + this.height );
     }
 }
