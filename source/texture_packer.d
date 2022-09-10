@@ -46,19 +46,91 @@ struct TexturePacker {
         // Grab the AABB. ( Note: Not a direct dictionary object reference )
         Rect AABB = this.collisionBoxes[key];
 
-        
-        
+        // Packer x,y starts at 0
+        AABB.x = 0;
+
+        // Finally, set the position in the texture packer's dictionary
+        this.collisionBoxes[key] = AABB;
     }
 
     void debugIt(string key) {
         writeln(this.collisionBoxes[key]);
     }
 
+
+    /*
+     * Get a specific pixel color on the texture's canvas
+     */
+    Color getPixel(uint x, uint y) {
+
+        // Starts off as transparent
+        Color returningColor = Color(0,0,0,0);
+        
+        // Index each collision box to check if within
+        foreach (data; this.collisionBoxes.byKeyValue()){
+
+            Rect AABB = data.value;
+
+            if (AABB.containsPoint(x, y)) {
+                // Subtract canvas position by AABB position to get the position on the texture
+                if (this.config.showDebugBorder && AABB.isEdge(x,y)) {
+                    returningColor = this.config.borderColor;
+                } else {
+                    returningColor = this.textures[data.key].getPixel(x - AABB.x, y - AABB.y);
+                }
+                break;
+            }
+        }
+
+        return returningColor;
+    }
+
+    // Construct the components of the texture packer into a usable image, then save it to file
+    void saveToFile(string fileName) {
+        uint width = this.getWidth();
+        uint height = this.getHeight();
+        TrueColorImage constructingImage = new TrueColorImage(width, height);
+
+        for (uint x = 0; x < width; x++) {
+            for (uint y = 0; y < height; y++) {
+                constructingImage.setPixel(x, y, this.getPixel(x,y));
+            }
+        }
+
+        writeImageToPngFile(fileName, constructingImage);
+    }
+
+    // Get the width of the texture packer's canvas
+    uint getWidth() {
+        uint width = 0;
+        // Iterate through each texture's collision box to see if it's wider than the current calculation
+        foreach (Rect collisionBox; this.collisionBoxes) {
+            uint newMaxWidth = collisionBox.x + collisionBox.width;
+            if (newMaxWidth > width) {
+                width = newMaxWidth;
+            }
+        }
+        return width;
+    }
+
+    // Get the height of the texture packer's canvas
+    uint getHeight() {
+        uint height = 0;
+        // Iterate through each texture's collision box to see if it's taller than the current calculation
+        foreach (Rect collisionBox; this.collisionBoxes) {
+            uint newMaxHeight = collisionBox.y + collisionBox.height;
+            if (newMaxHeight > height) {
+                height = newMaxHeight;
+            }
+        }
+        return height;
+    }
+
     /*
      * Uploads a texture into the associative arrays of the texture packer.
      * This allows game developers to handle a lot less boilerplate
      */
-    private void uploadTexture(string key, string fileLocation) {
+    void uploadTexture(string key, string fileLocation) {
         TrueColorImage tempTextureObject = loadImageFromFile(fileLocation).getAsTrueColorImage();
 
         // Trim it and generate a new trimmed texture
