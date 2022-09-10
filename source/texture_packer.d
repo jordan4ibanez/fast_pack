@@ -48,11 +48,17 @@ struct TexturePacker {
         // Grab the AABB. ( Note: Not a direct dictionary object reference )
         Rect AABB = this.collisionBoxes[key];
 
-        // Packer x,y starts at 0
-        AABB.x = 0;
+        tetrisPack(AABB);
 
         // Finally, set the position in the texture packer's dictionary
         this.collisionBoxes[key] = AABB;
+    }
+
+    /*
+     * Internal pixel by pixel inverse tetris scan with scoring algorithm
+     */
+    private void tetrisPack(ref Rect AABB) {
+
     }
 
 
@@ -71,8 +77,8 @@ struct TexturePacker {
 
             if (AABB.containsPoint(x, y)) {
                 // Debug outlining texture
-                if (this.config.showDebugBorder && AABB.isEdge(x,y)) {
-                    returningColor = this.config.borderColor;
+                if (this.config.showDebugEdge && AABB.isEdge(x,y)) {
+                    returningColor = this.config.edgeColor;
                 } else {
                     // Subtract canvas position by AABB position to get the position on the texture
                     returningColor = this.textures[data.key].getPixel(x - AABB.x, y - AABB.y);
