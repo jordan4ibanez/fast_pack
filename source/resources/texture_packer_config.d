@@ -1,11 +1,13 @@
 module resources.texture_packer_config;
 
+import image;
+
 struct TexturePackerConfig {
 
     // Blank pixel border around each texture
     uint border = 0;
     // The border color. Default is red
-    Color borderColor = new Color(255,0,0,255);
+    Color borderColor = Color(255,0,0,255);
 
     /*
      * Trim alpha space out of textures to shrink them
