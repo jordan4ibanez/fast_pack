@@ -11,7 +11,7 @@ struct Rect {
 
     // Inverse AABB point check, best case: 1 cpu cycle, worst case: 4 cpu cycles
     bool containsPoint(uint x, uint y) {
-        return !(x < this.x || x > this.x + this.width || y < this.y || y > this.y + this.width);
+        return !(x < this.x || x > this.x + this.width || y < this.y || y > this.y + this.height);
     }
 
     // Check if a point is on the texture's edge
