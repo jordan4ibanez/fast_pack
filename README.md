@@ -3,8 +3,20 @@
 
 This uses an algorithm I call "inverse tetris". It tries to find the best spot, highest on the y axis, and furthest to the left. It does this pixel by pixel going upwards instead of downwards, hence why it is called inverse tetris.
 
-This relies on Adam D. Ruppe's awesome image library: https://code.dlang.org/packages/arsd-official%3Aimage_files
+[This relies on Adam D. Ruppe's awesome image library. Click here to see it.](https://code.dlang.org/packages/arsd-official%3Aimage_files)
 
+[If you want to learn how this works, click here.](https://github.com/jordan4ibanez/fast_pack/blob/main/HowThisWorks.md)
+
+This is written to be modular. For example:
+- You can only import the packer and config to turn it into a command line texture folder packer saver if you really want.
+- You could just import the packer and pack a font with trim so it looks nice.
+- You could just import the rects for some reason and work with those if you want I guess
+
+On my current todo list of the master branch for 2.0.0:
+
+1. Auto resizing, the canvas will expand if it runs out of room.
+2. An algorithm that will pack biggest to smallest based on area of collision box.
+3. Generics. It would be fantastic to use this to store character maps in multiple languages! Or maybe you want to order your items by objects, or numbers. Generics are important.
 
 This is the texture atlas that the code below saved:
 
