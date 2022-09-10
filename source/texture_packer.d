@@ -14,6 +14,8 @@ import std.typecons: tuple, Tuple;
  */
 struct TexturePacker {
 
+    // Please note: indexing position actually starts at the top left of the image (0,0)
+
     // The configuration of the texture packer
     private TexturePackerConfig config = *new TexturePackerConfig();
 
@@ -53,10 +55,6 @@ struct TexturePacker {
         this.collisionBoxes[key] = AABB;
     }
 
-    void debugIt(string key) {
-        writeln(this.collisionBoxes[key]);
-    }
-
 
     /*
      * Get a specific pixel color on the texture's canvas
@@ -72,10 +70,11 @@ struct TexturePacker {
             Rect AABB = data.value;
 
             if (AABB.containsPoint(x, y)) {
-                // Subtract canvas position by AABB position to get the position on the texture
+                // Debug outlining texture
                 if (this.config.showDebugBorder && AABB.isEdge(x,y)) {
                     returningColor = this.config.borderColor;
                 } else {
+                    // Subtract canvas position by AABB position to get the position on the texture
                     returningColor = this.textures[data.key].getPixel(x - AABB.x, y - AABB.y);
                 }
                 break;
@@ -87,16 +86,21 @@ struct TexturePacker {
 
     // Construct the components of the texture packer into a usable image, then save it to file
     void saveToFile(string fileName) {
+
         uint width = this.getWidth();
         uint height = this.getHeight();
+
+        // Creates a blank image with the current canvas size
         TrueColorImage constructingImage = new TrueColorImage(width, height);
 
+        // Linear scan the whole canvas, set pixels to constructing image
         for (uint x = 0; x < width; x++) {
             for (uint y = 0; y < height; y++) {
                 constructingImage.setPixel(x, y, this.getPixel(x,y));
             }
         }
 
+        // Use in asdr built in api to save it to a file for debugging
         writeImageToPngFile(fileName, constructingImage);
     }
 
