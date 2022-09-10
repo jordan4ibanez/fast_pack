@@ -61,7 +61,7 @@ struct TexturePacker {
     private void tetrisPack(string key, ref Rect AABB) {
 
         // Start the score at the max value possible for reduction formula
-        double score = double.max;
+        uint score = uint.max;
 
         bool found = false;
 
@@ -112,12 +112,7 @@ struct TexturePacker {
                 }
 
                 if (!failed) {
-                    double newScore = sqrt(
-                        (cast(double)(AABB.y - goalY) * 
-                        cast(double)(AABB.y - goalY)) + 
-                        (cast(double)(AABB.x - goalX) * 
-                        cast(double)(AABB.x - goalX))
-                    );
+                    uint newScore = AABB.y - goalY;
                     if (newScore <= score) {
                         found = true;
                         score = newScore;
