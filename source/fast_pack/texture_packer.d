@@ -44,7 +44,7 @@ struct TexturePacker {
     }
 
     /**
-     * This allows game developers to tell the texture packer what to upload as simply as possible
+     * This allows game developers to add in textures to the texture packer canvas with a string key and string file location
      */
     void pack(string key, string fileLocation) {
 
