@@ -90,8 +90,14 @@ struct TexturePacker {
                 AABB.y = cast(uint)y;
 
                 // out of bounds failure
-                if (AABB.x + AABB.width + padding >= maxX ||
-                    AABB.y + AABB.height + padding >= maxY) {
+                if (
+                    // Outer
+                    AABB.x + AABB.width + padding >= maxX ||
+                    AABB.y + AABB.height + padding >= maxY ||
+                    // Inner
+                    AABB.x < padding ||
+                    AABB.y < padding
+                    ) {
                     failed = true;
                 }
 
