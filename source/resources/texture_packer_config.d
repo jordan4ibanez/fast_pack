@@ -8,7 +8,7 @@ import image;
 struct TexturePackerConfig {
 
     // Blank pixel border padding around each texture
-    uint padding = 3;
+    uint padding = 0;
 
     // The edge color. Default is red
     Color edgeColor = Color(255,0,0,255);
