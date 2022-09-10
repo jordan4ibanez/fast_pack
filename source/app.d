@@ -7,7 +7,9 @@ void main() {
     // *new is optional
 	TexturePacker packer = *new TexturePacker();
 
-    packer.uploadTexture("assets/5.png");
+    packer.pack("blah", "assets/5.png");
+
+    packer.debugIt("blah");
 
     // Only use the best debug info when testing 
     writeln("it worked");
