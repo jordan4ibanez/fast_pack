@@ -21,6 +21,8 @@ struct TexturePacker {
 
     /// Please note: indexing position actually starts at the top left of the image (0,0)
 
+    private uint currentID = 0;
+
     /// The configuration of the texture packer
     private TexturePackerConfig config = *new TexturePackerConfig();
 
@@ -56,14 +58,49 @@ struct TexturePacker {
             throw new Exception("Something has gone wrong getting collision box from internal library!");   
         }
 
-        /// Grab the AABB. ( Note: Not a direct dictionary object reference )
-        Rect AABB = this.collisionBoxes[key];
-
         /// Do a tetris pack bottom right to top left
-        tetrisPack(key, AABB);
+        if (this.config.autoResize) {
+            while(!tetrisPack(key)) {
 
-        /// Set the position in the texture packer's dictionary
-        this.collisionBoxes[key] = AABB;
+                this.config.width  += this.config.expansionAmount;
+                this.config.height += this.config.expansionAmount;
+
+                // Re-sort all the items out of bounds
+                string[] allKeys;
+
+                uint currentSearch = 0;
+
+                while(currentSearch < this.currentID) {
+                    foreach (string gottenKey; this.collisionBoxes.keys()) {
+                        if (this.collisionBoxes[gottenKey].id == currentSearch) {
+                            allKeys ~= gottenKey;
+                            currentSearch++;
+                            /// Only breaks foreach
+                            break;
+                        }
+                    }
+                }
+
+                writeln(allKeys);
+                // Set the keys out of bounds
+                for (uint i = 0; i < allKeys.length; i++) {
+                    this.collisionBoxes[allKeys[i]].x = this.config.width + 1;
+                    this.collisionBoxes[allKeys[i]].y = this.config.height + 1;
+                }
+
+                // Collide them back into the box
+                for (uint i = 0; i < allKeys.length; i++) {
+                    string thisKey = allKeys[i];
+                    if (key != thisKey) {
+                        tetrisPack(thisKey);
+                    }
+                }
+
+                writeln("NEW CANVAS SIZE: ", this.config.width, " ", this.config.height);
+            }
+        } else {
+            tetrisPack(key);
+        }
 
         /// Finally, update the canvas's size in memory
         this.updateCanvasSize();
@@ -72,7 +109,10 @@ struct TexturePacker {
     /**
      * Internal pixel by pixel inverse tetris scan with scoring algorithm
      */
-    private void tetrisPack(string key, ref Rect AABB) {
+    private bool tetrisPack(string key) {
+
+        /// Grab the AABB out of the internal dictionary
+        Rect AABB = this.collisionBoxes[key];
 
         /// Start the score at the max value possible for reduction formula
         uint score = uint.max;
@@ -139,11 +179,20 @@ struct TexturePacker {
         }
 
         if (!found) {
-            throw new Exception("Not enough room for texture! Make the packer canvas bigger!");
+            if (this.config.autoResize) {
+                return false;
+            } else {
+                throw new Exception("Not enough room for texture! Make the packer canvas bigger!");
+            }
         }
 
         AABB.x = bestX;
         AABB.y = bestY;
+
+        // Finally set the collisionbox back into the internal dictionary
+        this.collisionBoxes[key] = AABB;
+
+        return true;
     }
 
 
@@ -251,8 +300,9 @@ struct TexturePacker {
             tempTextureObject = this.trimTexture(tempTextureObject);
         }
 
-        /// Get an AABB of the texture
-        Rect AABB = Rect(0,0,tempTextureObject.width(), tempTextureObject.height());
+        /// Get an AABB of the texture, with specific internally handled ID
+        Rect AABB = Rect(this.currentID, 0,0,tempTextureObject.width(), tempTextureObject.height());
+        currentID++;
 
         // Throw exception if the texture size is 0 on x or y axis
         if (AABB.width == 0 || AABB.height == 0) {
