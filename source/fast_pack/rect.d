@@ -8,12 +8,14 @@ module fast_pack.rect;
  * AABB bounding box for textures
  */
 struct Rect {
+    uint id = 0;
     uint x = 0;
     uint y = 0;
     uint width = 0;
     uint height = 0;
 
-    this(uint x, uint y, uint width, uint height) {
+    this(uint id, uint x, uint y, uint width, uint height) {
+        this.id = id;
         this.x = x;
         this.y = y;
         this.width = width;
