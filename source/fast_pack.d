@@ -31,22 +31,22 @@ struct Rect {
         this.height = height;
     }
 
-    /// Inverse AABB point check, best case: 1 cpu cycle, worst case: 4 cpu cycles
+    /// AABB point check
     bool containsPoint(uint x, uint y) {
-        return !(x < this.x || x > this.x + this.width - 1 || y < this.y || y > this.y + this.height - 1);
+        return x >= this.x && x <= this.x + this.width - 1 && y >= this.y && y <= this.y + this.height - 1;
     }
 
-    /// Check if a point is on the texture's edge, best cast: 1 cpu cycle, worst cast: 4 cpu cycles
+    /// Check if a point is on the texture's edge
     bool isEdge(uint x, uint y) {
         return x == this.x || x == this.x + this.width - 1 || y == this.y || y == this.y + this.height - 1;
     }
 
-    /// Inverse AABB check, best cast: 1 cpu cycle, worst cast: 4 cpu cycles
+    /// AABB check
     bool collides(Rect AABB, uint padding) {
-        return !(AABB.x + AABB.width + padding - 1 < this.x ||
-                 AABB.x > this.x + this.width + padding ||
-                 AABB.y + AABB.height + padding - 1 < this.y ||
-                 AABB.y > this.y + this.height + padding);
+        return AABB.x + AABB.width + padding - 1 >= this.x &&
+                 AABB.x <= this.x + this.width + padding &&
+                 AABB.y + AABB.height + padding - 1 >= this.y &&
+                 AABB.y <= this.y + this.height + padding;
     }
 }
 
@@ -89,6 +89,13 @@ struct GLRectFloat {
  * with defaults, then piecemeal your changes in if you don't like the defaults!
  */
 struct TexturePackerConfig {
+
+    /**
+     * Fast mode disables all complex algorithms like:
+     * Atlas rebuilds, edge colors, blank space color, and just shoves the textures in there wherever.
+     * Default is: false
+     */
+    bool fastMode = false;
 
     /**
      * Blank pixel border padding around each texture
@@ -150,34 +157,6 @@ struct TexturePackerConfig {
      * Default is: 400
      */
     uint height = 400;
-
-    /**
-     * Customized constructor
-     * Please note: The fields in this structure are left public so you can create a blank slate
-     * with defaults, then piecemeal your changes in if you don't like the defaults!
-     */
-    this(
-        uint padding,
-        Color edgeColor,
-        Color blankSpaceColor,
-        bool autoResize,
-        uint expansionAmount,
-        bool trim,
-        bool showDebugEdge,
-        uint width,
-        uint height ) {
-
-        this.padding = padding;
-        this.edgeColor = edgeColor;
-        this.blankSpaceColor = blankSpaceColor;
-        this.autoResize = autoResize;
-        this.expansionAmount = expansionAmount;
-        this.trim = trim;
-        this.showDebugEdge = showDebugEdge;
-        this.height = height;
-        this.width = width;
-
-    }
 }
 
 /**
@@ -250,34 +229,36 @@ struct TexturePacker(T) {
                 this.config.width  += this.config.expansionAmount;
                 this.config.height += this.config.expansionAmount;
 
-                /// Re-sort all the items out of bounds
-                T[] allKeys;
+                if (!this.config.fastMode) {
+                    /// Re-sort all the items out of bounds
+                    T[] allKeys;
 
-                /// Run through in order of insertion
-                uint currentSearch = 0;
+                    /// Run through in order of insertion
+                    uint currentSearch = 0;
 
-                while(currentSearch < this.currentID) {
-                    foreach (T gottenKey; this.collisionBoxes.keys()) {
-                        if (this.collisionBoxes[gottenKey].id == currentSearch) {
-                            allKeys ~= gottenKey;
-                            currentSearch++;
-                            /// Only breaks foreach
-                            break;
+                    while(currentSearch < this.currentID) {
+                        foreach (T gottenKey; this.collisionBoxes.keys()) {
+                            if (this.collisionBoxes[gottenKey].id == currentSearch) {
+                                allKeys ~= gottenKey;
+                                currentSearch++;
+                                /// Only breaks foreach
+                                break;
+                            }
                         }
                     }
-                }
 
-                // Set the keys out of bounds
-                for (uint i = 0; i < allKeys.length; i++) {
-                    this.collisionBoxes[allKeys[i]].x = this.config.width + 1;
-                    this.collisionBoxes[allKeys[i]].y = this.config.height + 1;
-                }
+                    // Set the keys out of bounds
+                    for (uint i = 0; i < allKeys.length; i++) {
+                        this.collisionBoxes[allKeys[i]].x = this.config.width + 1;
+                        this.collisionBoxes[allKeys[i]].y = this.config.height + 1;
+                    }
 
-                // Collide them back into the box
-                for (uint i = 0; i < allKeys.length; i++) {
-                    T thisKey = allKeys[i];
-                    if (key != thisKey) {
-                        tetrisPack(thisKey);
+                    // Collide them back into the box
+                    for (uint i = 0; i < allKeys.length; i++) {
+                        T thisKey = allKeys[i];
+                        if (key != thisKey) {
+                            tetrisPack(thisKey);
+                        }
                     }
                 }
             }
@@ -321,6 +302,9 @@ struct TexturePacker(T) {
         uint[] xPositions;
         uint[] yPositions;
 
+        // Cached data arrays
+        auto keyValue = this.collisionBoxes.byKeyValue();
+
         /// These are the minimum positions (x: 0, y: 0 with 0 padding)
         xPositions ~= padding;
         yPositions ~= padding;
@@ -329,8 +313,10 @@ struct TexturePacker(T) {
         foreach (T gottenKey; this.collisionBoxes.keys()) {
             if (gottenKey != key) {
                 Rect thisCollisionBox = this.collisionBoxes[gottenKey];
-                xPositions ~= thisCollisionBox.x + thisCollisionBox.width + padding;
-                yPositions ~= thisCollisionBox.y + thisCollisionBox.height + padding;
+                if (!(thisCollisionBox.width > this.width || thisCollisionBox.y > this.height)) {
+                    xPositions ~= thisCollisionBox.x + thisCollisionBox.width + padding;
+                    yPositions ~= thisCollisionBox.y + thisCollisionBox.height + padding;
+                }
             }
         }
 
@@ -361,7 +347,7 @@ struct TexturePacker(T) {
 
                 /// Collided with other box failure
                 /// Index each collision box to check if within
-                foreach (data; this.collisionBoxes.byKeyValue()){
+                foreach (data; keyValue){
                     Rect otherAABB = data.value;
                     if (data.key != key && AABB.collides(otherAABB, padding)) {
                         failed = true;
