@@ -1,18 +1,184 @@
-/** 
- * The texture packer struct.
+/*
+ * A fast texture packer for D.
  */
 
-module fast_pack.texture_packer;
+module fast_pack;
 
 import std.stdio;
 
 import image;
 
-import fast_pack.rect;
-import fast_pack.texture_packer_config;
 import std.typecons: tuple, Tuple;
 import std.math: sqrt;
 import std.algorithm.sorting: sort;
+
+
+/**
+ * AABB bounding box for textures
+ */
+struct Rect {
+    uint id = 0;
+    uint x = 0;
+    uint y = 0;
+    uint width = 0;
+    uint height = 0;
+
+    this(uint id, uint x, uint y, uint width, uint height) {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+    }
+
+    /// Inverse AABB point check, best case: 1 cpu cycle, worst case: 4 cpu cycles
+    bool containsPoint(uint x, uint y) {
+        return !(x < this.x || x > this.x + this.width - 1 || y < this.y || y > this.y + this.height - 1);
+    }
+
+    /// Check if a point is on the texture's edge, best cast: 1 cpu cycle, worst cast: 4 cpu cycles
+    bool isEdge(uint x, uint y) {
+        return x == this.x || x == this.x + this.width - 1 || y == this.y || y == this.y + this.height - 1;
+    }
+
+    /// Inverse AABB check, best cast: 1 cpu cycle, worst cast: 4 cpu cycles
+    bool collides(Rect AABB, uint padding) {
+        return !(AABB.x + AABB.width + padding - 1 < this.x ||
+                 AABB.x > this.x + this.width + padding ||
+                 AABB.y + AABB.height + padding - 1 < this.y ||
+                 AABB.y > this.y + this.height + padding);
+    }
+}
+
+/**
+ * A double based struct to directly map textures to vertices in OpenGL
+ * This has different variables because it is easier to understand when mapping textures
+ */
+
+struct GLRectDouble {
+    /// Left
+    double minX = 0.0;
+    /// Top
+    double minY = 0.0;
+    /// Right
+    double maxX = 0.0;
+    /// Bottom
+    double maxY = 0.0;
+}
+
+/**
+ * A float based struct to directly map textures to vertices in OpenGL
+ *
+ * This has different variables because it is easier to understand when mapping textures
+ */
+struct GLRectFloat {
+    /// Left
+    float minX = 0.0;
+    /// Top
+    float minY = 0.0;
+    /// Right
+    float maxX = 0.0;
+    /// Bottom
+    float maxY = 0.0;
+}
+
+
+/**
+ * The configuration for the texture packer with defaults
+ * Please note: The fields in this structure are left public so you can create a blank slate
+ * with defaults, then piecemeal your changes in if you don't like the defaults!
+ */
+struct TexturePackerConfig {
+
+    /**
+     * Blank pixel border padding around each texture
+     * Default is: 0;
+     */
+    uint padding = 0;
+
+    /**
+     * The edge color.
+     * Default is: red
+     */
+    Color edgeColor = *new Color(255,0,0,255);
+
+    /**
+     * The blank space border.
+     * Default is nothing
+     */
+    Color blankSpaceColor = *new Color(0,0,0,0);
+
+    /** 
+     * Enables the auto resizer algorithm. This will expand the canvas when it runs out of room.
+     * You can combine this with a starting width and height of the canvas to your liking!
+     * Default is: true
+     */
+    bool autoResize = true;
+    
+    /**
+     * The auto resizer algorithm's resize amount.
+     * When the canvas runs out of space, it will expand it by this many pixels.
+     * It may have to loop a few times if this is too small to pack a new texture if this is too small.
+     * AKA: Too small with thrash it and it will have to continuously rebuild. AKA: Slower
+     * Too big and you'll have wasted space, I recommend to experiment with it and print it to png!
+     * Default is: 100
+     */
+    uint expansionAmount = 100;
+
+    /**
+     * Trim alpha space out of textures to shrink them
+     * This will create a new object in memory for each texture trimmed!
+     * Default is: false
+     */
+    bool trim = false;
+
+    /**
+     * Enables the edge debug, with the color specified
+     * Please note: This will overwrite the edge pixels in your texture!
+     * Default is: false
+     */
+    bool showDebugEdge = false;
+
+    /**
+     * The width of the texture packer's canvas
+     * Default is: 400
+     */
+    uint width = 400;
+
+    /**
+     * The height of the texture packer's canvas
+     * Default is: 400
+     */
+    uint height = 400;
+
+    /**
+     * Customized constructor
+     * Please note: The fields in this structure are left public so you can create a blank slate
+     * with defaults, then piecemeal your changes in if you don't like the defaults!
+     */
+    this(
+        uint padding,
+        Color edgeColor,
+        Color blankSpaceColor,
+        bool autoResize,
+        uint expansionAmount,
+        bool trim,
+        bool showDebugEdge,
+        uint width,
+        uint height ) {
+
+        this.padding = padding;
+        this.edgeColor = edgeColor;
+        this.blankSpaceColor = blankSpaceColor;
+        this.autoResize = autoResize;
+        this.expansionAmount = expansionAmount;
+        this.trim = trim;
+        this.showDebugEdge = showDebugEdge;
+        this.height = height;
+        this.width = width;
+
+    }
+}
 
 /**
  * The texture packer structure. Can also be allocated to heap via:
