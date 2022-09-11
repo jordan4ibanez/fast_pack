@@ -48,12 +48,29 @@ struct TexturePacker(T) {
     }
 
     /**
-     * This allows game developers to add in textures to the texture packer canvas with a generic key and string file location
+     * This allows game developers to add in textures to the texture packer canvas with a generic key and string file location.
      */
     void pack(T key, string fileLocation) {
-
         /// Automate upload internally
         this.uploadTexture(key, fileLocation);
+
+        this.internalPack(key);
+    }
+
+    /**
+     * This allows game developers to add in textures to the texture packer canvas with a generic key and TrueColorImage from memory.
+     */
+    void pack(T key, TrueColorImage memoryImage) {
+        /// Automate upload internally
+        this.uploadTexture(key, memoryImage);
+
+        this.internalPack(key);
+    }
+
+    /*
+     * Internally packs the image from the key provided when it was uploaded
+     */
+    private void internalPack(T key) {
 
         /// Throw exception if key is not in the internal library
         if (!(key in this.collisionBoxes)) {
@@ -336,7 +353,36 @@ struct TexturePacker(T) {
         /// Plop it into the internal keys
         this.collisionBoxes[key] = AABB;
         this.textures[key] = tempTextureObject;
+    }
 
+    /**
+     * Uploads a texture into the associative arrays of the texture packer.
+     * This allows game developers to handle a lot less boilerplate
+     */
+    private void uploadTexture(T key, TrueColorImage memoryImage) {
+
+        /// Trim it and generate a new trimmed texture
+        if (this.config.trim) {
+            memoryImage = this.trimTexture(memoryImage);
+        }
+
+        /// Get an AABB of the texture, with specific internally handled ID
+        Rect AABB = Rect(this.currentID, 0,0,memoryImage.width(), memoryImage.height());
+        currentID++;
+
+        // Throw exception if the texture size is 0 on x or y axis
+        if (AABB.width == 0 || AABB.height == 0) {
+            throw new Exception("Tried to upload a completely transparent texture!");
+        }
+
+        /// Throw exception if something crazy happens
+        if (memoryImage is null) {
+            throw new Exception("An unkown error has occurred on upload!");
+        }
+
+        /// Plop it into the internal keys
+        this.collisionBoxes[key] = AABB;
+        this.textures[key] = memoryImage;
     }
 
     /**
