@@ -22,9 +22,7 @@ Here is a simple tutorial on how to use it:
 
 ```d
 import std.stdio;
-import fast_pack.texture_packer;
-import fast_pack.texture_packer_config;
-import fast_pack.rect;
+import fast_pack;
 import std.conv: to;
 import image;
 
