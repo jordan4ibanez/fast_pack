@@ -69,30 +69,6 @@ struct TexturePacker {
         this.updateCanvasSize();
     }
 
-    /// Get texture coordinates for working with OpenGL with double floating point precision
-    GLRectDouble getTextureCoordinatesDouble(string key) {
-        Rect AABB = collisionBoxes[key];
-        return GLRectDouble(
-            cast(double) AABB.x / cast(double) width,
-            cast(double) AABB.y / cast(double) height,
-            /// Needs to overhang the pixel at the base of the next, so + 1
-            (cast(double) AABB.x + cast(double) AABB.width + 1) / cast(double) width,
-            (cast(double) AABB.y + cast(double) AABB.height + 1) / cast(double) height            
-        );
-    }
-
-    /// Get texture coordinates for working with OpenGL with double floating point precision
-    GLRectFloat getTextureCoordinatesFloat(string key) {
-        Rect AABB = collisionBoxes[key];
-        return GLRectFloat(
-            cast(float) AABB.x / cast(float) width,
-            cast(float) AABB.y / cast(float) height,
-            /// Needs to overhang the pixel at the base of the next, so + 1
-            (cast(float) AABB.x + cast(float) AABB.width + 1) / cast(float) width,
-            (cast(float) AABB.y + cast(float) AABB.height + 1) / cast(float) height            
-        );
-    }
-
     /**
      * Internal pixel by pixel inverse tetris scan with scoring algorithm
      */
@@ -198,6 +174,31 @@ struct TexturePacker {
 
         return returningColor;
     }
+
+    /// Get texture coordinates for working with OpenGL with double floating point precision
+    GLRectDouble getTextureCoordinatesDouble(string key) {
+        Rect AABB = collisionBoxes[key];
+        return GLRectDouble(
+            cast(double) AABB.x / cast(double) width,
+            cast(double) AABB.y / cast(double) height,
+            /// Needs to overhang the pixel at the base of the next, so + 1
+            (cast(double) AABB.x + cast(double) AABB.width + 1) / cast(double) width,
+            (cast(double) AABB.y + cast(double) AABB.height + 1) / cast(double) height            
+        );
+    }
+
+    /// Get texture coordinates for working with OpenGL with double floating point precision
+    GLRectFloat getTextureCoordinatesFloat(string key) {
+        Rect AABB = collisionBoxes[key];
+        return GLRectFloat(
+            cast(float) AABB.x / cast(float) width,
+            cast(float) AABB.y / cast(float) height,
+            /// Needs to overhang the pixel at the base of the next, so + 1
+            (cast(float) AABB.x + cast(float) AABB.width + 1) / cast(float) width,
+            (cast(float) AABB.y + cast(float) AABB.height + 1) / cast(float) height            
+        );
+    }
+
 
     /// Constructs a memory image of the current canvas
     TrueColorImage saveToTrueColorImage() {
