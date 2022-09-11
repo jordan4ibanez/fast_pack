@@ -1,4 +1,4 @@
-/*
+/**
  * A fast texture packer for D.
  */
 
