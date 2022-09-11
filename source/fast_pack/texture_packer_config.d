@@ -33,6 +33,8 @@ struct TexturePackerConfig {
      * The auto resizer algorithm's resize amount.
      * When the canvas runs out of space, it will expand it by this many pixels.
      * It may have to loop a few times if this is too small to pack a new texture if this is too small.
+     * AKA: Too small with thrash it and it will have to continuously rebuild. AKA: Slower
+     * Too big and you'll have wasted space, I recommend to experiment with it and print it to png!
      * Default is: 50
      */
     uint expansionAmount = 50;
