@@ -12,21 +12,30 @@ import image;
  */
 struct TexturePackerConfig {
 
-    /// Blank pixel border padding around each texture
+    /**
+     * Blank pixel border padding around each texture
+     * Default is: 0;
+     */
     uint padding = 0;
 
-    /// The edge color. Default is red
+    /**
+     * The edge color.
+     * Default is: red
+     */
     Color edgeColor = *new Color(255,0,0,255);
 
-    /// The blank space border. Default is nothing
+    /**
+     * The blank space border.
+     * Default is nothing
+     */
     Color blankSpaceColor = *new Color(0,0,0,0);
 
     /** 
      * Enables the auto resizer algorithm. This will expand the canvas when it runs out of room.
      * You can combine this with a starting width and height of the canvas to your liking!
-     * Default is: false
+     * Default is: true
      */
-    bool autoResize = false;
+    bool autoResize = true;
     
     /**
      * The auto resizer algorithm's resize amount.
@@ -41,19 +50,27 @@ struct TexturePackerConfig {
     /**
      * Trim alpha space out of textures to shrink them
      * This will create a new object in memory for each texture trimmed!
+     * Default is: false
      */
     bool trim = false;
 
     /**
      * Enables the edge debug, with the color specified
      * Please note: This will overwrite the edge pixels in your texture!
+     * Default is: false
      */
     bool showDebugEdge = false;
 
-    /// The width of the texture packer's canvas
+    /**
+     * The width of the texture packer's canvas
+     * Default is: 400
+     */
     uint width = 400;
 
-    /// The height of the texture packer's canvas
+    /**
+     * The height of the texture packer's canvas
+     * Default is: 400
+     */
     uint height = 400;
 
     /**
