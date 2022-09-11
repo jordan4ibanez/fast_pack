@@ -284,6 +284,10 @@ struct TexturePacker(T) {
         );
     }
 
+    /// Get texture coordinates in literal uint in case you want to do something custom
+    Rect getTextureCoordinates(T key) {
+        return collisionBoxes[key];
+    }
 
     /// Constructs a memory image of the current canvas
     TrueColorImage saveToTrueColorImage() {
