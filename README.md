@@ -2,6 +2,7 @@
  A fast texture packer for D
 
 This uses an algorithm I call "inverse tetris". It tries to find the best spot, highest on the y axis, and furthest to the left. Compares to existing collision boxes.
+The texture packer is also generic! You can use chars, ints, uints, strings, etc as keys!
 
 [This relies on Adam D. Ruppe's awesome image library. Click here to see it.](https://code.dlang.org/packages/arsd-official%3Aimage_files)
 
@@ -37,7 +38,7 @@ void main() {
     // We give the texture packer constructer our config.
     // This is optional, but the default canvas size is 400 by 400 pixels.
     // So you might want to make that bigger!
-	TexturePacker packer = *new TexturePacker(config);
+	TexturePacker!string packer = *new TexturePacker!string(config);
 
     // Now we pack our textures into it
     for (int i = 1; i <= 10; i++) {
