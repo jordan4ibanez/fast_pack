@@ -10,11 +10,6 @@ This uses an algorithm I call "inverse tetris". It tries to find the best spot, 
 This is written to be modular. For example:
 - You can only import the packer and config to turn it into a command line texture folder packer saver if you really want.
 - You could just import the packer and pack a font with trim so it looks nice.
-- You could just import the rects for some reason and work with those if you want I guess
-
-On my current todo list of the master branch for 2.0.0:
-
-1. Generics. It would be fantastic to use this to store character maps in multiple languages! Or maybe you want to order your items by objects, or numbers. Generics are important.
 
 This is the texture atlas that the code below saved:
 
