@@ -12,6 +12,7 @@ import fast_pack.rect;
 import fast_pack.texture_packer_config;
 import std.typecons: tuple, Tuple;
 import std.math: sqrt;
+import std.algorithm.sorting: sort;
 
 /**
  * The texture packer structure. Can also be allocated to heap via:
@@ -134,9 +135,30 @@ struct TexturePacker {
         /// Cached fail state
         bool failed = false;
 
-        /// 64 bit long to cover uint max
-        for (long x = maxX; x >= 0; x--) {
-            for (long y = maxY; y >= 0; y--) {
+        // Iterable positions
+        uint[] xPositions;
+        uint[] yPositions;
+
+        /// These are the minimum positions (x: 0, y: 0 with 0 padding)
+        xPositions ~= padding;
+        yPositions ~= padding;
+
+        // Add in all other keys
+        foreach (string gottenKey; this.collisionBoxes.keys()) {
+            if (gottenKey != key) {
+                Rect thisCollisionBox = this.collisionBoxes[gottenKey];
+                xPositions ~= thisCollisionBox.x + thisCollisionBox.width + padding;
+                yPositions ~= thisCollisionBox.y + thisCollisionBox.height + padding;
+            }
+        }
+
+        /// Now sort them max to min, we want to iterate towards the center
+        xPositions.sort!("a > b");
+        yPositions.sort!("a > b");
+
+        /// Iterate all available positions
+        foreach (uint x; xPositions) {
+            foreach (uint y; yPositions) {
 
                 failed = false;
 
