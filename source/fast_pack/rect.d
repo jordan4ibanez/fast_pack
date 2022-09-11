@@ -29,7 +29,7 @@ struct Rect {
         return !(x < this.x || x > this.x + this.width - 1 || y < this.y || y > this.y + this.height - 1);
     }
 
-    /// Check if a point is on the texture's edge
+    /// Check if a point is on the texture's edge, best cast: 1 cpu cycle, worst cast: 4 cpu cycles
     bool isEdge(uint x, uint y) {
         return x == this.x || x == this.x + this.width - 1 || y == this.y || y == this.y + this.height - 1;
     }
