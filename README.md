@@ -12,6 +12,7 @@ This is written to be modular. For example:
 - You can only import the packer and config to turn it into a command line texture folder packer saver if you really want.
 - You could just import the packer and pack a font with trim so it looks nice and save it to a png.
 - You can create an atlas of letters with a char keyset, export it to an image with trimming and work with it in memory.
+- Take individual texture atlasses, save the texture location data, then put it into another bigger atlas so you never have to change textures in OpenGL.
 
 This is the texture atlas that the code below saved:
 
