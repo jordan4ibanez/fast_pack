@@ -82,7 +82,6 @@ struct TexturePacker {
                     }
                 }
 
-                writeln(allKeys);
                 // Set the keys out of bounds
                 for (uint i = 0; i < allKeys.length; i++) {
                     this.collisionBoxes[allKeys[i]].x = this.config.width + 1;
@@ -96,8 +95,6 @@ struct TexturePacker {
                         tetrisPack(thisKey);
                     }
                 }
-
-                writeln("NEW CANVAS SIZE: ", this.config.width, " ", this.config.height);
             }
         } else {
             tetrisPack(key);
@@ -162,8 +159,8 @@ struct TexturePacker {
 
                 failed = false;
 
-                AABB.x = cast(uint)x;
-                AABB.y = cast(uint)y;
+                AABB.x = x;
+                AABB.y = y;
 
                 /// out of bounds failure
                 if (
@@ -193,8 +190,8 @@ struct TexturePacker {
                     if (newScore <= score) {
                         found = true;
                         score = newScore;
-                        bestX = cast(uint)x;
-                        bestY = cast(uint)y;
+                        bestX = x;
+                        bestY = y;
                     }
                 }
             }
