@@ -14,7 +14,7 @@ This is written to be modular. For example:
 
 On my current todo list of the master branch for 2.0.0:
 
-1. An algorithm that will pack biggest to smallest based on area of collision box.
+1. An algorithm that will pack biggest to smallest based on area of collision box. <- This was scrapped because it works terribly
 2. Generics. It would be fantastic to use this to store character maps in multiple languages! Or maybe you want to order your items by objects, or numbers. Generics are important.
 
 This is the texture atlas that the code below saved:
