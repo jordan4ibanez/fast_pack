@@ -35,9 +35,9 @@ struct TexturePackerConfig {
      * It may have to loop a few times if this is too small to pack a new texture if this is too small.
      * AKA: Too small with thrash it and it will have to continuously rebuild. AKA: Slower
      * Too big and you'll have wasted space, I recommend to experiment with it and print it to png!
-     * Default is: 50
+     * Default is: 100
      */
-    uint expansionAmount = 50;
+    uint expansionAmount = 100;
 
     /**
      * Trim alpha space out of textures to shrink them
