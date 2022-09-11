@@ -229,6 +229,7 @@ struct TexturePacker(T) {
                 this.config.width  += this.config.expansionAmount;
                 this.config.height += this.config.expansionAmount;
 
+                /// Do not rebuild the atlas on canvas expansion with fastMode
                 if (!this.config.fastMode) {
                     /// Re-sort all the items out of bounds
                     T[] allKeys;
