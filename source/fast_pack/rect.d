@@ -13,6 +13,7 @@ struct Rect {
     uint y = 0;
     uint width = 0;
     uint height = 0;
+    uint area = 0;
 
     this(uint id, uint x, uint y, uint width, uint height) {
         this.id = id;
@@ -20,6 +21,7 @@ struct Rect {
         this.y = y;
         this.width = width;
         this.height = height;
+        this.area = x * y;
     }
 
     /// Inverse AABB point check, best case: 1 cpu cycle, worst case: 4 cpu cycles
