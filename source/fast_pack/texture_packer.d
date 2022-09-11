@@ -22,6 +22,7 @@ struct TexturePacker {
 
     /// Please note: indexing position actually starts at the top left of the image (0,0)
 
+    /// Maintains the current ID that will be created for collision boxes
     private uint currentID = 0;
 
     /// The configuration of the texture packer
