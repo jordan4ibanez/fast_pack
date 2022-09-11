@@ -18,7 +18,7 @@ import std.algorithm.sorting: sort;
  * The texture packer structure. Can also be allocated to heap via:
  * TexturePacker blah = *new TexturePacker();
  */
-struct TexturePacker {
+struct TexturePacker(T) {
 
     /// Please note: indexing position actually starts at the top left of the image (0,0)
 
@@ -29,10 +29,10 @@ struct TexturePacker {
     private TexturePackerConfig config = *new TexturePackerConfig();
 
     /// This holds the collision boxes of the textures
-    private Rect[string] collisionBoxes;
+    private Rect[T] collisionBoxes;
 
     /// This holds the actual texture data
-    private TrueColorImage[string] textures;
+    private TrueColorImage[T] textures;
 
     /// The current width of the canvas
     private uint width = 0;
@@ -48,9 +48,9 @@ struct TexturePacker {
     }
 
     /**
-     * This allows game developers to add in textures to the texture packer canvas with a string key and string file location
+     * This allows game developers to add in textures to the texture packer canvas with a generic key and string file location
      */
-    void pack(string key, string fileLocation) {
+    void pack(T key, string fileLocation) {
 
         /// Automate upload internally
         this.uploadTexture(key, fileLocation);
@@ -68,13 +68,13 @@ struct TexturePacker {
                 this.config.height += this.config.expansionAmount;
 
                 /// Re-sort all the items out of bounds
-                string[] allKeys;
+                T[] allKeys;
 
                 /// Run through in order of insertion
                 uint currentSearch = 0;
 
                 while(currentSearch < this.currentID) {
-                    foreach (string gottenKey; this.collisionBoxes.keys()) {
+                    foreach (T gottenKey; this.collisionBoxes.keys()) {
                         if (this.collisionBoxes[gottenKey].id == currentSearch) {
                             allKeys ~= gottenKey;
                             currentSearch++;
@@ -92,7 +92,7 @@ struct TexturePacker {
 
                 // Collide them back into the box
                 for (uint i = 0; i < allKeys.length; i++) {
-                    string thisKey = allKeys[i];
+                    T thisKey = allKeys[i];
                     if (key != thisKey) {
                         tetrisPack(thisKey);
                     }
@@ -109,7 +109,7 @@ struct TexturePacker {
     /**
      * Internal pixel by pixel inverse tetris scan with scoring algorithm
      */
-    private bool tetrisPack(string key) {
+    private bool tetrisPack(T key) {
 
         /// Grab the AABB out of the internal dictionary
         Rect AABB = this.collisionBoxes[key];
@@ -143,7 +143,7 @@ struct TexturePacker {
         yPositions ~= padding;
 
         // Add in all other keys
-        foreach (string gottenKey; this.collisionBoxes.keys()) {
+        foreach (T gottenKey; this.collisionBoxes.keys()) {
             if (gottenKey != key) {
                 Rect thisCollisionBox = this.collisionBoxes[gottenKey];
                 xPositions ~= thisCollisionBox.x + thisCollisionBox.width + padding;
@@ -246,7 +246,7 @@ struct TexturePacker {
     }
 
     /// Get texture coordinates for working with OpenGL with double floating point precision
-    GLRectDouble getTextureCoordinatesDouble(string key) {
+    GLRectDouble getTextureCoordinatesDouble(T key) {
         Rect AABB = collisionBoxes[key];
         return GLRectDouble(
             cast(double) AABB.x / cast(double) width,
@@ -258,7 +258,7 @@ struct TexturePacker {
     }
 
     /// Get texture coordinates for working with OpenGL with double floating point precision
-    GLRectFloat getTextureCoordinatesFloat(string key) {
+    GLRectFloat getTextureCoordinatesFloat(T key) {
         Rect AABB = collisionBoxes[key];
         return GLRectFloat(
             cast(float) AABB.x / cast(float) width,
@@ -313,7 +313,7 @@ struct TexturePacker {
      * Uploads a texture into the associative arrays of the texture packer.
      * This allows game developers to handle a lot less boilerplate
      */
-    private void uploadTexture(string key, string fileLocation) {
+    private void uploadTexture(T key, string fileLocation) {
         TrueColorImage tempTextureObject = loadImageFromFile(fileLocation).getAsTrueColorImage();
 
         /// Trim it and generate a new trimmed texture
