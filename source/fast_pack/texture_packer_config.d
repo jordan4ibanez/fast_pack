@@ -40,14 +40,6 @@ struct TexturePackerConfig {
     uint expansionAmount = 100;
 
     /**
-     * Enables sorting by size.
-     * This will try to optimize the sorting to push the biggest items first to leave space
-     * to drop in smaller textures.
-     * Default is: true
-     */
-    bool sizeSort = true;
-
-    /**
      * Trim alpha space out of textures to shrink them
      * This will create a new object in memory for each texture trimmed!
      */
@@ -76,7 +68,6 @@ struct TexturePackerConfig {
         Color blankSpaceColor,
         bool autoResize,
         uint expansionAmount,
-        bool sizeSort,
         bool trim,
         bool showDebugEdge,
         uint width,
@@ -87,7 +78,6 @@ struct TexturePackerConfig {
         this.blankSpaceColor = blankSpaceColor;
         this.autoResize = autoResize;
         this.expansionAmount = expansionAmount;
-        this.sizeSort = sizeSort;
         this.trim = trim;
         this.showDebugEdge = showDebugEdge;
         this.height = height;
