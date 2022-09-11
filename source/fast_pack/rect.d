@@ -45,7 +45,6 @@ struct Rect {
 
 /**
  * A double based struct to directly map textures to vertices in OpenGL
- * 
  * This has different variables because it is easier to understand when mapping textures
  */
 

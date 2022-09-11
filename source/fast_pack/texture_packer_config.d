@@ -7,7 +7,6 @@ import image;
 
 /**
  * The configuration for the texture packer with defaults
- *
  * Please note: The fields in this structure are left public so you can create a blank slate
  * with defaults, then piecemeal your changes in if you don't like the defaults!
  */
