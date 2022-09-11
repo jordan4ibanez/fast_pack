@@ -10,7 +10,8 @@ The texture packer is also generic! You can use chars, ints, uints, strings, etc
 
 This is written to be modular. For example:
 - You can only import the packer and config to turn it into a command line texture folder packer saver if you really want.
-- You could just import the packer and pack a font with trim so it looks nice.
+- You could just import the packer and pack a font with trim so it looks nice and save it to a png.
+- You can create an atlas of letters with a char keyset, export it to an image with trimming and work with it in memory.
 
 This is the texture atlas that the code below saved:
 
@@ -49,7 +50,26 @@ void main() {
     // The image above is what this saves to. It uses the /assets/ textures.
     packer.saveToFile("imagePack.png");
 
+    // That's pretty neat, now let's create a texture atlas of texture atlases!
+    TrueColorImage temp = packer.saveToTrueColorImage();
+
+    config.expansionAmount = 200;
+
+    TexturePacker!int superPacker = *new TexturePacker!int(config);
+
+    for (int i = 0; i <= 30; i++) {
+        writeln("packing ", i);
+        superPacker.pack(i, temp);
+    }
+
+    superPacker.saveToFile("imagePackSuper.png");
+
     /*
+    This seems ridiculous! But you could possibly use it to put a char array for
+    font rendering, then shift all the values you get from the packer you put it into, 
+    by the values from the packer you pulled the texture atlas out of via:
+    Rect coords = packer.getTextureCoordinates("blah1");
+
     Or you use it to work with OpenGL like this:
     Note: This is using Mike Parker's awesome bindbc OpenGL library.
     You can find this here: https://code.dlang.org/packages/bindbc-opengl
@@ -97,12 +117,18 @@ void main() {
     double minX = myTextureCoordinates.minX;
     double maxY = myTextureCoordinates.maxY;
 
-    /*
-    
+    /*    
     So on and so forth
 
-    Hopefully this is helpful to you! Enjoy! :D
+    If you want even more precision, direct pixel location access, you can do this:
+    */
 
+    Rect coords = packer.getTextureCoordinates("blah1");
+
+    /*
+    This will give you a bunch of extra information on the specific texture as well
+
+    Hopefully this is helpful to you! Enjoy! :D
     */
 
 }
