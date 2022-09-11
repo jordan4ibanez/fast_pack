@@ -70,9 +70,9 @@ struct TexturePacker {
                 /// Re-sort all the items out of bounds
                 string[] allKeys;
 
+                /// Run through in order of insertion
                 uint currentSearch = 0;
 
-                /// Run through in order of insertion
                 while(currentSearch < this.currentID) {
                     foreach (string gottenKey; this.collisionBoxes.keys()) {
                         if (this.collisionBoxes[gottenKey].id == currentSearch) {
