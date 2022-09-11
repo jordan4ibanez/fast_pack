@@ -18,6 +18,7 @@ void main() {
     config.width = 0;
     config.height = 0;
     config.autoResize = true;
+    config.expansionAmount = 100;
 
     // We give the texture packer constructer our config.
     // This is optional, but the default canvas size is 400 by 400 pixels.
