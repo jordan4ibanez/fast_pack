@@ -345,8 +345,11 @@ struct TexturePacker(T) {
         yPositions.sort!("a > b");
 
         /// Iterate all available positions
-        foreach (uint x; xPositions) {
-            foreach (uint y; yPositions) {
+        for (int _x = 0; _x < xPositions.length; _x++) {
+            for (int _y = 0; _y < yPositions.length; _y++) {
+
+                uint x = xPositions[_x];
+                uint y = yPositions[_y];
 
                 failed = false;
 
