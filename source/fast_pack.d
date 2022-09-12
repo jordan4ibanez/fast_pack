@@ -311,8 +311,14 @@ struct TexturePacker(T) {
         uint[] xPositions;
         uint[] yPositions;
 
-        // Cached data arrays
-        auto keyValue = this.collisionBoxes.byKeyValue();
+        // Cached collisionboxes
+        Rect[] otherCollisionBoxes;
+
+        foreach (gottenData; this.collisionBoxes.byKeyValue()) {
+            if (gottenData.key != key) {
+                otherCollisionBoxes ~= gottenData.value;
+            }
+        }
 
         /// These are the minimum positions (x: 0, y: 0 with 0 padding)
         xPositions ~= padding;
@@ -356,9 +362,8 @@ struct TexturePacker(T) {
 
                 /// Collided with other box failure
                 /// Index each collision box to check if within
-                foreach (data; keyValue){
-                    Rect otherAABB = data.value;
-                    if (data.key != key && AABB.collides(otherAABB, padding)) {
+                foreach (otherAABB; otherCollisionBoxes){
+                    if (AABB.collides(otherAABB, padding)) {
                         failed = true;
                         break;
                     }
