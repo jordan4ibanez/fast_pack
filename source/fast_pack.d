@@ -377,8 +377,7 @@ struct TexturePacker(T) {
 
                     /// If it successfully found a new position, update the best X and Y
                     if (!failed) {
-                        uint newScore = calculateManhattan(AABB.x, AABB.y, goalX, goalY);
-                        // uint newScore = AABB.y - goalY;
+                        uint newScore = AABB.y - goalY;
                         if (newScore <= score) {
                             found = true;
                             score = newScore;
@@ -681,15 +680,4 @@ struct TexturePacker(T) {
 
         return trimmedTexture;
     }
-}
-
-/**
-* Simple distance 2d calculator
-*/
-private uint calculateManhattan(
-    uint x1,
-    uint y1,
-    uint x2,
-    uint y2) {
-        return (x1 - x2) + (y1 - y2);
 }
