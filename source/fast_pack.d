@@ -330,9 +330,9 @@ struct TexturePacker(T) {
         yPositions ~= padding;
 
         // Add in all other keys
-        foreach (T gottenKey; this.collisionBoxes.keys()) {
-            if (gottenKey != key) {
-                Rect thisCollisionBox = this.collisionBoxes[gottenKey];
+        { // Scope it out of existence again
+            for (int i = 0; i < otherCollisionBoxes.length; i++) {
+                Rect thisCollisionBox = otherCollisionBoxes[i];
                 if (!(thisCollisionBox.width > this.width || thisCollisionBox.y > this.height)) {
                     xPositions ~= thisCollisionBox.x + thisCollisionBox.width + padding;
                     yPositions ~= thisCollisionBox.y + thisCollisionBox.height + padding;
