@@ -91,11 +91,20 @@ struct GLRectFloat {
 struct TexturePackerConfig {
 
     /**
-     * Fast mode disables all complex algorithms like:
-     * Atlas rebuilds, edge colors, blank space color, and just shoves the textures in there wherever.
-     * Default is: false
+     * Enables atlas rebuilds.
+     * This only makes a difference if autoResize is enabled.
+     * If it is false, the packer will not rebuild the atlas upon canvas expansion.
+     * It is faster if disabled, but it will also use more space on the exported texture.
+     * Default is: true
      */
-    bool fastMode = false;
+    bool atlasRebuilder = true;
+
+    /**
+     * Enables fast canvas exporting.
+     * If this is enabled edgeColor and blankSpaceColor will be ignored.
+     * Default is: true
+     */
+    bool fastCanvasExport = true;
 
     /**
      * Blank pixel border padding around each texture
@@ -229,8 +238,7 @@ struct TexturePacker(T) {
                 this.config.width  += this.config.expansionAmount;
                 this.config.height += this.config.expansionAmount;
 
-                /// Do not rebuild the atlas on canvas expansion with fastMode
-                if (!this.config.fastMode) {
+                if (this.config.atlasRebuilder) {
                     /// Re-sort all the items out of bounds
                     T[] allKeys;
 
