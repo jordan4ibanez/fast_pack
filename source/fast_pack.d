@@ -314,9 +314,14 @@ struct TexturePacker(T) {
         // Cached collisionboxes
         Rect[] otherCollisionBoxes;
 
-        foreach (gottenData; this.collisionBoxes.byKeyValue()) {
-            if (gottenData.key != key) {
-                otherCollisionBoxes ~= gottenData.value;
+        { // Scope it out of existence
+            T[] keyArray = this.collisionBoxes.keys();
+
+            for (int i = 0; i < keyArray.length; i++) {
+                T gottenKey = keyArray[i];
+                if (gottenKey != key) {
+                    otherCollisionBoxes ~= this.collisionBoxes[gottenKey];
+                }
             }
         }
 
