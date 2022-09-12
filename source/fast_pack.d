@@ -277,7 +277,7 @@ struct TexturePacker(T) {
 
         /// Finally, update the canvas's size in memory
         this.updateCanvasSize();
-    }
+    }        
 
     /**
      * Internal pixel by pixel inverse tetris scan with scoring algorithm
@@ -295,6 +295,7 @@ struct TexturePacker(T) {
         /// Cache padding
         uint padding = this.config.padding;
 
+        uint goalX = 0;
         uint goalY = 0;
 
         /// Cache widths
@@ -356,35 +357,34 @@ struct TexturePacker(T) {
                 AABB.x = x;
                 AABB.y = y;
 
-                /// out of bounds failure
-                if (
-                    /// Outer
-                    AABB.x + AABB.width + padding >= maxX ||
-                    AABB.y + AABB.height + padding >= maxY ||
+                /// In bounds check
+                if (// Outer
+                    AABB.x + AABB.width + padding < maxX &&
+                    AABB.y + AABB.height + padding < maxY &&
                     /// Inner
-                    AABB.x < padding ||
-                    AABB.y < padding
-                    ) {
-                    failed = true;
-                }
+                    AABB.x >= padding &&
+                    AABB.y >= padding) {
 
-                /// Collided with other box failure
-                /// Index each collision box to check if within
-                foreach (otherAABB; otherCollisionBoxes){
-                    if (AABB.collides(otherAABB, padding)) {
-                        failed = true;
-                        break;
+                    /// Collided with other box failure
+                    /// Index each collision box to check if within
+                    for (int i = 0; i < otherCollisionBoxes.length; i++) {
+                        Rect otherAABB = otherCollisionBoxes[i];
+                        if (AABB.collides(otherAABB, padding)) {
+                            failed = true;
+                            break;
+                        }
                     }
-                }
 
-                /// If it successfully found a new position, update the best X and Y
-                if (!failed) {
-                    uint newScore = AABB.y - goalY;
-                    if (newScore <= score) {
-                        found = true;
-                        score = newScore;
-                        bestX = x;
-                        bestY = y;
+                    /// If it successfully found a new position, update the best X and Y
+                    if (!failed) {
+                        uint newScore = calculateManhattan(AABB.x, AABB.y, goalX, goalY);
+                        // uint newScore = AABB.y - goalY;
+                        if (newScore <= score) {
+                            found = true;
+                            score = newScore;
+                            bestX = x;
+                            bestY = y;
+                        }
                     }
                 }
             }
@@ -681,4 +681,15 @@ struct TexturePacker(T) {
 
         return trimmedTexture;
     }
+}
+
+/**
+* Simple distance 2d calculator
+*/
+private uint calculateManhattan(
+    uint x1,
+    uint y1,
+    uint x2,
+    uint y2) {
+        return (x1 - x2) + (y1 - y2);
 }
