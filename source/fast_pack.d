@@ -1,15 +1,9 @@
 /**
  * A fast texture packer for D.
  */
-
 module fast_pack;
 
-import std.stdio;
-
 import image;
-
-import std.typecons: tuple, Tuple;
-import std.math: sqrt;
 import std.algorithm.sorting: sort;
 
 
