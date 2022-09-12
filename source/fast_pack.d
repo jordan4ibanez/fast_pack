@@ -455,10 +455,33 @@ struct TexturePacker(T) {
         /// Creates a blank image with the current canvas size
         TrueColorImage constructingImage = new TrueColorImage(width, height);
 
-        /// Linear scan the whole canvas, set pixels to constructing image
-        for (uint x = 0; x < width; x++) {
-            for (uint y = 0; y < height; y++) {
-                constructingImage.setPixel(x, y, this.getPixel(x,y));
+        if (this.config.fastCanvasExport) {
+            /// Iterate through all collision boxes and blit the pixels (fast)
+            T[] keys = this.collisionBoxes.keys();
+            for (uint i = 0; i < keys.length; i++) {
+                T thisKey = keys[i];
+                Rect AABB = this.collisionBoxes[thisKey];
+                TrueColorImage thisTexture = this.textures[thisKey];
+                for (int x = AABB.x; x < AABB.x + AABB.width; x++) {
+                    for (int y = AABB.y; y < AABB.y + AABB.height; y++) {
+                        constructingImage.setPixel(
+                            x,
+                            y,
+                            thisTexture.getPixel(
+                                x - AABB.x,
+                                y - AABB.y
+                            )
+                        );
+                    }
+                }
+            }
+
+        } else {
+            /// Linear scan the whole canvas and collision detect each pixel (slow)
+            for (uint x = 0; x < width; x++) {
+                for (uint y = 0; y < height; y++) {
+                    constructingImage.setPixel(x, y, this.getPixel(x,y));
+                }
             }
         }
 
