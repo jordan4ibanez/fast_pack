@@ -5,7 +5,19 @@ module fast_pack;
 
 import image;
 import std.algorithm.sorting: sort;
+import std.algorithm.mutation: remove;
 
+/**
+ * The packing algorithm which the packer will utilize.
+ * TREE is faster, but way less space efficient.
+ * TETRIS is slower, but way more space efficient.
+ */
+enum PackingAlgorithm {
+    TETRIS,
+    TREE
+}
+alias TETRIS = PackingAlgorithm.TETRIS;
+alias TREE = PackingAlgorithm.TREE;
 
 /**
  * AABB bounding box for textures
@@ -85,6 +97,15 @@ struct GLRectFloat {
 struct TexturePackerConfig {
 
     /**
+     * The packing algorithm the packer will utilize.
+     * You can pick between:
+     * TREE which is faster, but less space efficient.
+     * TETRIS which is slower, but way more space efficient.
+     * The default is: TETRIS
+     */
+    PackingAlgorithm algorithm = TETRIS;
+
+    /**
      * Enables fast canvas exporting.
      * If this is enabled edgeColor and blankSpaceColor will be ignored.
      * Default is: true
@@ -154,6 +175,14 @@ struct TexturePackerConfig {
 }
 
 /**
+ * Internally handles free position slots
+ */
+private struct FreeSlot {
+    uint x = 0;
+    uint y = 0;
+}
+
+/**
  * The texture packer structure. Can also be allocated to heap via:
  * TexturePacker blah = *new TexturePacker();
  */
@@ -179,11 +208,15 @@ struct TexturePacker(T) {
     /// The current height of the canvas
     private uint height = 0;
 
+    /// Open positions on the canvas
+    private FreeSlot[] freeSlots = [FreeSlot(0,0)];
+
     /**
      * A constructor with a predefined configuration
      */
     this(TexturePackerConfig config) {
         this.config = config;
+        this.freeSlots = [FreeSlot(this.config.padding, this.config.padding)];
     }
 
     /**
@@ -216,22 +249,170 @@ struct TexturePacker(T) {
             throw new Exception("Something has gone wrong getting collision box from internal library!");   
         }
 
-        /// Do a tetris pack bottom right to top left
-        if (this.config.autoResize) {
-            while(!tetrisPack(key)) {
-                this.config.width  += this.config.expansionAmount;
-                this.config.height += this.config.expansionAmount;
+        if (this.config.algorithm == TETRIS) {
+            /// Do a tetris pack bottom right to top left
+            if (this.config.autoResize) {
+                while(!tetrisPack(key)) {
+                    this.config.width  += this.config.expansionAmount;
+                    this.config.height += this.config.expansionAmount;
+                }
+            } else {
+                tetrisPack(key);
             }
         } else {
-            tetrisPack(key);
+            if (this.config.autoResize) {
+                while(!treePack(key)) {
+                    this.config.width  += this.config.expansionAmount;
+                    this.config.height += this.config.expansionAmount;
+                }
+            } else {
+                treePack(key);
+            }
         }
 
         /// Finally, update the canvas's size in memory
         this.updateCanvasSize();
     }        
 
+
+
     /**
-     * Internal pixel by pixel inverse tetris scan with scoring algorithm
+     * Internal point based tree packing algorithm
+     */
+    private bool treePack(T key) {
+
+        /// Grab the AABB out of the internal dictionary
+        Rect AABB = this.collisionBoxes[key];
+
+        /// Start the score at the max value possible for reduction formula
+        uint score = uint.max;
+
+        bool found = false;
+
+        /// Cache padding
+        uint padding = this.config.padding;
+
+        /// Cache widths
+        uint maxX = this.config.width;
+        uint maxY = this.config.height;
+
+        uint bestX = uint.max;
+        uint bestY = uint.max;
+
+        /// Cached fail state
+        bool failed = false;
+
+        /// Cached keys
+        T[] keyArray = this.collisionBoxes.keys();
+        /// Cached collisionboxes
+        Rect[] otherCollisionBoxes;
+
+        { // Scope it out of existence
+
+            for (int i = 0; i < keyArray.length; i++) {
+                T gottenKey = keyArray[i];
+                if (gottenKey != key) {
+                    otherCollisionBoxes ~= this.collisionBoxes[gottenKey];
+                }
+            }
+        }
+
+
+        long pickedSlot = 0;
+
+        /// Iterate all available positions
+        for (int u = 0; u < this.freeSlots.length; u++) {
+
+            FreeSlot slot = this.freeSlots[u];
+
+            failed = false;
+
+            AABB.x = slot.x;
+            AABB.y = slot.y;
+
+            /// In bounds check
+            if (// Outer
+                AABB.x + AABB.width + padding < maxX &&
+                AABB.y + AABB.height + padding < maxY &&
+                /// Inner
+                AABB.x >= padding &&
+                AABB.y >= padding) {
+
+                /// Collided with other box failure
+                /// Index each collision box to check if within
+                
+                for (int i = 0; i < otherCollisionBoxes.length; i++) {
+                    Rect otherAABB = otherCollisionBoxes[i];
+                    if (AABB.collides(otherAABB, padding)) {
+                        failed = true;
+                        break;
+                    }
+                }
+
+                /// If it successfully found a new position, update the best X and Y
+                if (!failed) {
+                    uint newScore = calculateManhattan(AABB.x, AABB.y, 0, 0);
+                    // uint newScore = AABB.y - goalY;
+                    if (newScore <= score) {
+                        pickedSlot = u;
+                        found = true;
+                        score = newScore;
+                        bestX = AABB.x;
+                        bestY = AABB.y;
+                    }
+                }
+            }
+        }
+
+        if (!found) {
+            if (this.config.autoResize) {
+                return false;
+            } else {
+                throw new Exception("Not enough room for texture! Make the packer canvas bigger!");
+            }
+        }
+
+        /// Found it, remove this free slot
+        this.freeSlots = this.freeSlots.remove(pickedSlot);
+
+        /// Add in other free slots around it
+        this.freeSlots ~= FreeSlot(bestX + AABB.width + padding, bestY);
+        this.freeSlots ~= FreeSlot(bestX, bestY + AABB.height + padding);
+
+        AABB.x = bestX;
+        AABB.y = bestY;
+
+        // Set the collisionbox back into the internal dictionary
+        this.collisionBoxes[key] = AABB;
+
+        // Finally clean out points
+        for (uint i = 0; i < keyArray.length; i++) {
+            T gottenKey = keyArray[i];
+            Rect gottenCollisionBox = this.collisionBoxes[gottenKey];
+
+
+            long[] removals;
+            for (uint w = 0; w < this.freeSlots.length; w++) {
+                FreeSlot thisFreeSlot = this.freeSlots[w];
+                if (gottenCollisionBox.containsPoint(thisFreeSlot.x, thisFreeSlot.y)) {
+                    removals ~= w;
+                }
+            }
+
+            long shift = 0;
+            for (long q = 0; q < removals.length; q++) {
+                this.freeSlots.remove(removals[q] + shift);
+
+                shift--;
+            }
+
+        }
+
+        return true;
+    }
+
+    /**
+     * Internal inverse tetris scan pack with scoring algorithm
      */
     private bool tetrisPack(T key) {
 
@@ -245,9 +426,6 @@ struct TexturePacker(T) {
 
         /// Cache padding
         uint padding = this.config.padding;
-
-        uint goalX = 0;
-        uint goalY = 0;
 
         /// Cache widths
         uint maxX = this.config.width;
@@ -328,7 +506,7 @@ struct TexturePacker(T) {
 
                     /// If it successfully found a new position, update the best X and Y
                     if (!failed) {
-                        uint newScore = AABB.y - goalY;
+                        uint newScore = AABB.y;
                         if (newScore <= score) {
                             found = true;
                             score = newScore;
@@ -380,6 +558,12 @@ struct TexturePacker(T) {
                     returningColor = this.textures[data.key].getPixel(x - AABB.x, y - AABB.y);
                 }
                 break;
+            }
+        }
+
+        foreach (FreeSlot key; this.freeSlots) {
+            if (key.x - this.config.padding == x && key.y - this.config.padding == y) {
+                returningColor = Color(0,255,0,255);
             }
         }
 
@@ -631,4 +815,15 @@ struct TexturePacker(T) {
 
         return trimmedTexture;
     }
+}
+
+/**
+* Simple distance 2d calculator
+*/
+private uint calculateManhattan(
+    uint x1,
+    uint y1,
+    uint x2,
+    uint y2) {
+        return (x1 - x2) + (y1 - y2);
 }
