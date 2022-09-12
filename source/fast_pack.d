@@ -85,15 +85,6 @@ struct GLRectFloat {
 struct TexturePackerConfig {
 
     /**
-     * Enables atlas rebuilds.
-     * This only makes a difference if autoResize is enabled.
-     * If it is false, the packer will not rebuild the atlas upon canvas expansion.
-     * It is faster if disabled, but it will also use more space on the exported texture.
-     * Default is: true
-     */
-    bool atlasRebuilder = true;
-
-    /**
      * Enables fast canvas exporting.
      * If this is enabled edgeColor and blankSpaceColor will be ignored.
      * Default is: true
@@ -228,42 +219,8 @@ struct TexturePacker(T) {
         /// Do a tetris pack bottom right to top left
         if (this.config.autoResize) {
             while(!tetrisPack(key)) {
-
                 this.config.width  += this.config.expansionAmount;
                 this.config.height += this.config.expansionAmount;
-
-                if (this.config.atlasRebuilder) {
-                    /// Re-sort all the items out of bounds
-                    T[] allKeys;
-
-                    /// Run through in order of insertion
-                    uint currentSearch = 0;
-
-                    while(currentSearch < this.currentID) {
-                        foreach (T gottenKey; this.collisionBoxes.keys()) {
-                            if (this.collisionBoxes[gottenKey].id == currentSearch) {
-                                allKeys ~= gottenKey;
-                                currentSearch++;
-                                /// Only breaks foreach
-                                break;
-                            }
-                        }
-                    }
-
-                    // Set the keys out of bounds
-                    for (uint i = 0; i < allKeys.length; i++) {
-                        this.collisionBoxes[allKeys[i]].x = this.config.width + 1;
-                        this.collisionBoxes[allKeys[i]].y = this.config.height + 1;
-                    }
-
-                    // Collide them back into the box
-                    for (uint i = 0; i < allKeys.length; i++) {
-                        T thisKey = allKeys[i];
-                        if (key != thisKey) {
-                            tetrisPack(thisKey);
-                        }
-                    }
-                }
             }
         } else {
             tetrisPack(key);
