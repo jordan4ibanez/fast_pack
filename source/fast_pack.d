@@ -329,23 +329,18 @@ struct TexturePacker(T) {
         uint thisHeight = this.boxHeight[currentIndex];
 
         /// Iterate all available positions
-        for (long i = currentIndex - 1; i >= 0; i--) {
+        foreach (uint x; this.availableX) {
 
-            uint x = this.positionX[i] + this.boxWidth[i] + padding;
+            foreach (uint y; this.availableY) {
 
-            for (long w = currentIndex - 1; w >= 0; w--) {
-
-                uint y = positionY[w] + this.boxHeight[w] + padding;
+                writeln(y);
 
                 bool failed = false;
 
                 /// In bounds check
                 if (// Outer
                     x + thisWidth + padding < maxX &&
-                    y + thisHeight + padding < maxY &&
-                    /// Inner
-                    x >= padding &&
-                    y >= padding) {
+                    y + thisHeight + padding < maxY ) {
 
                     /// Collided with other box failure
                     /// Index each collision box to check if within
@@ -582,19 +577,8 @@ struct TexturePacker(T) {
      * Removes duplicates, automatically sorts smallest to biggest
      */
     private void trimAndSortAvailableSlots() {
-
-        uint[] tempX;
-        this.positionX.sort!((a,b) => a > b ).uniq().retro().each!((x){
-            tempX ~= x;
-        });
-
-        uint[] tempY;
-        this.positionY.sort!((a,b) => a > b ).uniq().retro().each!((y){
-            tempY ~= y;
-        });
-
-        this.availableX = tempX;
-        this.availableY = tempY;
+        this.availableX = this.availableX.sort!((a,b) => a > b ).uniq().retro().array;
+        this.availableY = this.availableY.sort!((a,b) => a > b ).uniq().retro().array;        
     }
 
     /**
