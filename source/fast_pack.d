@@ -3,9 +3,13 @@
  */
 module fast_pack;
 
+import std.stdio;
+
 import image;
-import std.algorithm.sorting: sort;
-import std.algorithm.mutation: remove;
+import std.algorithm.sorting;
+import std.algorithm.mutation;
+import std.algorithm.iteration;
+import std.range;
 
 /**
  * The packing algorithm which the packer will utilize.
@@ -22,6 +26,7 @@ alias TREE = PackingAlgorithm.TREE;
 /**
  * AABB bounding box for textures
  */
+/* 
 struct Rect {
     uint id = 0;
     uint x = 0;
@@ -55,6 +60,7 @@ struct Rect {
                  AABB.y <= this.y + this.height + padding;
     }
 }
+*/
 
 /**
  * A double based struct to directly map textures to vertices in OpenGL
@@ -177,46 +183,66 @@ struct TexturePackerConfig {
 /**
  * Internally handles free position slots
  */
+/*
 private struct FreeSlot {
     uint x = 0;
     uint y = 0;
 }
+*/
 
 /**
  * The texture packer structure. Can also be allocated to heap via:
  * TexturePacker blah = *new TexturePacker();
+ * This works as a static component, component system
  */
 struct TexturePacker(T) {
 
     /// Please note: indexing position actually starts at the top left of the image (0,0)
 
     /// Maintains the current ID that will be created for collision boxes
-    private uint currentID = 0;
+    private uint currentID = 1;
 
     /// The configuration of the texture packer
     private TexturePackerConfig config = *new TexturePackerConfig();
 
+    // Holds the keys for the textures, hashmap for faster index retreival
+    uint[T] keys;
+
     /// This holds the collision boxes of the textures
-    private Rect[T] collisionBoxes;
+    uint[] positionX = [0];
+    uint[] positionY = [0];
+    uint[] boxWidth  = [0];
+    uint[] boxHeight = [0];
 
     /// This holds the actual texture data
-    private TrueColorImage[T] textures;
+    private TrueColorImage[] textures = [null];
+
+    // Free slots for the next texture to be packed into
+    uint[] availableX = [0];
+    uint[] availableY = [0];
 
     /// The current width of the canvas
-    private uint width = 0;
+    private uint canvasWidth = 0;
 
     /// The current height of the canvas
-    private uint height = 0;
+    private uint canvasHeight = 0;
 
     /// Open positions on the canvas
-    private FreeSlot[] freeSlots = [FreeSlot(0,0)];
+    // private FreeSlot[] freeSlots = [FreeSlot(0,0)];
 
     /**
      * A constructor with a predefined configuration
      */
     this(TexturePackerConfig config) {
         this.config = config;
-        this.freeSlots = [FreeSlot(this.config.padding, this.config.padding)];
+        // this.freeSlots = [FreeSlot(this.config.padding, this.config.padding)];
+        
+        // Remove these allocations
+        this.positionX[0] = this.config.padding;
+        this.positionY[0] = this.config.padding;
+
+        this.availableX[0] = this.config.padding;
+        this.availableY[0] = this.config.padding;
     }
 
     /**
@@ -224,9 +250,12 @@ struct TexturePacker(T) {
      */
     void pack(T key, string fileLocation) {
         /// Automate upload internally
-        this.uploadTexture(key, fileLocation);
+        uint currentIndex = this.uploadTexture(key, fileLocation);
 
-        this.internalPack(key);
+        this.internalPack(currentIndex);
+
+        // writeln(this. positionX, " | ", this.positionY, " | ", this.boxWidth, " | ", this.boxHeight);
+        // writeln("size: ", this.canvasWidth, " ", this.canvasHeight);
     }
 
     /**
@@ -234,31 +263,32 @@ struct TexturePacker(T) {
      */
     void pack(T key, TrueColorImage memoryImage) {
         /// Automate upload internally
-        this.uploadTexture(key, memoryImage);
+        uint currentIndex = this.uploadTexture(key, memoryImage);
 
-        this.internalPack(key);
+        this.internalPack(currentIndex);
     }
 
     /*
      * Internally packs the image from the key provided when it was uploaded
      */
-    private void internalPack(T key) {
+    private void internalPack(uint currentIndex) {
 
         /// Throw exception if key is not in the internal library
-        if (!(key in this.collisionBoxes)) {
-            throw new Exception("Something has gone wrong getting collision box from internal library!");   
-        }
+        //if (!(key in this.collisionBoxes)) {
+            //throw new Exception("Something has gone wrong getting collision box from internal library!");   
+        //}
 
-        if (this.config.algorithm == TETRIS) {
+        //if (this.config.algorithm == TETRIS) {
             /// Do a tetris pack bottom right to top left
             if (this.config.autoResize) {
-                while(!tetrisPack(key)) {
+                while(!tetrisPack(currentIndex)) {
                     this.config.width  += this.config.expansionAmount;
                     this.config.height += this.config.expansionAmount;
                 }
             } else {
-                tetrisPack(key);
+                tetrisPack(currentIndex);
             }
+        /*
         } else {
             if (this.config.autoResize) {
                 while(!treePack(key)) {
@@ -269,157 +299,18 @@ struct TexturePacker(T) {
                 treePack(key);
             }
         }
-
+        */
         /// Finally, update the canvas's size in memory
-        this.updateCanvasSize();
+        this.updateCanvasSize(currentIndex);
     }        
 
-
-
-    /**
-     * Internal point based tree packing algorithm
-     */
-    private bool treePack(T key) {
-
-        /// Grab the AABB out of the internal dictionary
-        Rect AABB = this.collisionBoxes[key];
-
-        /// Start the score at the max value possible for reduction formula
-        uint score = uint.max;
-
-        bool found = false;
-
-        /// Cache padding
-        uint padding = this.config.padding;
-
-        /// Cache widths
-        uint maxX = this.config.width;
-        uint maxY = this.config.height;
-
-        uint bestX = uint.max;
-        uint bestY = uint.max;
-
-        /// Cached fail state
-        bool failed = false;
-
-        /// Cached keys
-        T[] keyArray = this.collisionBoxes.keys();
-        /// Cached collisionboxes
-        Rect[] otherCollisionBoxes;
-
-        { // Scope it out of existence
-
-            for (int i = 0; i < keyArray.length; i++) {
-                T gottenKey = keyArray[i];
-                if (gottenKey != key) {
-                    otherCollisionBoxes ~= this.collisionBoxes[gottenKey];
-                }
-            }
-        }
-
-
-        long pickedSlot = 0;
-
-        /// Iterate all available positions
-        for (int u = 0; u < this.freeSlots.length; u++) {
-
-            FreeSlot slot = this.freeSlots[u];
-
-            failed = false;
-
-            AABB.x = slot.x;
-            AABB.y = slot.y;
-
-            /// In bounds check
-            if (// Outer
-                AABB.x + AABB.width + padding < maxX &&
-                AABB.y + AABB.height + padding < maxY &&
-                /// Inner
-                AABB.x >= padding &&
-                AABB.y >= padding) {
-
-                /// Collided with other box failure
-                /// Index each collision box to check if within
-                
-                for (int i = 0; i < otherCollisionBoxes.length; i++) {
-                    Rect otherAABB = otherCollisionBoxes[i];
-                    if (AABB.collides(otherAABB, padding)) {
-                        failed = true;
-                        break;
-                    }
-                }
-
-                /// If it successfully found a new position, update the best X and Y
-                if (!failed) {
-                    uint newScore = calculateManhattan(AABB.x, AABB.y, 0, 0);
-                    // uint newScore = AABB.y - goalY;
-                    if (newScore <= score) {
-                        pickedSlot = u;
-                        found = true;
-                        score = newScore;
-                        bestX = AABB.x;
-                        bestY = AABB.y;
-                    }
-                }
-            }
-        }
-
-        if (!found) {
-            if (this.config.autoResize) {
-                return false;
-            } else {
-                throw new Exception("Not enough room for texture! Make the packer canvas bigger!");
-            }
-        }
-
-        /// Found it, remove this free slot
-        this.freeSlots = this.freeSlots.remove(pickedSlot);
-
-        /// Add in other free slots around it
-        this.freeSlots ~= FreeSlot(bestX + AABB.width + padding, bestY);
-        this.freeSlots ~= FreeSlot(bestX, bestY + AABB.height + padding);
-
-        AABB.x = bestX;
-        AABB.y = bestY;
-
-        // Set the collisionbox back into the internal dictionary
-        this.collisionBoxes[key] = AABB;
-
-        // Finally clean out points
-        for (uint i = 0; i < keyArray.length; i++) {
-            T gottenKey = keyArray[i];
-            Rect gottenCollisionBox = this.collisionBoxes[gottenKey];
-
-
-            long[] removals;
-            for (uint w = 0; w < this.freeSlots.length; w++) {
-                FreeSlot thisFreeSlot = this.freeSlots[w];
-                if (gottenCollisionBox.containsPoint(thisFreeSlot.x, thisFreeSlot.y)) {
-                    removals ~= w;
-                }
-            }
-
-            long shift = 0;
-            for (long q = 0; q < removals.length; q++) {
-                this.freeSlots.remove(removals[q] + shift);
-
-                shift--;
-            }
-
-        }
-
-        return true;
-    }
 
     /**
      * Internal inverse tetris scan pack with scoring algorithm
      */
-    private bool tetrisPack(T key) {
+    private bool tetrisPack(uint currentIndex) {
 
-        /// Grab the AABB out of the internal dictionary
-        Rect AABB = this.collisionBoxes[key];
-
-        /// Start the score at the max value possible for reduction formula
+        /// Start the score at the max value possible for reduction algorithm
         uint score = uint.max;
 
         bool found = false;
@@ -434,82 +325,55 @@ struct TexturePacker(T) {
         uint bestX = uint.max;
         uint bestY = uint.max;
 
-        /// Cached fail state
-        bool failed = false;
+        uint thisWidth  = this.boxWidth[currentIndex];
+        uint thisHeight = this.boxHeight[currentIndex];
 
-        // Iterable positions
-        uint[] xPositions;
-        uint[] yPositions;
-
-        // Cached collisionboxes
-        Rect[] otherCollisionBoxes;
-
-        { // Scope it out of existence
-            T[] keyArray = this.collisionBoxes.keys();
-
-            for (int i = 0; i < keyArray.length; i++) {
-                T gottenKey = keyArray[i];
-                if (gottenKey != key) {
-                    otherCollisionBoxes ~= this.collisionBoxes[gottenKey];
-                }
-            }
-        }
-
-        /// These are the minimum positions (x: 0, y: 0 with 0 padding)
-        xPositions ~= padding;
-        yPositions ~= padding;
-
-        // Add in all other keys
-        { // Scope it out of existence again
-            for (int i = 0; i < otherCollisionBoxes.length; i++) {
-                Rect thisCollisionBox = otherCollisionBoxes[i];
-                if (!(thisCollisionBox.width > this.width || thisCollisionBox.y > this.height)) {
-                    xPositions ~= thisCollisionBox.x + thisCollisionBox.width + padding;
-                    yPositions ~= thisCollisionBox.y + thisCollisionBox.height + padding;
-                }
-            }
-        }
-
-        /// Now sort them max to min, we want to iterate towards the center
-        xPositions.sort!("a > b");
-        yPositions.sort!("a > b");
+        this.positionX.sort!((a,b) => a > b ).release().retro().uniq().each!((index, x){
+            writeln(index, " ", x);
+        });
 
         /// Iterate all available positions
-        for (int _x = 0; _x < xPositions.length; _x++) {
-            for (int _y = 0; _y < yPositions.length; _y++) {
+        for (long i = currentIndex - 1; i >= 0; i--) {
 
-                uint x = xPositions[_x];
-                uint y = yPositions[_y];
+            uint x = this.positionX[i] + this.boxWidth[i] + padding;
 
-                failed = false;
+            for (long w = currentIndex - 1; w >= 0; w--) {
 
-                AABB.x = x;
-                AABB.y = y;
+                uint y = positionY[w] + this.boxHeight[w] + padding;
+
+                bool failed = false;
 
                 /// In bounds check
                 if (// Outer
-                    AABB.x + AABB.width + padding < maxX &&
-                    AABB.y + AABB.height + padding < maxY &&
+                    x + thisWidth + padding < maxX &&
+                    y + thisHeight + padding < maxY &&
                     /// Inner
-                    AABB.x >= padding &&
-                    AABB.y >= padding) {
+                    x >= padding &&
+                    y >= padding) {
 
                     /// Collided with other box failure
                     /// Index each collision box to check if within
-                    for (int i = 0; i < otherCollisionBoxes.length; i++) {
-                        Rect otherAABB = otherCollisionBoxes[i];
-                        if (AABB.collides(otherAABB, padding)) {
-                            failed = true;
-                            break;
+                    for (int z = 1; z < currentIndex; z++) {
+                        
+                        uint otherX = this.positionX[z];
+                        uint otherY = this.positionY[z];
+                        uint otherWidth = this.boxWidth[z];
+                        uint otherHeight = this.boxHeight[z];
+
+                        if (otherX + otherWidth + padding - 1 >= x &&
+                            otherX <= x + thisWidth + padding &&
+                            otherY + otherHeight + padding - 1 >= y &&
+                            otherY <= y + thisHeight + padding) {
+                                failed = true;
+                                break;
                         }
                     }
 
                     /// If it successfully found a new position, update the best X and Y
                     if (!failed) {
-                        uint newScore = AABB.y;
-                        if (newScore <= score) {
+                        if (y < score) {
                             found = true;
-                            score = newScore;
+                            score = y;
                             bestX = x;
                             bestY = y;
                         }
@@ -526,11 +390,8 @@ struct TexturePacker(T) {
             }
         }
 
-        AABB.x = bestX;
-        AABB.y = bestY;
-
-        // Finally set the collisionbox back into the internal dictionary
-        this.collisionBoxes[key] = AABB;
+        this.positionX[currentIndex] = bestX;
+        this.positionY[currentIndex] = bestY;
 
         return true;
     }
@@ -539,8 +400,9 @@ struct TexturePacker(T) {
     /**
      * Get a specific pixel color on the texture's canvas
      */
+     /*
     Color getPixel(uint x, uint y) {
-
+        
         /// Starts off as blank space
         Color returningColor = this.config.blankSpaceColor;
         
@@ -596,41 +458,46 @@ struct TexturePacker(T) {
     Rect getTextureCoordinates(T key) {
         return collisionBoxes[key];
     }
+    */
 
     /// Constructs a memory image of the current canvas
     TrueColorImage saveToTrueColorImage() {
         /// Creates a blank image with the current canvas size
-        TrueColorImage constructingImage = new TrueColorImage(width, height);
+        TrueColorImage constructingImage = new TrueColorImage(this.canvasWidth, this.canvasHeight);
 
         if (this.config.fastCanvasExport) {
             /// Iterate through all collision boxes and blit the pixels (fast)
-            T[] keys = this.collisionBoxes.keys();
-            for (uint i = 0; i < keys.length; i++) {
-                T thisKey = keys[i];
-                Rect AABB = this.collisionBoxes[thisKey];
-                TrueColorImage thisTexture = this.textures[thisKey];
-                for (int x = AABB.x; x < AABB.x + AABB.width; x++) {
-                    for (int y = AABB.y; y < AABB.y + AABB.height; y++) {
+            for (uint i = 1; i < this.currentID; i++) {
+
+                TrueColorImage thisTexture = this.textures[i];
+                uint thisX = this.positionX[i];
+                uint thisY = this.positionY[i];
+                uint thisWidth = this.boxWidth[i];
+                uint thisHeight = this.boxHeight[i];
+
+                for (int x = thisX; x < thisX + thisWidth; x++) {
+                    for (int y = thisY; y < thisY + thisHeight; y++) {
                         constructingImage.setPixel(
                             x,
                             y,
                             thisTexture.getPixel(
-                                x - AABB.x,
-                                y - AABB.y
+                                x - thisX,
+                                y - thisY
                             )
                         );
                     }
                 }
             }
 
-        } else {
+        } /* else {
             /// Linear scan the whole canvas and collision detect each pixel (slow)
-            for (uint x = 0; x < width; x++) {
-                for (uint y = 0; y < height; y++) {
+            for (uint x = 0; x < this.canvasWidth; x++) {
+                for (uint y = 0; y < this.canvasHeight; y++) {
                     constructingImage.setPixel(x, y, this.getPixel(x,y));
                 }
             }
         }
+        */
 
         return constructingImage;
     }
@@ -645,17 +512,15 @@ struct TexturePacker(T) {
     }
 
     /// Update the width of the texture packer's canvas
-    private void updateCanvasSize() {
-        /// Iterate through each texture's collision box to see if it's wider than the current calculation
-        foreach (Rect collisionBox; this.collisionBoxes) {
-            uint newMaxWidth = collisionBox.x + collisionBox.width;
-            uint newMaxHeight = collisionBox.y + collisionBox.height;
-            if (newMaxWidth > width) {
-                width = newMaxWidth + this.config.padding;
-            }
-            if (newMaxHeight > height) {
-                height = newMaxHeight + this.config.padding;
-            }
+    private void updateCanvasSize(uint currentIndex) {
+        uint newRight = this.positionX[currentIndex] + this.boxWidth[currentIndex];
+        uint newTop = this.positionY[currentIndex] + this.boxHeight[currentIndex];
+        uint padding = this.config.padding;
+        if (newRight > this.canvasWidth) {
+            this.canvasWidth = newRight + padding;
+        }
+        if (newTop > this.canvasHeight) {
+            this.canvasHeight = newTop + padding;
         }
     }
 
@@ -663,7 +528,7 @@ struct TexturePacker(T) {
      * Uploads a texture into the associative arrays of the texture packer.
      * This allows game developers to handle a lot less boilerplate
      */
-    private void uploadTexture(T key, string fileLocation) {
+    private uint uploadTexture(T key, string fileLocation) {
         TrueColorImage tempTextureObject = loadImageFromFile(fileLocation).getAsTrueColorImage();
 
         /// Trim it and generate a new trimmed texture
@@ -671,13 +536,45 @@ struct TexturePacker(T) {
             tempTextureObject = this.trimTexture(tempTextureObject);
         }
 
+        /// Throw exception if something crazy happens
+        if (tempTextureObject is null) {
+            throw new Exception("An unkown error has occurred on upload!");
+        }
+
         /// Get an AABB of the texture, with specific internally handled ID
-        Rect AABB = Rect(this.currentID, 0,0,tempTextureObject.width(), tempTextureObject.height());
-        currentID++;
+        uint id = this.currentID;
+        uint posX = 0;
+        uint posY = 0;
+        uint width = tempTextureObject.width();
+        uint height = tempTextureObject.height();
 
         // Throw exception if the texture size is 0 on x or y axis
-        if (AABB.width == 0 || AABB.height == 0) {
+        if (width == 0 || height == 0) {
             throw new Exception("Tried to upload a completely transparent texture!");
+        }
+
+        currentID++;
+
+        /// Plop it into the internal keys
+        this.keys[key]  = id;
+        this.positionX ~= posX;
+        this.positionY ~= posY;
+        this.boxWidth  ~= width;
+        this.boxHeight ~= height;
+        this.textures  ~= tempTextureObject;
+
+        return id;
+    }
+
+    /**
+     * Uploads a texture into the associative arrays of the texture packer.
+     * This allows game developers to handle a lot less boilerplate
+     */
+    private uint uploadTexture(T key, TrueColorImage tempTextureObject) {
+
+        /// Trim it and generate a new trimmed texture
+        if (this.config.trim) {
+            tempTextureObject = this.trimTexture(tempTextureObject);
         }
 
         /// Throw exception if something crazy happens
@@ -685,39 +582,29 @@ struct TexturePacker(T) {
             throw new Exception("An unkown error has occurred on upload!");
         }
 
-        /// Plop it into the internal keys
-        this.collisionBoxes[key] = AABB;
-        this.textures[key] = tempTextureObject;
-    }
-
-    /**
-     * Uploads a texture into the associative arrays of the texture packer.
-     * This allows game developers to handle a lot less boilerplate
-     */
-    private void uploadTexture(T key, TrueColorImage memoryImage) {
-
-        /// Trim it and generate a new trimmed texture
-        if (this.config.trim) {
-            memoryImage = this.trimTexture(memoryImage);
-        }
-
         /// Get an AABB of the texture, with specific internally handled ID
-        Rect AABB = Rect(this.currentID, 0,0,memoryImage.width(), memoryImage.height());
-        currentID++;
+        uint id = this.currentID;
+        uint posX = 0;
+        uint posY = 0;
+        uint width = tempTextureObject.width();
+        uint height = tempTextureObject.height();
 
         // Throw exception if the texture size is 0 on x or y axis
-        if (AABB.width == 0 || AABB.height == 0) {
+        if (width == 0 || height == 0) {
             throw new Exception("Tried to upload a completely transparent texture!");
         }
 
-        /// Throw exception if something crazy happens
-        if (memoryImage is null) {
-            throw new Exception("An unkown error has occurred on upload!");
-        }
+        currentID++;
 
         /// Plop it into the internal keys
-        this.collisionBoxes[key] = AABB;
-        this.textures[key] = memoryImage;
+        this.keys[key]  = id;
+        this.positionX ~= posX;
+        this.positionY ~= posY;
+        this.boxWidth  ~= width;
+        this.boxHeight ~= height;
+        this.textures  ~= tempTextureObject;
+
+        return id;
     }
 
     /**
@@ -826,4 +713,20 @@ private uint calculateManhattan(
     uint x2,
     uint y2) {
         return (x1 - x2) + (y1 - y2);
+}
+
+unittest {
+    import std.stdio;
+    import std.conv: to;
+    TexturePackerConfig config = TexturePackerConfig();
+    config.trim = true;
+    config.padding = 2;
+    TexturePacker!string packer = TexturePacker!string(config);
+    int testLimiter = 10;
+    for(int i = 1; i <= testLimiter; i++){
+        // writeln(i);
+        int value = ((i - 1) % 10) + 1;
+        packer.pack("blah" ~ to!string(i), "assets/" ~ to!string(value) ~ ".png");
+    }
+    packer.saveToFile("newTest.png");
 }
