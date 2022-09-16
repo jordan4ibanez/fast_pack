@@ -200,7 +200,7 @@ struct TexturePacker(T) {
     /// Please note: indexing position actually starts at the top left of the image (0,0)
 
     /// Maintains the current ID that will be created for collision boxes
-    private uint currentID = 1;
+    private uint currentID = 0;
 
     /// The configuration of the texture packer
     private TexturePackerConfig config = *new TexturePackerConfig();
@@ -209,13 +209,13 @@ struct TexturePacker(T) {
     uint[T] keys;
 
     /// This holds the collision boxes of the textures
-    uint[] positionX = [0];
-    uint[] positionY = [0];
-    uint[] boxWidth  = [0];
-    uint[] boxHeight = [0];
+    uint[] positionX;
+    uint[] positionY;
+    uint[] boxWidth;
+    uint[] boxHeight;
 
     /// This holds the actual texture data
-    private TrueColorImage[] textures = [null];
+    private TrueColorImage[] textures;
 
     // Free slots for the next texture to be packed into
     uint[] availableX = [0];
@@ -236,10 +236,6 @@ struct TexturePacker(T) {
     this(TexturePackerConfig config) {
         this.config = config;
         // this.freeSlots = [FreeSlot(this.config.padding, this.config.padding)];
-
-        // Remove these allocations
-        this.positionX[0] = this.config.padding;
-        this.positionY[0] = this.config.padding;
 
         this.availableX[0] = this.config.padding;
         this.availableY[0] = this.config.padding;
@@ -310,10 +306,11 @@ struct TexturePacker(T) {
      */
     private bool tetrisPack(uint currentIndex) {
 
-        /// Start the score at the max value possible for reduction algorithm
-        uint score = uint.max;
-
         bool found = false;
+
+        if (currentIndex == 0) {
+            found = true;
+        }
 
         /// Cache padding
         uint padding = this.config.padding;
@@ -322,53 +319,46 @@ struct TexturePacker(T) {
         uint maxX = this.config.width;
         uint maxY = this.config.height;
 
-        uint bestX = uint.max;
-        uint bestY = uint.max;
+        uint bestX = padding;
+        uint bestY = padding;
 
         uint thisWidth  = this.boxWidth[currentIndex];
         uint thisHeight = this.boxHeight[currentIndex];
 
         /// Iterate all available positions
         foreach (uint x; this.availableX) {
-
+            if (found) {
+                break;
+            }
             foreach (uint y; this.availableY) {
 
-                writeln(y);
-
-                bool failed = false;
-
                 /// In bounds check
-                if (// Outer
-                    x + thisWidth + padding < maxX &&
+                if (x + thisWidth + padding < maxX &&
                     y + thisHeight + padding < maxY ) {
 
                     /// Collided with other box failure
                     /// Index each collision box to check if within
-                    for (int z = 1; z < currentIndex; z++) {
+                    for (int z = 0; z < currentIndex; z++) {
                         
                         uint otherX = this.positionX[z];
                         uint otherY = this.positionY[z];
                         uint otherWidth = this.boxWidth[z];
                         uint otherHeight = this.boxHeight[z];
 
-                        if (otherX + otherWidth + padding - 1 >= x &&
+                        // If it found a free slot, first come first plop
+                        if (!(otherX + otherWidth + padding - 1 >= x &&
                             otherX <= x + thisWidth + padding &&
                             otherY + otherHeight + padding - 1 >= y &&
-                            otherY <= y + thisHeight + padding) {
-                                failed = true;
+                            otherY <= y + thisHeight + padding)) {
+                                found = true;
+                                bestX = x;
+                                bestY = y;
                                 break;
                         }
                     }
-
-                    /// If it successfully found a new position, update the best X and Y
-                    if (!failed) {
-                        if (y < score) {
-                            found = true;
-                            score = y;
-                            bestX = x;
-                            bestY = y;
-                        }
-                    }
+                }
+                if (found) {
+                    break;
                 }
             }
         }
@@ -458,13 +448,13 @@ struct TexturePacker(T) {
 
         if (this.config.fastCanvasExport) {
             /// Iterate through all collision boxes and blit the pixels (fast)
-            for (uint i = 1; i < this.currentID; i++) {
-
+            for (uint i = 0; i < this.currentID; i++) {
                 TrueColorImage thisTexture = this.textures[i];
                 uint thisX = this.positionX[i];
                 uint thisY = this.positionY[i];
                 uint thisWidth = this.boxWidth[i];
                 uint thisHeight = this.boxHeight[i];
+                writeln(thisX, thisY, thisWidth, thisHeight, thisTexture);
 
                 for (int x = thisX; x < thisX + thisWidth; x++) {
                     for (int y = thisY; y < thisY + thisHeight; y++) {
@@ -489,7 +479,7 @@ struct TexturePacker(T) {
             }
         }
         */
-
+        writeln("got here2");
         return constructingImage;
     }
 
@@ -696,7 +686,7 @@ unittest {
     config.trim = true;
     config.padding = 2;
     TexturePacker!string packer = TexturePacker!string(config);
-    int testLimiter = 10;
+    int testLimiter = 1;
     for(int i = 1; i <= testLimiter; i++){
         // writeln(i);
         int value = ((i - 1) % 10) + 1;
