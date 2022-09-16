@@ -236,7 +236,7 @@ struct TexturePacker(T) {
     this(TexturePackerConfig config) {
         this.config = config;
         // this.freeSlots = [FreeSlot(this.config.padding, this.config.padding)];
-        
+
         // Remove these allocations
         this.positionX[0] = this.config.padding;
         this.positionY[0] = this.config.padding;
@@ -530,40 +530,7 @@ struct TexturePacker(T) {
      */
     private uint uploadTexture(T key, string fileLocation) {
         TrueColorImage tempTextureObject = loadImageFromFile(fileLocation).getAsTrueColorImage();
-
-        /// Trim it and generate a new trimmed texture
-        if (this.config.trim) {
-            tempTextureObject = this.trimTexture(tempTextureObject);
-        }
-
-        /// Throw exception if something crazy happens
-        if (tempTextureObject is null) {
-            throw new Exception("An unkown error has occurred on upload!");
-        }
-
-        /// Get an AABB of the texture, with specific internally handled ID
-        uint id = this.currentID;
-        uint posX = 0;
-        uint posY = 0;
-        uint width = tempTextureObject.width();
-        uint height = tempTextureObject.height();
-
-        // Throw exception if the texture size is 0 on x or y axis
-        if (width == 0 || height == 0) {
-            throw new Exception("Tried to upload a completely transparent texture!");
-        }
-
-        currentID++;
-
-        /// Plop it into the internal keys
-        this.keys[key]  = id;
-        this.positionX ~= posX;
-        this.positionY ~= posY;
-        this.boxWidth  ~= width;
-        this.boxHeight ~= height;
-        this.textures  ~= tempTextureObject;
-
-        return id;
+        return this.uploadTexture(key, tempTextureObject);
     }
 
     /**
