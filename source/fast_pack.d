@@ -328,10 +328,6 @@ struct TexturePacker(T) {
         uint thisWidth  = this.boxWidth[currentIndex];
         uint thisHeight = this.boxHeight[currentIndex];
 
-        this.positionX.sort!((a,b) => a > b ).release().retro().uniq().each!((index, x){
-            writeln(index, " ", x);
-        });
-
         /// Iterate all available positions
         for (long i = currentIndex - 1; i >= 0; i--) {
 
@@ -571,7 +567,34 @@ struct TexturePacker(T) {
         this.boxHeight ~= height;
         this.textures  ~= tempTextureObject;
 
+        // Cache padding
+        uint padding = this.config.padding;
+
+        this.availableX ~= posX + width + padding;
+        this.availableY ~= posY + height + padding;
+
+        this.trimAndSortAvailableSlots();
+
         return id;
+    }
+
+    /*
+     * Removes duplicates, automatically sorts smallest to biggest
+     */
+    private void trimAndSortAvailableSlots() {
+
+        uint[] tempX;
+        this.positionX.sort!((a,b) => a > b ).uniq().retro().each!((x){
+            tempX ~= x;
+        });
+
+        uint[] tempY;
+        this.positionY.sort!((a,b) => a > b ).uniq().retro().each!((y){
+            tempY ~= y;
+        });
+
+        this.availableX = tempX;
+        this.availableY = tempY;
     }
 
     /**
