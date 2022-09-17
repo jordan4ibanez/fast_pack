@@ -326,7 +326,7 @@ struct TexturePacker(T) {
                         uint otherHeight = this.boxHeight[i];
 
                         // If it found a free slot, first come first plop
-                        if (otherX + otherWidth > x &&
+                        if (otherX + otherWidth + padding > x &&
                             otherX <= x + thisWidth + padding &&
                             otherY + otherHeight + padding > y &&
                             otherY <= y + thisHeight + padding ) {
