@@ -10,18 +10,8 @@ import std.algorithm.sorting;
 import std.algorithm.mutation;
 import std.algorithm.iteration;
 import std.range;
+import std.parallelism;
 
-/**
- * The packing algorithm which the packer will utilize.
- * TREE is faster, but way less space efficient.
- * TETRIS is slower, but way more space efficient.
- */
-enum PackingAlgorithm {
-    TETRIS,
-    TREE
-}
-alias TETRIS = PackingAlgorithm.TETRIS;
-alias TREE = PackingAlgorithm.TREE;
 
 /**
  * AABB bounding box for textures
@@ -102,14 +92,6 @@ struct GLRectFloat {
  */
 struct TexturePackerConfig {
 
-    /**
-     * The packing algorithm the packer will utilize.
-     * You can pick between:
-     * TREE which is faster, but less space efficient.
-     * TETRIS which is slower, but way more space efficient.
-     * The default is: TETRIS
-     */
-    PackingAlgorithm algorithm = TETRIS;
 
     /**
      * Enables fast canvas exporting.
@@ -183,12 +165,10 @@ struct TexturePackerConfig {
 /**
  * Internally handles free position slots
  */
-/*
 private struct FreeSlot {
     uint x = 0;
     uint y = 0;
 }
-*/
 
 /**
  * The texture packer structure. Can also be allocated to heap via:
@@ -306,14 +286,12 @@ struct TexturePacker(T) {
      */
     private bool tetrisPack(uint currentIndex) {
 
-        bool found = false;
-
-        if (currentIndex == 0) {
-            found = true;
-        }
+        bool found = false;        
 
         /// Cache padding
         uint padding = this.config.padding;
+
+        uint score = uint.max;
 
         /// Cache widths
         uint maxX = this.config.width;
@@ -324,39 +302,49 @@ struct TexturePacker(T) {
 
         uint thisWidth  = this.boxWidth[currentIndex];
         uint thisHeight = this.boxHeight[currentIndex];
-
+        
         /// Iterate all available positions
-        foreach (uint x; this.availableX) {
+        foreach (uint y; this.availableY) {
             if (found) {
                 break;
             }
-            foreach (uint y; this.availableY) {
-
+            foreach (uint x; this.availableX) {
+                uint newScore = x + y;
+                if (newScore < score) {
                 /// In bounds check
-                if (x + thisWidth + padding < maxX &&
-                    y + thisHeight + padding < maxY ) {
+                if (x + thisWidth + padding < maxX && y + thisHeight + padding < maxY ) {                    
 
+                    bool failed = false;
                     /// Collided with other box failure
                     /// Index each collision box to check if within
-                    for (int z = 0; z < currentIndex; z++) {
+
+                    for (int i = 0; i < currentIndex; i++) {
                         
-                        uint otherX = this.positionX[z];
-                        uint otherY = this.positionY[z];
-                        uint otherWidth = this.boxWidth[z];
-                        uint otherHeight = this.boxHeight[z];
+                        uint otherX = this.positionX[i];
+                        uint otherY = this.positionY[i];
+                        uint otherWidth = this.boxWidth[i];
+                        uint otherHeight = this.boxHeight[i];
 
                         // If it found a free slot, first come first plop
-                        if (!(otherX + otherWidth + padding - 1 >= x &&
+                        if (otherX + otherWidth > x &&
                             otherX <= x + thisWidth + padding &&
-                            otherY + otherHeight + padding - 1 >= y &&
-                            otherY <= y + thisHeight + padding)) {
-                                found = true;
-                                bestX = x;
-                                bestY = y;
+                            otherY + otherHeight + padding > y &&
+                            otherY <= y + thisHeight + padding ) {
+                                failed = true;
                                 break;
                         }
                     }
+
+                    if (!failed) {
+                        found = true;
+                        bestX = x;
+                        bestY = y;
+                        score = newScore;
+                        break;
+                    }
                 }
+                }
+                
                 if (found) {
                     break;
                 }
@@ -373,6 +361,9 @@ struct TexturePacker(T) {
 
         this.positionX[currentIndex] = bestX;
         this.positionY[currentIndex] = bestY;
+
+        this.availableX ~= bestX + thisWidth + padding;
+        this.availableY ~= bestY + thisHeight + padding;
 
         return true;
     }
@@ -454,7 +445,6 @@ struct TexturePacker(T) {
                 uint thisY = this.positionY[i];
                 uint thisWidth = this.boxWidth[i];
                 uint thisHeight = this.boxHeight[i];
-                writeln(thisX, thisY, thisWidth, thisHeight, thisTexture);
 
                 for (int x = thisX; x < thisX + thisWidth; x++) {
                     for (int y = thisY; y < thisY + thisHeight; y++) {
@@ -479,7 +469,6 @@ struct TexturePacker(T) {
             }
         }
         */
-        writeln("got here2");
         return constructingImage;
     }
 
@@ -551,12 +540,6 @@ struct TexturePacker(T) {
         this.boxWidth  ~= width;
         this.boxHeight ~= height;
         this.textures  ~= tempTextureObject;
-
-        // Cache padding
-        uint padding = this.config.padding;
-
-        this.availableX ~= posX + width + padding;
-        this.availableY ~= posY + height + padding;
 
         this.trimAndSortAvailableSlots();
 
@@ -679,18 +662,26 @@ private uint calculateManhattan(
         return (x1 - x2) + (y1 - y2);
 }
 
-unittest {
+unittest {    
+    int start = 1;
     import std.stdio;
     import std.conv: to;
     TexturePackerConfig config = TexturePackerConfig();
     config.trim = true;
     config.padding = 2;
     TexturePacker!string packer = TexturePacker!string(config);
-    int testLimiter = 1;
-    for(int i = 1; i <= testLimiter; i++){
-        // writeln(i);
-        int value = ((i - 1) % 10) + 1;
-        packer.pack("blah" ~ to!string(i), "assets/" ~ to!string(value) ~ ".png");
+
+    int testLimiter = 500;
+
+    TrueColorImage[] textures = new TrueColorImage[10];
+    for (uint i = 0; i < 10; i++) {
+        textures[i] = loadImageFromFile("assets/" ~ to!string(i + 1) ~ ".png").getAsTrueColorImage();
+    }
+
+    for(int i = start; i <= testLimiter; i++){
+        writeln(i);
+        int value = ((i - 1) % 10);
+        packer.pack("blah" ~ to!string(i),textures[value]);
     }
     packer.saveToFile("newTest.png");
 }
