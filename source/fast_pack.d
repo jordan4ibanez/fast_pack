@@ -483,6 +483,13 @@ class TexturePacker(T) {
 
         return trimmedTexture;
     }
+
+    /**
+    * Gets the canvas width and height as a uint[2]
+    */
+    uint[2] getCanvasSize() {
+        return [this.canvasWidth, this.canvasHeight];
+    }
 }
 
 unittest {
