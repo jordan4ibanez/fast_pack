@@ -27,9 +27,7 @@ import image;
 
 void main() {
 
-    // In this example I am allocating the texture packer and config onto the heap to clear out the stack
-    // *new is optional
-    TexturePackerConfig config = *new TexturePackerConfig();
+    TexturePackerConfig config;
     config.showDebugEdge = true;
     config.trim = true;
     config.padding = 2;
@@ -38,7 +36,7 @@ void main() {
     // We give the texture packer constructer our config.
     // This is optional, but the default canvas size is 400 by 400 pixels.
     // So you might want to make that bigger!
-	TexturePacker!string packer = *new TexturePacker!string(config);
+	TexturePacker!string packer = new TexturePacker!string(config);
 
     // Now we pack our textures into it
     for (int i = 1; i <= 10; i++) {
