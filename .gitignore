@@ -13,4 +13,5 @@ fast_pack-test-*
 *.o
 *.obj
 *.lst
+libfast_pack.a
 newTest.png
