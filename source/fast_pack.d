@@ -3,55 +3,10 @@
 */
 module fast_pack;
 
-import std.stdio;
-
 import image;
 import std.algorithm.sorting;
-import std.algorithm.mutation;
 import std.algorithm.iteration;
 import std.range;
-import std.parallelism;
-
-
-/**
-* AABB bounding box for textures
-*/
-class Rect {
-
-    uint id = 0;
-
-    uint x = 0;
-    uint y = 0;
-
-    uint width = 0;
-    uint height = 0;
-
-    this(uint id, uint x, uint y, uint width, uint height) {
-        this.id = id;
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-    }
-
-    /// AABB point check
-    bool containsPoint(uint x, uint y) {
-        return x >= this.x && x <= this.x + this.width - 1 && y >= this.y && y <= this.y + this.height - 1;
-    }
-
-    /// Check if a point is on the texture's edge
-    bool isEdge(uint x, uint y) {
-        return x == this.x || x == this.x + this.width - 1 || y == this.y || y == this.y + this.height - 1;
-    }
-
-    /// AABB check
-    bool collides(Rect AABB, uint padding) {
-        return AABB.x + AABB.width + padding - 1 >= this.x &&
-                 AABB.x <= this.x + this.width + padding &&
-                 AABB.y + AABB.height + padding - 1 >= this.y &&
-                 AABB.y <= this.y + this.height + padding;
-    }
-}
 
 /**
 * A double based struct to directly map textures to vertices in your rendering api.
@@ -73,7 +28,7 @@ struct TextureRectangle {
 * Please note: The fields in this structure are left public so you can create a blank slate
 * with defaults, then piecemeal your changes in if you don't like the defaults!
 */
-class TexturePackerConfig {
+struct TexturePackerConfig {
 
 
     /**
@@ -100,15 +55,6 @@ class TexturePackerConfig {
     * Default is nothing
     */
     Color blankSpaceColor = *new Color(0,0,0,0);
-
-    /** 
-    * Enables the auto resizer algorithm. This will expand the canvas when it runs out of room.
-    * You can combine this with a starting width and height of the canvas to your liking!
-    * Default is: true
-
-    //! This is now deprecated
-    */
-    // bool autoResize = true;
     
     /**
     * The auto resizer algorithm's resize amount.
@@ -147,13 +93,6 @@ class TexturePackerConfig {
     uint height = 400;
 }
 
-/**
- * Internally handles free position slots
- */
-private struct FreeSlot {
-    uint x = 0;
-    uint y = 0;
-}
 
 /**
 * The texture packer structure. Can also be allocated to heap via:
@@ -166,7 +105,7 @@ struct TexturePacker(T) {
     private uint currentID = 0;
 
     /// The configuration of the texture packer
-    private TexturePackerConfig config = new TexturePackerConfig();
+    private TexturePackerConfig config;
 
     // Holds the keys for the textures, hashmap for faster index retreival
     private uint[T] keys;
@@ -190,15 +129,11 @@ struct TexturePacker(T) {
     /// The current height of the canvas
     private uint canvasHeight = 0;
 
-    /// Open positions on the canvas
-    // private FreeSlot[] freeSlots = [FreeSlot(0,0)];
-
     /**
     * A constructor with a predefined configuration
     */
     this(TexturePackerConfig config) {
         this.config = config;
-        // this.freeSlots = [FreeSlot(this.config.padding, this.config.padding)];
 
         this.availableX[0] = this.config.padding;
         this.availableY[0] = this.config.padding;
@@ -208,6 +143,7 @@ struct TexturePacker(T) {
     * This allows game developers to add in textures to the texture packer canvas with a generic key and string file location.
     */
     void pack(T key, string fileLocation) {
+
         /// Automate upload internally
         uint currentIndex = this.uploadTexture(key, fileLocation);
 
@@ -265,10 +201,10 @@ struct TexturePacker(T) {
         uint thisHeight = this.boxHeight[currentIndex];
         
         /// Iterate all available positions
-        loop: foreach (uint y; this.availableY) {
+        foreach (uint y; this.availableY) {
 
             if (found) {
-                break loop;
+                break;
             }
 
             foreach (uint x; this.availableX) {
@@ -296,7 +232,7 @@ struct TexturePacker(T) {
                                 otherY <= y + thisHeight + padding 
                                 ) {
                                     failed = true;
-                                    break loop;
+                                    break;
                             }
                         }
 
@@ -305,7 +241,7 @@ struct TexturePacker(T) {
                             bestX = x;
                             bestY = y;
                             score = newScore;
-                            break loop;
+                            break;
                         }
                     }
                 }
@@ -326,17 +262,17 @@ struct TexturePacker(T) {
     }
 
     /// Get texture coordinates for working with your graphics api in double floating point precision
-    TextureRectangle getTextureCoordinatesDouble(T key) {
+    // TextureRectangle getTextureCoordinatesDouble(T key) {
 
-        Rect AABB = collisionBoxes[key];
+    //     Rect AABB = collisionBoxes[key];
 
-        return FastRect(
-             cast(double) AABB.x / cast(double) width,
-             cast(double) AABB.y / cast(double) height,
-            (cast(double) AABB.x + cast(double) AABB.width) / cast(double) width,
-            (cast(double) AABB.y + cast(double) AABB.height) / cast(double) height            
-        );
-    }
+    //     return FastRect(
+    //          cast(double) AABB.x / cast(double) width,
+    //          cast(double) AABB.y / cast(double) height,
+    //         (cast(double) AABB.x + cast(double) AABB.width) / cast(double) width,
+    //         (cast(double) AABB.y + cast(double) AABB.height) / cast(double) height            
+    //     );
+    // }
 
     /// Constructs a memory image of the current canvas
     TrueColorImage saveToTrueColorImage() {
@@ -553,11 +489,10 @@ private uint calculateManhattan(uint x1, uint y1, uint x2, uint y2) {
     return (x1 - x2) + (y1 - y2);
 }
 
-unittest {    
-    int start = 1;
+unittest {
     import std.stdio;
     import std.conv: to;
-    TexturePackerConfig config = new TexturePackerConfig();
+    TexturePackerConfig config;
     config.trim = true;
     config.padding = 2;
     TexturePacker!string packer = TexturePacker!string(config);
@@ -565,14 +500,17 @@ unittest {
     int testLimiter = 500;
 
     TrueColorImage[] textures = new TrueColorImage[10];
-    for (uint i = 0; i < 10; i++) {
+
+    foreach (uint i; 0..10) {
         textures[i] = loadImageFromFile("assets/" ~ to!string(i + 1) ~ ".png").getAsTrueColorImage();
     }
 
-    for(int i = start; i <= testLimiter; i++){
+    foreach (int i; 1..testLimiter){
         writeln(i);
         int value = ((i - 1) % 10);
         packer.pack("blah" ~ to!string(i),textures[value]);
     }
+
+
     packer.saveToFile("newTest.png");
 }
