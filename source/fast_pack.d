@@ -99,7 +99,7 @@ struct TexturePackerConfig {
 * TexturePacker blah = *new TexturePacker();
 * This works as a static component, component system
 */
-struct TexturePacker(T) {
+class TexturePacker(T) {
     
     /// Maintains the current ID that will be created for collision boxes
     private uint currentID = 0;
@@ -148,9 +148,6 @@ struct TexturePacker(T) {
         uint currentIndex = this.uploadTexture(key, fileLocation);
 
         this.internalPack(currentIndex);
-
-        // writeln(this. positionX, " | ", this.positionY, " | ", this.boxWidth, " | ", this.boxHeight);
-        // writeln("size: ", this.canvasWidth, " ", this.canvasHeight);
     }
 
     /**
@@ -262,43 +259,49 @@ struct TexturePacker(T) {
     }
 
     /// Get texture coordinates for working with your graphics api in double floating point precision
-    // TextureRectangle getTextureCoordinatesDouble(T key) {
+    TextureRectangle getTextureCoordinatesDouble(T key) {
 
-    //     Rect AABB = collisionBoxes[key];
+        ulong index = keys[key];
 
-    //     return FastRect(
-    //          cast(double) AABB.x / cast(double) width,
-    //          cast(double) AABB.y / cast(double) height,
-    //         (cast(double) AABB.x + cast(double) AABB.width) / cast(double) width,
-    //         (cast(double) AABB.y + cast(double) AABB.height) / cast(double) height            
-    //     );
-    // }
+        double thisX = positionX[index];
+        double thisY = positionY[index];
+        double thisWidth = boxWidth[index];
+        double thisHeight = boxHeight[index];
+
+        double canWidth = cast(double) canvasWidth;
+        double canHeight = cast(double) canvasHeight;
+
+        return TextureRectangle(
+             thisX / canWidth,
+             thisY / canHeight,
+            (thisX + thisWidth)  /  canWidth,
+            (thisY + thisHeight) / canHeight  
+        );
+    }
 
     /// Constructs a memory image of the current canvas
     TrueColorImage saveToTrueColorImage() {
         /// Creates a blank image with the current canvas size
         TrueColorImage constructingImage = new TrueColorImage(this.canvasWidth, this.canvasHeight);
+        
+        /// Iterate through all collision boxes and blit the pixels (fast)
+        for (uint i = 0; i < this.currentID; i++) {
+            TrueColorImage thisTexture = this.textures[i];
+            uint thisX = this.positionX[i];
+            uint thisY = this.positionY[i];
+            uint thisWidth = this.boxWidth[i];
+            uint thisHeight = this.boxHeight[i];
 
-        if (this.config.fastCanvasExport) {
-            /// Iterate through all collision boxes and blit the pixels (fast)
-            for (uint i = 0; i < this.currentID; i++) {
-                TrueColorImage thisTexture = this.textures[i];
-                uint thisX = this.positionX[i];
-                uint thisY = this.positionY[i];
-                uint thisWidth = this.boxWidth[i];
-                uint thisHeight = this.boxHeight[i];
-
-                for (int x = thisX; x < thisX + thisWidth; x++) {
-                    for (int y = thisY; y < thisY + thisHeight; y++) {
-                        constructingImage.setPixel(
-                            x,
-                            y,
-                            thisTexture.getPixel(
-                                x - thisX,
-                                y - thisY
-                            )
-                        );
-                    }
+            for (int x = thisX; x < thisX + thisWidth; x++) {
+                for (int y = thisY; y < thisY + thisHeight; y++) {
+                    constructingImage.setPixel(
+                        x,
+                        y,
+                        thisTexture.getPixel(
+                            x - thisX,
+                            y - thisY
+                        )
+                    );
                 }
             }
         }
@@ -482,28 +485,30 @@ struct TexturePacker(T) {
     }
 }
 
-/**
-* Simple distance 2d calculator
-*/
-private uint calculateManhattan(uint x1, uint y1, uint x2, uint y2) {
-    return (x1 - x2) + (y1 - y2);
-}
-
 unittest {
+    
     import std.stdio;
     import std.conv: to;
+    import std.datetime.stopwatch;
     TexturePackerConfig config;
     config.trim = true;
     config.padding = 2;
-    TexturePacker!string packer = TexturePacker!string(config);
+    config.fastCanvasExport = true;
+    TexturePacker!string packer = new TexturePacker!string(config);
 
     int testLimiter = 500;
 
     TrueColorImage[] textures = new TrueColorImage[10];
 
+
+    StopWatch sw = StopWatch(AutoStart.yes);
+
     foreach (uint i; 0..10) {
         textures[i] = loadImageFromFile("assets/" ~ to!string(i + 1) ~ ".png").getAsTrueColorImage();
     }
+
+    writeln("insertion took: ",sw.peek.total!"msecs", "ms");
+    sw.reset();
 
     foreach (int i; 1..testLimiter){
         writeln(i);
@@ -511,6 +516,10 @@ unittest {
         packer.pack("blah" ~ to!string(i),textures[value]);
     }
 
+    writeln("packing took: ",sw.peek.total!"msecs", "ms");
+    sw.reset();
 
     packer.saveToFile("newTest.png");
+
+    writeln("saving took: ",sw.peek.total!"msecs", "ms");
 }
