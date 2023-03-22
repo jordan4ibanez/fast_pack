@@ -215,7 +215,7 @@ class TexturePacker(T) {
                         /// Collided with other box failure
                         /// Index each collision box to check if within
 
-                        for (int i = 0; i < currentIndex; i++) {
+                        foreach(int i;0..currentIndex) {
                             
                             uint otherX = this.positionX[i];
                             uint otherY = this.positionY[i];
