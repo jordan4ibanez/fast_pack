@@ -6,8 +6,6 @@ Note: Go and try this https://www.david-colson.com/2020/03/10/exploring-rect-pac
 This texture packer has two different algorithms built in: TREE and TETRIS. Choose the one that fits your needs!
 The texture packer is also generic! You can use chars, ints, uints, strings, etc as keys!
 
-[This relies on Adam D. Ruppe's awesome image library. Click here to see it.](https://code.dlang.org/packages/arsd-official%3Aimage_files)
-
 [If you want to learn how this works, click here.](https://github.com/jordan4ibanez/fast_pack/blob/main/HowThisWorks.md)
 
 This is written to be modular. For example:
