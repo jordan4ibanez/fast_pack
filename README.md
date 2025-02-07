@@ -1,10 +1,7 @@
 # fast_pack
  A fast texture packer for D
 
-This texture packer has two different algorithms built in: TREE and TETRIS. Choose the one that fits your needs!
 The texture packer is also generic! You can use chars, ints, uints, strings, etc as keys!
-
-[This relies on Adam D. Ruppe's awesome image library. Click here to see it.](https://code.dlang.org/packages/arsd-official%3Aimage_files)
 
 [If you want to learn how this works, click here.](https://github.com/jordan4ibanez/fast_pack/blob/main/HowThisWorks.md)
 
@@ -23,7 +20,6 @@ Here is a simple tutorial on how to use it:
 import std.stdio;
 import fast_pack;
 import std.conv: to;
-import image;
 
 void main() {
 

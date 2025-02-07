@@ -2,14 +2,14 @@
 	"authors": [
 		"jordan4ibanez"
 	],
-    "dependencies": {
-		"arsd-official:image_files": "~>10.9.2"
-	},
 	"copyright": "Copyright © 2022, jordan4ibanez",
+	"dependencies": {
+		"gamut": "~>3.1.3"
+	},
 	"description": "A fast texture packer for D",
-	"license": "MIT",
-	"name": "fast_pack",
-    "libs-posix": [
+	"libs-posix": [
 		"z"
-	]
+	],
+	"license": "MIT",
+	"name": "fast_pack"
 }
