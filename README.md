@@ -1,6 +1,8 @@
 # fast_pack
  A fast texture packer for D
 
+Note: Go and try this https://www.david-colson.com/2020/03/10/exploring-rect-packing.html
+
 This texture packer has two different algorithms built in: TREE and TETRIS. Choose the one that fits your needs!
 The texture packer is also generic! You can use chars, ints, uints, strings, etc as keys!
 
