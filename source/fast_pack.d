@@ -4,8 +4,8 @@
 module fast_pack;
 
 import image;
-import std.algorithm.sorting;
 import std.algorithm.iteration;
+import std.algorithm.sorting;
 import std.range;
 
 /**
@@ -30,7 +30,6 @@ struct TextureRectangle {
 */
 struct TexturePackerConfig {
 
-
     /**
     * Enables fast canvas exporting.
     * If this is enabled edgeColor and blankSpaceColor will be ignored.
@@ -48,14 +47,14 @@ struct TexturePackerConfig {
     * The edge color.
     * Default is: nothing
     */
-    Color edgeColor = *new Color(0,0,0,255);
+    Color edgeColor = Color(0, 0, 0, 255);
 
     /**
     * The blank space border.
     * Default is nothing
     */
-    Color blankSpaceColor = *new Color(0,0,0,0);
-    
+    Color blankSpaceColor = Color(0, 0, 0, 0);
+
     /**
     * The auto resizer algorithm's resize amount.
     * When the canvas runs out of space, it will expand it by this many pixels.
@@ -93,14 +92,13 @@ struct TexturePackerConfig {
     uint height = 400;
 }
 
-
 /**
 * The texture packer structure. Can also be allocated to heap via:
-* TexturePacker blah = *new TexturePacker();
+* TexturePacker blah = new TexturePacker();
 * This works as a static component, component system
 */
 class TexturePacker(T) {
-    
+
     /// Maintains the current ID that will be created for collision boxes
     private uint currentID = 0;
 
@@ -165,22 +163,21 @@ class TexturePacker(T) {
     */
     private void internalPack(uint currentIndex) {
 
-        while(!tetrisPack(currentIndex)) {
-            this.config.width  += this.config.expansionAmount;
+        while (!tetrisPack(currentIndex)) {
+            this.config.width += this.config.expansionAmount;
             this.config.height += this.config.expansionAmount;
         }
 
         /// Finally, update the canvas's size in memory
         this.updateCanvasSize(currentIndex);
-    }        
-
+    }
 
     /**
     * Internal inverse tetris scan pack with scoring algorithm
     */
     private bool tetrisPack(uint currentIndex) {
 
-        bool found = false;        
+        bool found = false;
 
         /// Cache padding
         uint padding = this.config.padding;
@@ -194,9 +191,9 @@ class TexturePacker(T) {
         uint bestX = padding;
         uint bestY = padding;
 
-        uint thisWidth  = this.boxWidth[currentIndex];
+        uint thisWidth = this.boxWidth[currentIndex];
         uint thisHeight = this.boxHeight[currentIndex];
-        
+
         /// Iterate all available positions
         foreach (uint y; this.availableY) {
 
@@ -208,28 +205,28 @@ class TexturePacker(T) {
                 uint newScore = x + y;
                 if (newScore < score) {
                     /// In bounds check
-                    if (x + thisWidth + padding < maxX && y + thisHeight + padding < maxY ) {                    
+                    if (x + thisWidth + padding < maxX && y + thisHeight + padding < maxY) {
 
                         bool failed = false;
 
                         /// Collided with other box failure
                         /// Index each collision box to check if within
 
-                        foreach(int i;0..currentIndex) {
-                            
+                        foreach (int i; 0 .. currentIndex) {
+
                             uint otherX = this.positionX[i];
                             uint otherY = this.positionY[i];
                             uint otherWidth = this.boxWidth[i];
                             uint otherHeight = this.boxHeight[i];
 
                             // If it found a free slot, first come first plop
-                            if (otherX + otherWidth + padding > x  &&
-                                otherX <= x + thisWidth + padding  &&
+                            if (otherX + otherWidth + padding > x &&
+                                otherX <= x + thisWidth + padding &&
                                 otherY + otherHeight + padding > y &&
-                                otherY <= y + thisHeight + padding 
+                                otherY <= y + thisHeight + padding
                                 ) {
-                                    failed = true;
-                                    break;
+                                failed = true;
+                                break;
                             }
                         }
 
@@ -272,10 +269,10 @@ class TexturePacker(T) {
         double canHeight = cast(double) canvasHeight;
 
         return TextureRectangle(
-             thisX / canWidth,
-             thisY / canHeight,
-            (thisX + thisWidth)  /  canWidth,
-            (thisY + thisHeight) / canHeight  
+            thisX / canWidth,
+            thisY / canHeight,
+            (thisX + thisWidth) / canWidth,
+            (thisY + thisHeight) / canHeight
         );
     }
 
@@ -283,7 +280,7 @@ class TexturePacker(T) {
     TrueColorImage saveToTrueColorImage() {
         /// Creates a blank image with the current canvas size
         TrueColorImage constructingImage = new TrueColorImage(this.canvasWidth, this.canvasHeight);
-        
+
         /// Iterate through all collision boxes and blit the pixels (fast)
         for (uint i = 0; i < this.currentID; i++) {
             TrueColorImage thisTexture = this.textures[i];
@@ -300,7 +297,7 @@ class TexturePacker(T) {
                         thisTexture.getPixel(
                             x - thisX,
                             y - thisY
-                        )
+                    )
                     );
                 }
             }
@@ -370,12 +367,12 @@ class TexturePacker(T) {
         currentID++;
 
         /// Plop it into the internal keys
-        this.keys[key]  = id;
+        this.keys[key] = id;
         this.positionX ~= posX;
         this.positionY ~= posY;
-        this.boxWidth  ~= width;
+        this.boxWidth ~= width;
         this.boxHeight ~= height;
-        this.textures  ~= tempTextureObject;
+        this.textures ~= tempTextureObject;
 
         this.trimAndSortAvailableSlots();
 
@@ -386,8 +383,8 @@ class TexturePacker(T) {
     * Removes duplicates, automatically sorts smallest to biggest
     */
     private void trimAndSortAvailableSlots() {
-        this.availableX = this.availableX.sort!((a,b) => a > b ).uniq().retro().array;
-        this.availableY = this.availableY.sort!((a,b) => a > b ).uniq().retro().array;        
+        this.availableX = this.availableX.sort!((a, b) => a > b).uniq().retro().array;
+        this.availableY = this.availableY.sort!((a, b) => a > b).uniq().retro().array;
     }
 
     /**
@@ -406,7 +403,7 @@ class TexturePacker(T) {
         for (int x = 0; x < textureWidth; x++) {
             bool found = false;
             for (int y = 0; y < textureHeight; y++) {
-                if (untrimmedTexture.getPixel(x,y).a > 0) {
+                if (untrimmedTexture.getPixel(x, y).a > 0) {
                     minX = x;
                     found = true;
                     break;
@@ -423,7 +420,7 @@ class TexturePacker(T) {
         for (int x = textureWidth - 1; x >= 0; x--) {
             bool found = false;
             for (int y = 0; y < textureHeight; y++) {
-                if (untrimmedTexture.getPixel(x,y).a > 0) {
+                if (untrimmedTexture.getPixel(x, y).a > 0) {
                     maxX = x + 1;
                     found = true;
                     break;
@@ -440,7 +437,7 @@ class TexturePacker(T) {
         for (int y = 0; y < textureHeight; y++) {
             bool found = false;
             for (int x = 0; x < textureWidth; x++) {
-                if (untrimmedTexture.getPixel(x,y).a > 0) {
+                if (untrimmedTexture.getPixel(x, y).a > 0) {
                     minY = y;
                     found = true;
                     break;
@@ -457,7 +454,7 @@ class TexturePacker(T) {
         for (int y = textureHeight - 1; y >= 0; y--) {
             bool found = false;
             for (int x = 0; x < textureWidth; x++) {
-                if (untrimmedTexture.getPixel(x,y).a > 0) {
+                if (untrimmedTexture.getPixel(x, y).a > 0) {
                     maxY = y + 1;
                     found = true;
                     break;
@@ -477,7 +474,7 @@ class TexturePacker(T) {
         /// Blit the old pixels into the new texture with modified location
         for (uint x = 0; x < newSizeX; x++) {
             for (uint y = 0; y < newSizeY; y++) {
-                trimmedTexture.setPixel(x,y, untrimmedTexture.getPixel(x + minX, y + minY));
+                trimmedTexture.setPixel(x, y, untrimmedTexture.getPixel(x + minX, y + minY));
             }
         }
 
@@ -493,40 +490,40 @@ class TexturePacker(T) {
 }
 
 unittest {
-    
-    import std.stdio;
-    import std.conv: to;
+
+    import std.conv : to;
     import std.datetime.stopwatch;
+    import std.stdio;
+
     TexturePackerConfig config;
     config.trim = true;
     config.padding = 2;
     config.fastCanvasExport = true;
     TexturePacker!string packer = new TexturePacker!string(config);
 
-    int testLimiter = 500;
+    int testLimiter = 10;
 
     TrueColorImage[] textures = new TrueColorImage[10];
 
-
     StopWatch sw = StopWatch(AutoStart.yes);
 
-    foreach (uint i; 0..10) {
+    foreach (uint i; 0 .. 10) {
         textures[i] = loadImageFromFile("assets/" ~ to!string(i + 1) ~ ".png").getAsTrueColorImage();
     }
 
-    writeln("insertion took: ",sw.peek.total!"msecs", "ms");
+    writeln("insertion took: ", sw.peek.total!"msecs", "ms");
     sw.reset();
 
-    foreach (int i; 1..testLimiter){
+    foreach (int i; 1 .. testLimiter) {
         writeln(i);
         int value = ((i - 1) % 10);
-        packer.pack("blah" ~ to!string(i),textures[value]);
+        packer.pack("blah" ~ to!string(i), textures[value]);
     }
 
-    writeln("packing took: ",sw.peek.total!"msecs", "ms");
+    writeln("packing took: ", sw.peek.total!"msecs", "ms");
     sw.reset();
 
     packer.saveToFile("newTest.png");
 
-    writeln("saving took: ",sw.peek.total!"msecs", "ms");
+    writeln("saving took: ", sw.peek.total!"msecs", "ms");
 }
