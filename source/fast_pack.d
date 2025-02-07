@@ -180,64 +180,65 @@ class TexturePacker(T) {
         bool found = false;
 
         /// Cache padding
-        uint padding = this.config.padding;
+        immutable uint padding = this.config.padding;
 
         uint score = uint.max;
 
         /// Cache widths
-        uint maxX = this.config.width;
-        uint maxY = this.config.height;
+        immutable uint maxX = this.config.width;
+        immutable uint maxY = this.config.height;
 
         uint bestX = padding;
         uint bestY = padding;
 
-        uint thisWidth = this.boxWidth[currentIndex];
-        uint thisHeight = this.boxHeight[currentIndex];
+        immutable uint thisWidth = this.boxWidth[currentIndex];
+        immutable uint thisHeight = this.boxHeight[currentIndex];
 
         /// Iterate all available positions
-        foreach (uint y; this.availableY) {
-
-            if (found) {
-                break;
-            }
+        outer: foreach (uint y; this.availableY) {
 
             foreach (uint x; this.availableX) {
-                uint newScore = x + y;
-                if (newScore < score) {
-                    /// In bounds check
-                    if (x + thisWidth + padding < maxX && y + thisHeight + padding < maxY) {
 
-                        bool failed = false;
+                immutable uint newScore = x + y;
 
-                        /// Collided with other box failure
-                        /// Index each collision box to check if within
+                if (newScore >= score) {
+                    continue;
+                }
 
-                        foreach (int i; 0 .. currentIndex) {
+                /// In bounds check
+                if (x + thisWidth + padding >= maxX || y + thisHeight + padding >= maxY) {
+                    continue;
+                }
 
-                            uint otherX = this.positionX[i];
-                            uint otherY = this.positionY[i];
-                            uint otherWidth = this.boxWidth[i];
-                            uint otherHeight = this.boxHeight[i];
+                bool failed = false;
 
-                            // If it found a free slot, first come first plop
-                            if (otherX + otherWidth + padding > x &&
-                                otherX <= x + thisWidth + padding &&
-                                otherY + otherHeight + padding > y &&
-                                otherY <= y + thisHeight + padding
-                                ) {
-                                failed = true;
-                                break;
-                            }
-                        }
+                /// Collided with other box failure
+                /// Index each collision box to check if within
 
-                        if (!failed) {
-                            found = true;
-                            bestX = x;
-                            bestY = y;
-                            score = newScore;
-                            break;
-                        }
+                foreach (int i; 0 .. currentIndex) {
+
+                    immutable uint otherX = this.positionX[i];
+                    immutable uint otherY = this.positionY[i];
+                    immutable uint otherWidth = this.boxWidth[i];
+                    immutable uint otherHeight = this.boxHeight[i];
+
+                    // If it found a free slot, first come first plop
+                    if (otherX + otherWidth + padding > x &&
+                        otherX <= x + thisWidth + padding &&
+                        otherY + otherHeight + padding > y &&
+                        otherY <= y + thisHeight + padding
+                        ) {
+                        failed = true;
+                        break;
                     }
+                }
+
+                if (!failed) {
+                    bestX = x;
+                    bestY = y;
+                    score = newScore;
+                    found = true;
+                    break outer;
                 }
             }
         }
@@ -279,7 +280,8 @@ class TexturePacker(T) {
     /// Constructs a memory image of the current canvas
     TrueColorImage saveToTrueColorImage() {
         /// Creates a blank image with the current canvas size
-        TrueColorImage constructingImage = new TrueColorImage(this.canvasWidth, this.canvasHeight);
+        TrueColorImage constructingImage = new TrueColorImage(this.canvasWidth, this
+                .canvasHeight);
 
         /// Iterate through all collision boxes and blit the pixels (fast)
         for (uint i = 0; i < this.currentID; i++) {
