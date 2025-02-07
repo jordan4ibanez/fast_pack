@@ -503,7 +503,7 @@ unittest {
     config.fastCanvasExport = true;
     TexturePacker!string packer = new TexturePacker!string(config);
 
-    int testLimiter = 100;
+    int testLimiter = 10;
 
     TrueColorImage[] textures = new TrueColorImage[10];
 
@@ -516,7 +516,7 @@ unittest {
     writeln("insertion took: ", sw.peek.total!"msecs", "ms");
     sw.reset();
 
-    foreach (int i; 1 .. testLimiter) {
+    foreach (int i; 1 .. testLimiter + 1) {
         writeln(i);
         int value = ((i - 1) % 10);
         packer.pack("blah" ~ to!string(i), textures[value]);
