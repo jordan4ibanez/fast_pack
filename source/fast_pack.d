@@ -501,7 +501,7 @@ unittest {
     config.fastCanvasExport = true;
     TexturePacker!string packer = new TexturePacker!string(config);
 
-    int testLimiter = 10;
+    int testLimiter = 100;
 
     TrueColorImage[] textures = new TrueColorImage[10];
 
