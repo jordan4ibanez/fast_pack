@@ -1,7 +1,7 @@
 module empty_spaces;
 
-import insert_and_split;
 import empty_space_allocators;
+import insert_and_split;
 import optional;
 
 enum flipping_option {
@@ -9,13 +9,12 @@ enum flipping_option {
     ENABLED
 }
 
-
-class empty_spaces(allow_flip : bool, empty_spaces_provider = default_empty_spaces) {
+class empty_spaces() {
 
     rect_wh current_aabb;
     empty_spaces_provider spaces;
-
-    /* MSVC fix for non-conformant if constexpr implementation */
+    bool allow_flip = false;
+    default_empty_spaces empty_spaces_provider;
 
     static auto make_output_rect(const int x, const int y, const int w, const int h) {
         return rect_xywh(x, y, w, h);
@@ -30,8 +29,10 @@ public:
 
     flipping_option flipping_mode = flipping_option.ENABLED;
 
-    this(const ref rect_wh r) {
+    this(bool allow_flip, default_empty_spaces empty_spaces_provider, const ref rect_wh r) {
         this.reset(r);
+        this.allow_flip = allow_flip;
+        this.empty_spaces_provider = empty_spaces_provider;
     }
 
     void reset(const ref rect_wh r) {
