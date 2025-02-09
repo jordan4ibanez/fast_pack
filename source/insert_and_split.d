@@ -3,9 +3,10 @@ module insert_and_split;
 import rect_structs;
 
 struct created_splits {
+
     int count = 0;
-std:
-     : array < space_rect, 2 > spaces;
+
+    space_rect[2] spaces;
 
     static auto failed() {
         created_splits result;
@@ -17,26 +18,27 @@ std:
         return created_splits();
     }
 
-    template < class...Args >
-        created_splits(Args && ...args) : spaces( {
-        std:
-             : forward < Args > (args)...}) {
-                count = sizeof...(Args);
-            }
+    this(T...)(T args) {
 
-            bool better_than(const created_splits & b) const {
-                return count < b.count;
-            }
+        //             : spaces( {
+        // std:: forward < Args > (args)...}) {
+        //         count = sizeof...(Args);
+        //     }
 
-            explicit operator bool() const {
-                return count !=  - 1;
-            }
-        };
+        //     bool better_than(const created_splits & b) const {
+        //         return count < b.count;
+        //     }
 
-    inline created_splits insert_and_split(
-        const rect_wh & im, /* Image rectangle */
-        const space_rect & sp /* Space rectangle */
-    
+        //     explicit operator bool() const {
+        //         return count !=  - 1;
+        //     }
+        // };
+
+    }
+
+    created_splits insert_and_split(
+        ref rect_wh im, // Image rectangle, Space rectangle
+        ref space_rect sp
     ) {
         const auto free_w = sp.w - im.w;
         const auto free_h = sp.h - im.h;
@@ -46,8 +48,7 @@ std:
 				Image is bigger than the candidate empty space.
 				We'll need to look further.
 			*/
-
-            return created_splits :  : failed();
+            return failed();
         }
 
         if (free_w == 0 && free_h == 0) {
@@ -55,8 +56,7 @@ std:
 				If the image dimensions equal the dimensions of the candidate empty space (image fits exactly),
 				we will just delete the space and create no splits.  
 			*/
-
-            return created_splits :  : none();
+            return none();
         }
 
         /*
@@ -65,7 +65,6 @@ std:
 			(e.g. image = 20x40, candidate space = 30x40)
 			we delete the space and create a single split. In this case a 10x40 space.
 		*/
-
         if (free_w > 0 && free_h == 0) {
             auto r = sp;
             r.x += im.w;
@@ -135,3 +134,4 @@ std:
 
         return created_splits(bigger_split, lesser_split);
     }
+}
