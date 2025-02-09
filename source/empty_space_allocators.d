@@ -30,19 +30,24 @@ public:
     }
 }
 
-// template <int MAX_SPACES>
-class static_empty_spaces(MAX_SPACES : int) {
+class static_empty_spaces {
+
     int count_spaces = 0;
-    space_rect[MAX_SPACES] empty_spaces;
+    space_rect[] empty_spaces;
 
 public:
+
+    this(int MAX_SPACES) {
+        empty_spaces = new space_rect[MAX_SPACES];
+    }
+
     void remove(const int i) {
         empty_spaces[i] = empty_spaces[count_spaces - 1];
         --count_spaces;
     }
 
     bool add(const space_rect r) {
-        if (count_spaces < cast(int)(empty_spaces.size())) {
+        if (count_spaces < cast(int)(empty_spaces.length)) {
             empty_spaces[count_spaces] = r;
             ++count_spaces;
 
@@ -63,4 +68,11 @@ public:
     const auto get(const int i) {
         return empty_spaces[i];
     }
+}
+
+unittest {
+    import std.stdio;
+
+    static_empty_spaces blah = new static_empty_spaces(2);
+    writeln(blah.get_count());
 }
