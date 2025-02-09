@@ -9,7 +9,7 @@ struct rect_wh {
     int w = 0;
     int h = 0;
 
-    void rect_wh(int w, int h) {
+    this(int w, int h) {
         this.w = w;
         this.h = h;
     }
@@ -42,14 +42,16 @@ struct rect_wh {
 }
 
 struct rect_xywh {
-    int x;
-    int y;
-    int w;
-    int h;
+    int x = 0;
+    int y = 0;
+    int w = 0;
+    int h = 0;
 
-    rect_xywh() : x(0), y(0), w(0), h(0) {
-    }
-    rect_xywh(const int x, const int y, const int w, const int h) : x(x), y(y), w(w), h(h) {
+    this(int x, int y, int w, int h) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
     }
 
     int area() const {
@@ -60,10 +62,10 @@ struct rect_xywh {
         return 2 * w + 2 * h;
     }
 
-    auto get_wh() const {
+    rect_wh get_wh() const {
         return rect_wh(w, h);
     }
-};
+}
 
 struct rect_xywhf {
     int x;
