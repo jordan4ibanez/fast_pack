@@ -1,6 +1,8 @@
 module insert_and_split;
 
+import core.lifetime;
 import rect_structs;
+import std.random;
 
 struct created_splits {
 
@@ -19,21 +21,24 @@ struct created_splits {
     }
 
     this(T...)(T args) {
+        foreach (key, val; args) {
+            spaces[key] = val;
+        }
 
-        //             : spaces( {
-        // std:: forward < Args > (args)...}) {
-        //         count = sizeof...(Args);
-        //     }
+        static if (args.length) {
+            count = args.length;
+        } else {
+            count = 1;
+        }
 
-        //     bool better_than(const created_splits & b) const {
-        //         return count < b.count;
-        //     }
+    }
 
-        //     explicit operator bool() const {
-        //         return count !=  - 1;
-        //     }
-        // };
+    bool better_than(const ref created_splits b) const {
+        return count < b.count;
+    }
 
+    bool opCast(T : bool)() const {
+        return count != -1;
     }
 
     created_splits insert_and_split(
