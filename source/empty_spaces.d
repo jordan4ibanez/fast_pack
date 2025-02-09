@@ -47,20 +47,21 @@ public:
 
             report_candidate_empty_space(candidate_space);
 
-            auto accept_result = [this, i, image_rectangle, candidate_space](
-                const created_splits & splits,
+            // ->std::optional<output_rect_type> return type
+            auto accept_result = (
+                const created_splits splits,
                 const bool flipping_necessary
-            )->std::optional<output_rect_type>{
+            ) {
 
                 spaces.remove(i);
 
                 for (int s = 0; s < splits.count; ++s) {
                     if (!spaces.add(splits.spaces[s])) {
-                        return std :  : nullopt;
+                        return none;
                     }
                 }
 
-                if constexpr(allow_flip) {
+                static if (allow_flip) {
                     const auto result = make_output_rect(
                         candidate_space.x,
                         candidate_space.y,
@@ -71,8 +72,8 @@ public:
 
                     current_aabb.expand_with(result);
                     return result;
-                } else if constexpr(!allow_flip) {
-                    (void) flipping_necessary;
+                } else static if (!allow_flip) {
+                    cast(void) flipping_necessary;
 
                     const auto result = make_output_rect(
                         candidate_space.x,
