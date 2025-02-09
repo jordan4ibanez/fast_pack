@@ -1,63 +1,66 @@
 module empty_space_allocators;
 
-	class default_empty_spaces {
-		std::vector<space_rect> empty_spaces;
+import rect_structs;
+import std.range.primitives;
 
-	public:
-		void remove(const int i) {
-			empty_spaces[i] = empty_spaces.back();
-			empty_spaces.pop_back();
-		}
+class default_empty_spaces {
+    space_rect[] empty_spaces;
 
-		bool add(const space_rect r) {
-			empty_spaces.emplace_back(r);
-			return true;
-		}
+public:
+    void remove(const int i) {
+        empty_spaces[i] = empty_spaces.back();
+        empty_spaces.popBack();
+    }
 
-		auto get_count() const {
-			return empty_spaces.size();
-		}
+    bool add(const space_rect r) {
+        empty_spaces ~= r;
+        return true;
+    }
 
-		void reset() {
-			empty_spaces.clear();
-		}
+    auto get_count() const {
+        return empty_spaces.length;
+    }
 
-		const auto& get(const int i) {
-			return empty_spaces[i];
-		}
-	};
+    void reset() {
+        empty_spaces = [];
+    }
 
-	template <int MAX_SPACES>
-	class static_empty_spaces {
-		int count_spaces = 0;
-		std::array<space_rect, MAX_SPACES> empty_spaces;
+    const auto get(const int i) {
+        return empty_spaces[i];
+    }
+}
 
-	public:
-		void remove(const int i) {
-			empty_spaces[i] = empty_spaces[count_spaces - 1];
-			--count_spaces;
-		}
+// template <int MAX_SPACES>
+class static_empty_spaces(MAX_SPACES : int) {
+    int count_spaces = 0;
+    space_rect[MAX_SPACES] empty_spaces;
 
-		bool add(const space_rect r) {
-			if (count_spaces < static_cast<int>(empty_spaces.size())) {
-				empty_spaces[count_spaces] = r;
-				++count_spaces;
+public:
+    void remove(const int i) {
+        empty_spaces[i] = empty_spaces[count_spaces - 1];
+        --count_spaces;
+    }
 
-				return true;
-			}
+    bool add(const space_rect r) {
+        if (count_spaces < cast(int)(empty_spaces.size())) {
+            empty_spaces[count_spaces] = r;
+            ++count_spaces;
 
-			return false;
-		}
-		
-		auto get_count() const {
-			return count_spaces;
-		}
+            return true;
+        }
 
-		void reset() {
-			count_spaces = 0;
-		}
+        return false;
+    }
 
-		const auto& get(const int i) {
-			return empty_spaces[i];
-		}
-	};
+    auto get_count() const {
+        return count_spaces;
+    }
+
+    void reset() {
+        count_spaces = 0;
+    }
+
+    const auto get(const int i) {
+        return empty_spaces[i];
+    }
+}
