@@ -41,52 +41,50 @@ public:
         spaces.add(rect_xywh(0, 0, r.w, r.h));
     }
 
-    // template < class F >
-
     optional!output_rect_type insert(F)(const rect_wh image_rectangle, F report_candidate_empty_space) {
         for (int i = cast(int)(spaces.get_count()) - 1; i >= 0; --i) {
             const auto candidate_space = spaces.get(i);
 
             report_candidate_empty_space(candidate_space);
 
-            // auto accept_result = [this, i, image_rectangle, candidate_space](
-            //     const created_splits & splits,
-            //     const bool flipping_necessary
-            // )->std::optional<output_rect_type>{
+            auto accept_result = [this, i, image_rectangle, candidate_space](
+                const created_splits & splits,
+                const bool flipping_necessary
+            )->std::optional<output_rect_type>{
 
-            //     spaces.remove(i);
+                spaces.remove(i);
 
-            //     for (int s = 0; s < splits.count; ++s) {
-            //         if (!spaces.add(splits.spaces[s])) {
-            //             return std :  : nullopt;
-            //         }
-            //     }
+                for (int s = 0; s < splits.count; ++s) {
+                    if (!spaces.add(splits.spaces[s])) {
+                        return std :  : nullopt;
+                    }
+                }
 
-            //     if constexpr(allow_flip) {
-            //         const auto result = make_output_rect(
-            //             candidate_space.x,
-            //             candidate_space.y,
-            //             image_rectangle.w,
-            //             image_rectangle.h,
-            //             flipping_necessary
-            //         );
+                if constexpr(allow_flip) {
+                    const auto result = make_output_rect(
+                        candidate_space.x,
+                        candidate_space.y,
+                        image_rectangle.w,
+                        image_rectangle.h,
+                        flipping_necessary
+                    );
 
-            //         current_aabb.expand_with(result);
-            //         return result;
-            //     } else if constexpr(!allow_flip) {
-            //         (void) flipping_necessary;
+                    current_aabb.expand_with(result);
+                    return result;
+                } else if constexpr(!allow_flip) {
+                    (void) flipping_necessary;
 
-            //         const auto result = make_output_rect(
-            //             candidate_space.x,
-            //             candidate_space.y,
-            //             image_rectangle.w,
-            //             image_rectangle.h
-            //         );
+                    const auto result = make_output_rect(
+                        candidate_space.x,
+                        candidate_space.y,
+                        image_rectangle.w,
+                        image_rectangle.h
+                    );
 
-            //         current_aabb.expand_with(result);
-            //         return result;
-            //     }
-            // };
+                    current_aabb.expand_with(result);
+                    return result;
+                }
+            };
 
             auto try_to_insert = (const rect_wh img) {
                 return insert_and_split(img, candidate_space);
