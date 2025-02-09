@@ -68,18 +68,22 @@ struct rect_xywh {
 }
 
 struct rect_xywhf {
-    int x;
-    int y;
-    int w;
-    int h;
-    bool flipped;
+    int x = 0;
+    int y = 0;
+    int w = 0;
+    int h = 0;
+    bool flipped = false;
 
-    rect_xywhf() : x(0), y(0), w(0), h(0), flipped(false) {
+    this(int x, int y, int w, int h, bool flipped) {
+        this.x = x;
+        this.y = y;
+        this.w = flipped ? h : w;
+        this.h = flipped ? w : h;
+        this.flipped = flipped;
     }
-    rect_xywhf(const int x, const int y, const int w, const int h, const bool flipped) : x(x), y(y), w(flipped ? h
-            : w), h(flipped ? w : h), flipped(flipped) {
-    }
-    rect_xywhf(const rect_xywh & b) : rect_xywhf(b.x, b.y, b.w, b.h, false) {
+
+    this(rect_xywh b) {
+        this = rect_xywhf(b.x, b.y, b.w, b.h, false);
     }
 
     int area() const {
@@ -93,6 +97,6 @@ struct rect_xywhf {
     auto get_wh() const {
         return rect_wh(w, h);
     }
-};
+}
 
-using space_rect = rect_xywh;
+alias space_rect = rect_xywh;
