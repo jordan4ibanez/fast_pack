@@ -1,6 +1,7 @@
 module empty_spaces;
 
 import insert_and_split;
+import empty_space_allocators;
 import optional;
 
 enum flipping_option {
@@ -8,7 +9,6 @@ enum flipping_option {
     ENABLED
 }
 
-class default_empty_spaces;
 
 class empty_spaces(allow_flip : bool, empty_spaces_provider = default_empty_spaces) {
 
