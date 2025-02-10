@@ -14,7 +14,7 @@ void main() {
         packer.pack(uniform(20, 40, rnd), uniform(20, 40, rnd));
     }
 
-    foreach (i; 0 .. 9000) {
+    foreach (i; 0 .. 99_000) {
         packer.pack(uniform(5, 10, rnd), uniform(5, 10, rnd));
     }
 
