@@ -28,6 +28,8 @@ void main() {
 
     packer.finalize();
 
+    writeln(packer.canvasWidth, " ", packer.canvasHeight);
+
     // writeln("======");
 
     // foreach (box; packer.boxes) {
