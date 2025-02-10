@@ -26,7 +26,7 @@ void main() {
     packer.pack(100, 100);
     packer.pack(100, 90);
 
-    packer.potpack();
+    packer.finalize();
 
     // writeln("======");
 

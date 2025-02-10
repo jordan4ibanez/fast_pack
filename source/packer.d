@@ -30,10 +30,14 @@ public:
         );
     }
 
-    // private:
-
     pragma(inline, true)
-    void potpack() {
+    void finalize() {
+        this.potpack();
+    }
+
+private:
+
+    pragma(inline, true) void potpack() {
 
         // Calculate total box area and maximum box width.
         int area = 0;
