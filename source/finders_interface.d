@@ -19,7 +19,7 @@ struct finder_input(F, G) {
     const flipping_option flipping_mode;
 }
 
-auto make_finder_input(F, G)(
+finder_input!(F, G) make_finder_input(F, G)(
     const int max_bin_side,
     const int discard_step,
     ref F handle_successful_insertion,
