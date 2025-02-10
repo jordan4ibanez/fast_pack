@@ -10,11 +10,11 @@ void main() {
     auto rnd = Random(unpredictableSeed());
     TexturePacker packer = TexturePacker();
 
-    foreach (i; 0 .. 300) {
+    foreach (i; 0 .. 4000) {
         packer.pack(uniform(20, 40, rnd), uniform(20, 40, rnd));
     }
 
-    foreach (i; 0 .. 3000) {
+    foreach (i; 0 .. 9000) {
         packer.pack(uniform(5, 10, rnd), uniform(5, 10, rnd));
     }
 
@@ -28,11 +28,11 @@ void main() {
 
     packer.potpack();
 
-    writeln("======");
+    // writeln("======");
 
-    foreach (box; packer.boxes) {
-        writeln(box.x, " ", box.y);
-    }
+    // foreach (box; packer.boxes) {
+    //     writeln(box.x, " ", box.y);
+    // }
 
     // writeln(packer.canvasWidth, " ", packer.canvasHeight, " ", packer.canvasFill);
 
@@ -40,9 +40,9 @@ void main() {
     // call this before using raylib
     validateRaylibBinding();
 
-    int offset = 100;
+    int offset = 10;
 
-    InitWindow(packer.canvasWidth + offset, packer.canvasHeight + offset, "Hello, Raylib-D!");
+    InitWindow(packer.canvasWidth + (offset * 2), packer.canvasHeight + (offset * 2), "Hello, Raylib-D!");
 
     SetTargetFPS(60);
     while (!WindowShouldClose()) {
