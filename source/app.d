@@ -11,15 +11,15 @@ void main() {
     auto rnd = Random(unpredictableSeed());
     TexturePacker packer = TexturePacker();
 
-    foreach (i; 0 .. 2000) {
+    foreach (i; 0 .. 400_000) {
         packer.pack(uniform(20, 40, rnd), uniform(20, 40, rnd));
     }
 
-    foreach (i; 0 .. 18_000) {
+    foreach (i; 0 .. 40_000) {
         packer.pack(uniform(5, 10, rnd), uniform(5, 10, rnd));
     }
 
-    foreach (i; 0 .. 4000) {
+    foreach (i; 0 .. 20_000) {
         packer.pack(uniform(200, 400, rnd), uniform(200, 400, rnd));
     }
 
