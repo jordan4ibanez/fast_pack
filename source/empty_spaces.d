@@ -1,148 +1,148 @@
 module empty_spaces;
 
 import insert_and_split;
+import optional;
 
-enum class flipping_option {
-	DISABLED,
-	ENABLED
-};
+enum flipping_option {
+    DISABLED,
+    ENABLED
+}
 
 class default_empty_spaces;
 
-template <bool allow_flip, class empty_spaces_provider = default_empty_spaces>
-class empty_spaces {
-	rect_wh current_aabb;
-	empty_spaces_provider spaces;
+class empty_spaces(bool allow_flip, empty_spaces_provider = default_empty_spaces) {
+private:
 
-	/* MSVC fix for non-conformant if constexpr implementation */
+    rect_wh current_aabb;
+    empty_spaces_provider spaces;
 
-	static auto make_output_rect(const int x, const int y, const int w, const int h) {
-		return rect_xywh(x, y, w, h);
-	}
+    /* MSVC fix for non-conformant if constexpr implementation */
 
-	static auto make_output_rect(const int x, const int y, const int w, const int h, const bool flipped) {
-		return rect_xywhf(x, y, w, h, flipped);
-	}
+    static auto make_output_rect(const int x, const int y, const int w, const int h) {
+        return rect_xywh(x, y, w, h);
+    }
+
+    static auto make_output_rect(const int x, const int y, const int w, const int h, const bool flipped) {
+        return rect_xywhf(x, y, w, h, flipped);
+    }
 
 public:
-	using output_rect_type = std::conditional_t<allow_flip, rect_xywhf, rect_xywh>;
 
-	flipping_option flipping_mode = flipping_option::ENABLED;
+    alias output_rect_type = Alias!(allow_flip ? rect_xywhf : rect_xywh);
 
-	empty_spaces(const rect_wh& r) {
-		reset(r);
-	}
+    flipping_option flipping_mode = flipping_option.ENABLED;
 
-	void reset(const rect_wh& r) {
-		current_aabb = {};
+    this(const ref rect_wh r) {
+        this.reset(r);
+    }
 
-		spaces.reset();
-		spaces.add(rect_xywh(0, 0, r.w, r.h));
-	}
+    void reset(const ref rect_wh r) {
+        current_aabb = {};
 
-	template <class F>
-	std::optional<output_rect_type> insert(const rect_wh image_rectangle, F report_candidate_empty_space) {
-		for (int i = static_cast<int>(spaces.get_count()) - 1; i >= 0; --i) {
-			const auto candidate_space = spaces.get(i);
+        spaces.reset();
+        spaces.add(rect_xywh(0, 0, r.w, r.h));
+    }
 
-			report_candidate_empty_space(candidate_space);
+    Optional!output_rect_type insert(F)(const rect_wh image_rectangle, F report_candidate_empty_space) {
+        for (int i = cast(int)(spaces.get_count()) - 1; i >= 0; --i) {
+            const auto candidate_space = spaces.get(i);
 
-			auto accept_result = [this, i, image_rectangle, candidate_space](
-				const created_splits& splits,
-				const bool flipping_necessary
-			) -> std::optional<output_rect_type> {
-				spaces.remove(i);
+            report_candidate_empty_space(candidate_space);
 
-				for (int s = 0; s < splits.count; ++s) {
-					if (!spaces.add(splits.spaces[s])) {
-						return std::nullopt;
-					}
-				}
+            // Returns: Optional!output_rect_type
+            auto accept_result = (
+                const ref created_splits splits,
+                const bool flipping_necessary
+            ) {
+                spaces.remove(i);
 
-				if constexpr(allow_flip) {
-					const auto result = make_output_rect(
-						candidate_space.x,
-						candidate_space.y,
-						image_rectangle.w,
-						image_rectangle.h,
-						flipping_necessary
-					);
+                for (int s = 0; s < splits.count; ++s) {
+                    if (!spaces.add(splits.spaces[s])) {
+                        return none;
+                    }
+                }
 
-					current_aabb.expand_with(result);
-					return result;
-				}
-				else if constexpr(!allow_flip) {
-					(void)flipping_necessary;
+                static if (allow_flip) {
+                    const auto result = make_output_rect(
+                        candidate_space.x,
+                        candidate_space.y,
+                        image_rectangle.w,
+                        image_rectangle.h,
+                        flipping_necessary
+                    );
 
-					const auto result = make_output_rect(
-						candidate_space.x,
-						candidate_space.y,
-						image_rectangle.w,
-						image_rectangle.h
-					);
+                    current_aabb.expand_with(result);
+                    return result;
+                } else static if (!allow_flip) {
+                    cast(void) flipping_necessary;
 
-					current_aabb.expand_with(result);
-					return result;
-				}
-			};
+                    const auto result = make_output_rect(
+                        candidate_space.x,
+                        candidate_space.y,
+                        image_rectangle.w,
+                        image_rectangle.h
+                    );
 
-			auto try_to_insert = [&](const rect_wh& img) {
-				return rectpack2D::insert_and_split(img, candidate_space);
-			};
+                    current_aabb.expand_with(result);
+                    return result;
+                }
+            };
 
-			if constexpr(!allow_flip) {
-				if (const auto normal = try_to_insert(image_rectangle)) {
-					return accept_result(normal, false);
-				}
-			}
-			else {
-				if (flipping_mode == flipping_option::ENABLED) {
-					const auto normal = try_to_insert(image_rectangle);
-					const auto flipped = try_to_insert(rect_wh(image_rectangle).flip());
+            auto try_to_insert = (const ref rect_wh img) {
+                return insert_and_split(img, candidate_space);
+            };
 
-					/* 
+            static if (!allow_flip) {
+                if (const normal = try_to_insert(image_rectangle)) {
+                    return accept_result(normal, false);
+                }
+            } else {
+                if (flipping_mode == flipping_option.ENABLED) {
+                    const auto normal = try_to_insert(image_rectangle);
+                    const auto flipped = try_to_insert(rect_wh(image_rectangle).flip());
+
+                    /* 
 						If both were successful, 
 						prefer the one that generated less remainder spaces.
 					*/
 
-					if (normal && flipped) {
-						if (flipped.better_than(normal)) {
-							/* Accept the flipped result if it producues less or "better" spaces. */
+                    if (normal && flipped) {
+                        if (flipped.better_than(normal)) {
+                            /* Accept the flipped result if it producues less or "better" spaces. */
 
-							return accept_result(flipped, true);
-						}
+                            return accept_result(flipped, true);
+                        }
 
-						return accept_result(normal, false);
-					}
+                        return accept_result(normal, false);
+                    }
 
-					if (normal) {
-						return accept_result(normal, false);
-					}
+                    if (normal) {
+                        return accept_result(normal, false);
+                    }
 
-					if (flipped) {
-						return accept_result(flipped, true);
-					}
-				}
-				else {
-					if (const auto normal = try_to_insert(image_rectangle)) {
-						return accept_result(normal, false);
-					}
-				}
-			}
-		}
+                    if (flipped) {
+                        return accept_result(flipped, true);
+                    }
+                } else {
+                    if (const normal = try_to_insert(image_rectangle)) {
+                        return accept_result(normal, false);
+                    }
+                }
+            }
+        }
 
-		return std::nullopt;
-	}
+        return none;
+    }
 
-	decltype(auto) insert(const rect_wh& image_rectangle) {
-		return insert(image_rectangle, [](auto&){ });
-	}
+    auto insert(const ref rect_wh image_rectangle) {
+        return insert(image_rectangle, (auto ref val) {});
+    }
 
-	auto get_rects_aabb() const {
-		return current_aabb;
-	}
+    auto get_rects_aabb() const {
+        return current_aabb;
+    }
 
-	const auto& get_spaces() const {
-		return spaces;
-	}
-};
+    const auto ref get_spaces() {
+        return spaces;
+    }
+}
