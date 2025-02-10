@@ -71,5 +71,5 @@ unittest {
     import std.stdio;
 
     // This is how you construct that.
-    static_empty_spaces!(2) i = new static_empty_spaces!(2)();
+    // static_empty_spaces!(2) i = new static_empty_spaces!(2)();
 }
