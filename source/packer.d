@@ -32,6 +32,7 @@ public:
 
     // private:
 
+    pragma(inline, true)
     void potpack() {
 
         // Calculate total box area and maximum box width.
@@ -45,15 +46,11 @@ public:
 
         // Sort the boxes for insertion by height, descending.
         boxes = boxes.sort!((a, b) {
-            // if (a.h == b.h) {
-            //     return a.w > b.w;
-            // }
-            return b.h < a.h;
+            if (a.h == b.h) {
+                return a.w > b.w;
+            }
+            return a.h > b.h;
         }).release();
-
-        foreach (box; boxes) {
-            writeln(box);
-        }
 
         // Aim for a squarish resulting container,
         // slightly adjusted for sub-100% space utilization.
