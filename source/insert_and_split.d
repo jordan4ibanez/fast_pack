@@ -19,7 +19,7 @@ struct created_splits {
     this(Args...)(Args args) {
 
         foreach (i, arg; args) {
-            space_rect[i] = arg;
+            spaces[i] = arg;
         }
 
         count = args.length;
