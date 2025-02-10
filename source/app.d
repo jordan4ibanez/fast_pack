@@ -2,6 +2,7 @@ module app;
 
 import packer;
 import raylib;
+import std.algorithm.comparison;
 import std.random;
 import std.stdio;
 
