@@ -32,6 +32,7 @@ public:
 
 // template <int MAX_SPACES>
 class static_empty_spaces(int MAX_SPACES) {
+private:
     int count_spaces = 0;
     // 	std::array<space_rect, MAX_SPACES> empty_spaces;
 
