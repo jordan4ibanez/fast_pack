@@ -44,7 +44,8 @@ void main() {
 
     int offset = 10;
 
-    InitWindow(packer.canvasWidth + (offset * 2), packer.canvasHeight + (offset * 2), "Hello, Raylib-D!");
+    InitWindow(cast(int) min(16_364, packer.canvasWidth) + (offset * 2),
+        cast(int) min(16_364, packer.canvasHeight) + (offset * 2), "Hello, Raylib-D!");
 
     SetTargetFPS(60);
     while (!WindowShouldClose()) {
