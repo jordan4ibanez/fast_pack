@@ -56,8 +56,6 @@ public:
         // slightly adjusted for sub-100% space utilization.
         immutable int startWidth = cast(int) max(ceil(sqrt(area / 0.95)), maxWidth);
 
-        // writeln(startWidth);
-
         // Start with a single empty space, unbounded at the bottom.
         PackRect[] spaces = [PackRect(0, 0, startWidth, 1_000_000)];
 
@@ -67,8 +65,6 @@ public:
         foreach (ref box; this.boxes) {
             // Look through spaces backwards so that we check smaller spaces first.
             for (int i = cast(int)(spaces.length) - 1; i >= 0; i--) {
-
-                // writeln(spaces);
 
                 PackRect space = spaces[i];
 
@@ -84,7 +80,6 @@ public:
                 // |         space |
                 // |_______________|
 
-                // writeln(space);
                 box.x = space.x;
                 box.y = space.y;
 
@@ -97,7 +92,6 @@ public:
                     spaces.popBack();
                     if (i < spaces.length)
                         spaces[i] = last;
-                    writeln("hit 1");
 
                 } else if (box.h == space.h) {
                     // space matches the box height; update it accordingly
@@ -121,8 +115,6 @@ public:
 
                     spaces[i] = space;
 
-                    writeln("hit 3");
-
                 } else {
                     // otherwise the box splits the space into two spaces
                     // |-------|-----------|
@@ -136,8 +128,6 @@ public:
                         space.y,
                         space.w - box.w,
                         box.h);
-
-                    writeln("blah ", blah);
 
                     spaces ~= blah;
 
