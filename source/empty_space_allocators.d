@@ -4,6 +4,7 @@ import rect_structs;
 import std.range.primitives;
 
 class default_empty_spaces {
+private:
     space_rect[] empty_spaces;
 
 public:
