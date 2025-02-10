@@ -1,8 +1,10 @@
 module app;
 
 import finders_interface;
+import std.stdio;
 
 void main() {
+    writeln("hi");
     static bool allow_flip = true;
     const auto runtime_flipping_mode = flipping_option.ENABLED;
 
