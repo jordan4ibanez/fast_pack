@@ -104,7 +104,7 @@ void main() {
 			- will be passed by default.
 		*/
 
-        const auto result_size = find_best_packing!rect_xywh(
+        const auto result_size = find_best_packing(
             rectangles,
             make_finder_input(
                 max_side,
@@ -112,7 +112,7 @@ void main() {
                 report_successful,
                 report_unsuccessful,
                 runtime_flipping_mode
-        )
+        
         );
 
         report_result(result_size);
