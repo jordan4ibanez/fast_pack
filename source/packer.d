@@ -1,5 +1,13 @@
 module packer;
 
+import ldc.attributes;
+import std.algorithm.comparison;
+import std.algorithm.sorting;
+import std.math.algebraic;
+import std.math.rounding;
+import std.range.primitives;
+import std.stdio;
+
 struct PackRect {
     int x = 0;
     int y = 0;
@@ -8,8 +16,11 @@ struct PackRect {
 }
 
 struct TexturePacker {
-private:
+    // private:
     PackRect[] boxes;
+    int canvasWidth = 0;
+    int canvasHeight = 0;
+    double canvasFill = 0;
 
 public:
 
@@ -19,109 +30,133 @@ public:
         );
     }
 
-private:
+    // private:
 
-    void potpack(boxes) {
+    void potpack() {
 
-        // calculate total box area and maximum box width
-        let area = 0;
-        let maxWidth = 0;
+        // Calculate total box area and maximum box width.
+        int area = 0;
+        int maxWidth = 0;
 
-        foreach (immutable box ; boxes) {
+        foreach (immutable box; boxes) {
             area += box.w * box.h;
-            maxWidth = Math.max(maxWidth, box.w);
+            maxWidth = max(maxWidth, box.w);
         }
 
-        // sort the boxes for insertion by height, descending
-        boxes.sort((a, b) => b.h - a.h);
+        // Sort the boxes for insertion by height, descending.
+        boxes = boxes.sort!((a, b) {
+            // if (a.h == b.h) {
+            //     return a.w > b.w;
+            // }
+            return b.h < a.h;
+        }).release();
 
-        // aim for a squarish resulting container,
-        // slightly adjusted for sub-100% space utilization
-        const startWidth = Math.max(Math.ceil(Math.sqrt(area / 0.95)), maxWidth);
+        foreach (box; boxes) {
+            writeln(box);
+        }
 
-        // start with a single empty space, unbounded at the bottom
-        const spaces = [{x: 0, y: 0, w: startWidth, h: Infinity}];
+        // Aim for a squarish resulting container,
+        // slightly adjusted for sub-100% space utilization.
+        immutable int startWidth = cast(int) max(ceil(sqrt(area / 0.95)), maxWidth);
 
-        // let width = 0;
-        // let height = 0;
+        // writeln(startWidth);
 
-        // for (const box of boxes) {
-        //     // look through spaces backwards so that we check smaller spaces first
-        //     for (let i = spaces.length - 1; i >= 0; i--) {
-        //         const space = spaces[i];
+        // Start with a single empty space, unbounded at the bottom.
+        PackRect[] spaces = [PackRect(0, 0, startWidth, 1_000_000)];
 
-        //         // look for empty spaces that can accommodate the current box
-        //         if (box.w > space.w || box.h > space.h)
-        //             continue;
+        int width = 0;
+        int height = 0;
 
-        //         // found the space; add the box to its top-left corner
-        //         // |-------|-------|
-        //         // |  box  |       |
-        //         // |_______|       |
-        //         // |         space |
-        //         // |_______________|
-        //         box.x = space.x;
-        //         box.y = space.y;
+        foreach (ref box; this.boxes) {
+            // Look through spaces backwards so that we check smaller spaces first.
+            for (int i = cast(int)(spaces.length) - 1; i >= 0; i--) {
 
-        //         height = Math.max(height, box.y + box.h);
-        //         width = Math.max(width, box.x + box.w);
+                // writeln(spaces);
 
-        //         if (box.w ==  = space.w && box.h ==  = space.h) {
-        //             // space matches the box exactly; remove it
-        //             const last = spaces.pop();
-        //             if (i < spaces.length)
-        //                 spaces[i] = last;
+                PackRect space = spaces[i];
 
-        //         } else if (box.h ==  = space.h) {
-        //             // space matches the box height; update it accordingly
-        //             // |-------|---------------|
-        //             // |  box  | updated space |
-        //             // |_______|_______________|
-        //             space.x += box.w;
-        //             space.w -= box.w;
+                // look for empty spaces that can accommodate the current box
+                if (box.w > space.w || box.h > space.h) {
+                    continue;
+                }
 
-        //         } else if (box.w ==  = space.w) {
-        //             // space matches the box width; update it accordingly
-        //             // |---------------|
-        //             // |      box      |
-        //             // |_______________|
-        //             // | updated space |
-        //             // |_______________|
-        //             space.y += box.h;
-        //             space.h -= box.h;
+                // found the space; add the box to its top-left corner
+                // |-------|-------|
+                // |  box  |       |
+                // |_______|       |
+                // |         space |
+                // |_______________|
 
-        //         } else {
-        //             // otherwise the box splits the space into two spaces
-        //             // |-------|-----------|
-        //             // |  box  | new space |
-        //             // |_______|___________|
-        //             // | updated space     |
-        //             // |___________________|
-        //             spaces.push( {
-        //             x:
-        //                 space.x + box.w,
-        //             y:
-        //                 space.y,
-        //             w:
-        //                 space.w - box.w,
-        //             h:
-        //                 box.h
-        //             });
-        //             space.y += box.h;
-        //             space.h -= box.h;
-        //         }
+                // writeln(space);
+                box.x = space.x;
+                box.y = space.y;
 
-        //         break;
-        //     }
-        // }
+                height = max(height, box.y + box.h);
+                width = max(width, box.x + box.w);
 
-        // return {
-        // w:
-        //     width, // container width
-        // h:
-        //         height, // container height
-        // fill:
-        //         (area / (width * height)) || 0 // space utilization
-        // };
+                if (box.w == space.w && box.h == space.h) {
+                    // space matches the box exactly; remove it
+                    const last = spaces[(spaces.length) - 1];
+                    spaces.popBack();
+                    if (i < spaces.length)
+                        spaces[i] = last;
+                    writeln("hit 1");
+
+                } else if (box.h == space.h) {
+                    // space matches the box height; update it accordingly
+                    // |-------|---------------|
+                    // |  box  | updated space |
+                    // |_______|_______________|
+                    space.x += box.w;
+                    space.w -= box.w;
+
+                    spaces[i] = space;
+
+                } else if (box.w == space.w) {
+                    // space matches the box width; update it accordingly
+                    // |---------------|
+                    // |      box      |
+                    // |_______________|
+                    // | updated space |
+                    // |_______________|
+                    space.y += box.h;
+                    space.h -= box.h;
+
+                    spaces[i] = space;
+
+                    writeln("hit 3");
+
+                } else {
+                    // otherwise the box splits the space into two spaces
+                    // |-------|-----------|
+                    // |  box  | new space |
+                    // |_______|___________|
+                    // | updated space     |
+                    // |___________________|
+
+                    auto blah = PackRect(
+                        space.x + box.w,
+                        space.y,
+                        space.w - box.w,
+                        box.h);
+
+                    writeln("blah ", blah);
+
+                    spaces ~= blah;
+
+                    space.y += box.h;
+                    space.h -= box.h;
+
+                    spaces[i] = space;
+
+                }
+
+                break;
+            }
+        }
+
+        canvasWidth = width; // container width
+        canvasHeight = height; // container height
+        canvasFill = (cast(double) area / (cast(double) width * cast(double) height)) || 0; // space utilization
     }
 }
