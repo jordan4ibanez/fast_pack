@@ -20,14 +20,12 @@ void main() {
 		possibly improving performance.
 	*/
 
-    alias spaces_type = rectpack2D.empty_spaces!(allow_flip, default_empty_spaces);
+    // alias spaces_type = empty_spaces(allow_flip, default_empty_spaces);
 
     /* 
 		rect_xywh or rect_xywhf (see src/rect_structs.h), 
 		depending on the value of allow_flip.
 	*/
-
-    alias rect_type = output_rect_t!spaces_type;
 
     /*
 		Note: 
@@ -37,11 +35,11 @@ void main() {
 		You may initialize another search when this happens.
 	*/
 
-    auto report_successful = (rect_type) {
+    auto report_successful = (ref rect_xywh blah) {
         return callback_result.CONTINUE_PACKING;
     };
 
-    auto report_unsuccessful = (rect_type) {
+    auto report_unsuccessful = (ref rect_xywh blah) {
         return callback_result.ABORT_PACKING;
     };
 
@@ -80,13 +78,13 @@ void main() {
 		and always overwrite the x and y coordinates with calculated results.
 	*/
 
-    rect_type[] rectangles;
+    rect_xywh[] rectangles;
 
-    rectangles.emplace_back(rect_xywh(0, 0, 20, 40));
-    rectangles.emplace_back(rect_xywh(0, 0, 120, 40));
-    rectangles.emplace_back(rect_xywh(0, 0, 85, 59));
-    rectangles.emplace_back(rect_xywh(0, 0, 199, 380));
-    rectangles.emplace_back(rect_xywh(0, 0, 85, 875));
+    rectangles ~= (rect_xywh(0, 0, 20, 40));
+    rectangles ~= (rect_xywh(0, 0, 120, 40));
+    rectangles ~= (rect_xywh(0, 0, 85, 59));
+    rectangles ~= (rect_xywh(0, 0, 199, 380));
+    rectangles ~= (rect_xywh(0, 0, 85, 875));
 
     auto report_result = (const rect_wh result_size) {
         writeln("Resultant bin: ", result_size.w, " ", result_size.h);
@@ -106,7 +104,7 @@ void main() {
 			- will be passed by default.
 		*/
 
-        const auto result_size = find_best_packing!spaces_type(
+        const auto result_size = find_best_packing!rect_xywh(
             rectangles,
             make_finder_input(
                 max_side,

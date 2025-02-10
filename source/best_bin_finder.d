@@ -1,6 +1,7 @@
 module best_bin_finder;
 
-import rect_structs;
+// import rect_structs;
+import finders_interface;
 import std.traits;
 import std.variant;
 
@@ -9,11 +10,11 @@ enum callback_result {
     CONTINUE_PACKING
 }
 
-auto dereference(T)(T r) {
+ref auto dereference(T)(ref T r) {
     /* 
-			This will allow us to pass orderings that consist of pointers,
-			as well as ones that are just plain objects in a vector.
-	   */
+        This will allow us to pass orderings that consist of pointers,
+        as well as ones that are just plain objects in a vector.
+    */
 
     static if (isPointer(T)) {
         return *r;
@@ -42,16 +43,14 @@ enum bin_dimension {
     HEIGHT
 }
 
-// template <class empty_spaces_type, class O>
-
 Variant!(total_area_type, rect_wh) best_packing_for_ordering_impl(empty_spaces_type, O)(
-    empty_spaces_type root,
+    ref empty_spaces_type root,
     O ordering,
     const rect_wh starting_bin,
     int discard_step,
     const bin_dimension tried_dimension
 ) {
-    auto candidate_bin = starting_bin;
+    rect_wh candidate_bin = starting_bin;
     int tries_before_discarding = 0;
 
     if (discard_step <= 0) {
@@ -59,7 +58,7 @@ Variant!(total_area_type, rect_wh) best_packing_for_ordering_impl(empty_spaces_t
         discard_step = 1;
     }
 
-    // writeln("best_packing_for_ordering_impl dim: ", cast(int)(tried_dimension), " w: ", starting_bin.w, " h: ", starting_bin.h);
+    //std::cout << "best_packing_for_ordering_impl dim: " << int(tried_dimension) << " w: " << starting_bin.w << " h: " << starting_bin.h << std::endl;
 
     int starting_step = 0;
 
@@ -84,10 +83,8 @@ Variant!(total_area_type, rect_wh) best_packing_for_ordering_impl(empty_spaces_t
         int total_inserted_area = 0;
 
         const bool all_inserted = () {
-
-            foreach (const r; ordering) {
-
-                const auto rect = dereference(r);
+            foreach (const ref r; ordering) {
+                const ref auto rect = dereference(r);
 
                 if (root.insert(rect.get_wh())) {
                     total_inserted_area += rect.area();
@@ -147,43 +144,38 @@ Variant!(total_area_type, rect_wh) best_packing_for_ordering_impl(empty_spaces_t
     }
 }
 
-// template <class empty_spaces_type, class O>
-
 Variant!(total_area_type, rect_wh) best_packing_for_ordering(empty_spaces_type, O)(
-    empty_spaces_type root,
-    O ordering,
+    ref empty_spaces_type root,
+    ref O ordering,
     const rect_wh starting_bin,
     const int discard_step
 ) {
-
     const auto try_pack = (
         const bin_dimension tried_dimension,
         const rect_wh starting_bin
     ) {
         return best_packing_for_ordering_impl(
             root,
-            ordering, // std::forward<O>(ordering)
+            ordering,
             starting_bin,
             discard_step,
             tried_dimension
         );
     };
 
-    const auto best_result = try_pack(bin_dimension.BOTH, starting_bin);
+    const Variant!(total_area_type, rect_wh) best_result = try_pack(bin_dimension.BOTH, starting_bin);
 
-    if (const failed = &best_result) {
-        return *failed;
+    if (best_result.convertsTo!total_area_type()) {
+        return best_result.get!total_area_type();
     }
 
-    // Variant!(total_area_type, rect_wh)
-    auto best_bin = best_result[1];
+    auto best_bin = best_result.get!rect_wh();
 
     auto trial = (const bin_dimension tried_dimension) {
+        const Variant!(total_area_type, rect_wh) trial = try_pack(tried_dimension, best_bin);
 
-        const auto trial = try_pack(tried_dimension, best_bin);
-
-        if (const better = &trial) {
-            best_bin = *better;
+        if (trial.convertsTo!rect_wh()) {
+            best_bin = trial.get!rect_wh();
         }
     };
 
@@ -216,15 +208,15 @@ rect_wh find_best_packing_impl(empty_spaces_type, OrderType, F, I)(F for_each_or
     static empty_spaces_type root = rect_wh();
     root.flipping_mode = input.flipping_mode;
 
-    for_each_order((OrderType current_order) {
-        const auto packing = best_packing_for_ordering(
+    for_each_order((ref OrderType current_order) {
+        const Variant!(total_area_type, rect_wh) packing = best_packing_for_ordering(
             root,
             current_order,
             max_bin,
             input.discard_step
         );
-
-        if (const total_inserted = &packing) {
+        if (packing.convertsTo!total_area_type()) {
+            const total_area_type total_inserted = packing.get!total_area_type();
             /*
 					Track which function inserts the most area in total,
 					just in case that all orders will fail to fit into the largest allowed bin.
@@ -235,27 +227,29 @@ rect_wh find_best_packing_impl(empty_spaces_type, OrderType, F, I)(F for_each_or
                     best_total_inserted = *total_inserted;
                 }
             }
-        } else if (const result_bin = &packing) {
+        } else if (packing.convertsTo!rect_wh()) {
+            const rect_wh result_bin = packing.get!rect_wh();
             /* Save the function if it performed the best. */
             if (result_bin.area() <= best_bin.area()) {
                 best_order = &current_order;
                 best_bin = *result_bin;
             }
         }
-    });
-
+    }
+    );
     {
         assert(best_order != nullptr);
 
         root.reset(best_bin);
 
-        foreach (rr; *best_order) {
-            auto rect = dereference(rr);
+        foreach (ref rr; *best_order) {
+            auto ref rect = dereference(rr);
 
             if (const ret = root.insert(rect.get_wh())) {
                 rect = *ret;
 
-                if (callback_result.ABORT_PACKING == input.handle_successful_insertion(rect)) {
+                if (callback_result.ABORT_PACKING == input.handle_successful_insertion(
+                        rect)) {
                     break;
                 }
             } else {
