@@ -34,41 +34,41 @@ public:
 class static_empty_spaces(int MAX_SPACES) {
 private:
     int count_spaces = 0;
-    // 	std::array<space_rect, MAX_SPACES> empty_spaces;
+    space_rect[MAX_SPACES] empty_spaces;
 
-    // public:
-    // 	void remove(const int i) {
-    // 		empty_spaces[i] = empty_spaces[count_spaces - 1];
-    // 		--count_spaces;
-    // 	}
+public:
+    void remove(const int i) {
+        empty_spaces[i] = empty_spaces[count_spaces - 1];
+        --count_spaces;
+    }
 
-    // 	bool add(const space_rect r) {
-    // 		if (count_spaces < static_cast<int>(empty_spaces.size())) {
-    // 			empty_spaces[count_spaces] = r;
-    // 			++count_spaces;
+    bool add(const space_rect r) {
+        if (count_spaces < cast(int)(empty_spaces.size())) {
+            empty_spaces[count_spaces] = r;
+            ++count_spaces;
 
-    // 			return true;
-    // 		}
+            return true;
+        }
 
-    // 		return false;
-    // 	}
+        return false;
+    }
 
-    // 	auto get_count() const {
-    // 		return count_spaces;
-    // 	}
+    auto get_count() const {
+        return count_spaces;
+    }
 
-    // 	void reset() {
-    // 		count_spaces = 0;
-    // 	}
+    void reset() {
+        count_spaces = 0;
+    }
 
-    // 	const auto& get(const int i) {
-    // 		return empty_spaces[i];
-    // 	}
-};
+    const ref auto get(const int i) {
+        return empty_spaces[i];
+    }
+}
 
 unittest {
     import std.stdio;
-    
+
     // This is how you construct that.
     static_empty_spaces!(2) i = new static_empty_spaces!(2)();
 }
