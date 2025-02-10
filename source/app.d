@@ -35,11 +35,13 @@ void main() {
 		You may initialize another search when this happens.
 	*/
 
-    auto report_successful = (ref rect_xywh blah) {
+    alias functionType = callback_result function(ref rect_xywh blah) pure nothrow @nogc @safe;
+
+    functionType report_successful = (ref rect_xywh blah) {
         return callback_result.CONTINUE_PACKING;
     };
 
-    auto report_unsuccessful = (ref rect_xywh blah) {
+    functionType report_unsuccessful = (ref rect_xywh blah) {
         return callback_result.ABORT_PACKING;
     };
 
@@ -48,7 +50,7 @@ void main() {
 		The result can only be smaller - if it cannot, the algorithm will gracefully fail.
 	*/
 
-    const auto max_side = 1000;
+    const int max_side = 1000;
 
     /*
 		The search stops when the bin was successfully inserted into,
@@ -70,7 +72,7 @@ void main() {
 		See the algorithm section of README for more information.
 	*/
 
-    const auto discard_step = -4;
+    const int discard_step = -4;
 
     /* 
 		Create some arbitrary rectangles.
@@ -104,18 +106,20 @@ void main() {
 			- will be passed by default.
 		*/
 
-        const auto result_size = find_best_packing(
-            rectangles,
-            make_finder_input(
-                max_side,
-                discard_step,
-                report_successful,
-                report_unsuccessful,
-                runtime_flipping_mode
-        
+        finder_input!(functionType, functionType) blah = make_finder_input(
+            max_side,
+            discard_step,
+            report_successful,
+            report_unsuccessful,
+            runtime_flipping_mode
         );
 
-        report_result(result_size);
+        // const result_size = find_best_packing(
+        //     rectangles,
+
+        // );
+
+        // report_result(result_size);
     }
 
 }
