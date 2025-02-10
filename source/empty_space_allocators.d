@@ -65,3 +65,9 @@ class static_empty_spaces(int MAX_SPACES) {
     // 	}
 };
 
+unittest {
+    import std.stdio;
+    
+    // This is how you construct that.
+    static_empty_spaces!(2) i = new static_empty_spaces!(2)();
+}
