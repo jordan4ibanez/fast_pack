@@ -55,6 +55,9 @@ void main() {
         DrawRectangle(offset, offset, packer.canvasWidth, packer.canvasHeight, Colors.WHITE);
 
         foreach (box; packer.boxes) {
+            if (box.x > 16_364 || box.y > 16_364) {
+                continue;
+            }
             DrawRectangleLines(offset + box.x, offset + box.y, box.w, box.h, Colors.BLACK);
         }
 
