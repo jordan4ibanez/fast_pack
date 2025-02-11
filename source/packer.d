@@ -44,8 +44,9 @@ public:
     }
 
     pragma(inline, true)
-    void finalize() {
+    void finalize(string outputFileName) {
         this.potpack();
+        this.flushToDisk(outputFileName);
     }
 
     int getCanvasWidth() {
@@ -63,7 +64,11 @@ public:
 
 private:
 
-    /// You can omit the key to automatically assign the file name.
+    pragma(inline, true)
+    void flushToDisk(string outputFileName) {
+
+    }
+
     pragma(inline, true)
     void uploadTexture(string key, string textureLocation) {
         TrueColorImage tempTextureObject = loadImageFromFile(textureLocation).getAsTrueColorImage();
