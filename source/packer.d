@@ -22,8 +22,12 @@ need to finalize again. Also, you'll have to re-upload into
 the gpu if it's Vulkan or OpenGL.
 */
 struct TexturePacker {
-private:
+    // private:
+
+    // These two are synchronized.
     TrueColorImage[] textures;
+    string[] keys;
+
     PackRect[] boxes;
     int canvasWidth = 0;
     int canvasHeight = 0;
@@ -35,10 +39,8 @@ public:
         this.padding = padding;
     }
 
-    void pack(immutable int width, immutable int height) {
-        boxes ~= PackRect(
-            0, 0, width + padding, height + padding
-        );
+    void pack(string key, string textureLocation) {
+        this.uploadTexture(key, textureLocation);
     }
 
     pragma(inline, true)
@@ -62,17 +64,21 @@ public:
 private:
 
     /// You can omit the key to automatically assign the file name.
-    void uploadTexture(string key, string fileLocation) {
-        TrueColorImage tempTextureObject = loadImageFromFile(fileLocation).getAsTrueColorImage();
-        this.uploadTexture(key, tempTextureObject);
-    }
-    /// ^ v these two functions are one in the same. ^ passes to v.
-    void uploadTexture(string key, TrueColorImage tempTextureObject) {
+    pragma(inline, true)
+    void uploadTexture(string key, string textureLocation) {
+        TrueColorImage tempTextureObject = loadImageFromFile(textureLocation).getAsTrueColorImage();
+
         if (tempTextureObject is null) {
             throw new Error(key ~ " is null");
         }
 
-        // todo: line up this PackRect with currentKey 
+        boxes ~= PackRect(
+            0, 0, tempTextureObject.width() + padding, tempTextureObject.height() + padding, textures
+                .length
+        );
+
+        textures ~= tempTextureObject;
+        keys ~= key;
     }
 
     /// This is the very nice packing algorithm. :)
