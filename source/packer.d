@@ -54,6 +54,11 @@ public:
         return canvasHeight;
     }
 
+    // todo: remove this.
+    int getPadding() {
+        return padding;
+    }
+
 private:
 
     /// You can omit the key to automatically assign the file name.
