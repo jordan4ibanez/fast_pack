@@ -29,7 +29,7 @@ public:
 
     void pack(immutable int width, immutable int height) {
         boxes ~= PackRect(
-            0, 0, width, height
+            0, 0, width + padding, height + padding
         );
     }
 
