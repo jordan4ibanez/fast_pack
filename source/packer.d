@@ -1,16 +1,18 @@
 module packer;
 
+import image;
 import std.algorithm.comparison;
 import std.algorithm.sorting;
 import std.math.algebraic;
 import std.math.rounding;
 import std.range.primitives;
 
-struct PackRect {
+private struct PackRect {
     int x = 0;
     int y = 0;
     int w = 0;
     int h = 0;
+    ulong pointingTo = 0;
 }
 
 /**
@@ -25,6 +27,7 @@ private:
     int canvasWidth = 0;
     int canvasHeight = 0;
     immutable int padding = 0;
+    ulong currentIndex = 0;
 
 public:
 
@@ -53,6 +56,21 @@ public:
 
 private:
 
+    /// You can omit the key to automatically assign the file name.
+    void uploadTexture(string key, string fileLocation) {
+        TrueColorImage tempTextureObject = loadImageFromFile(fileLocation).getAsTrueColorImage();
+        this.uploadTexture(key, tempTextureObject);
+    }
+    /// ^ v these two functions are one in the same. ^ passes to v.
+    void uploadTexture(string key, TrueColorImage tempTextureObject) {
+        if (tempTextureObject is null) {
+            throw new Error(key ~ " is null");
+        }
+
+        // todo: line up this PackRect with currentKey 
+    }
+
+    /// This is the very nice packing algorithm. :)
     pragma(inline, true)
     void potpack() {
 
