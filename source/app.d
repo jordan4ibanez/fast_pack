@@ -83,8 +83,6 @@ void main() {
 
             immutable selection = i % c.length;
 
-            writeln(selection);
-
             DrawRectangle(offset + box.x + padding, offset + box.y + padding, box.w - padding, box.h - padding,
                 c[selection]);
 
