@@ -23,11 +23,11 @@ the gpu if it's Vulkan or OpenGL.
 */
 struct TexturePacker {
 private:
+    TrueColorImage[] textures;
     PackRect[] boxes;
     int canvasWidth = 0;
     int canvasHeight = 0;
     immutable int padding = 0;
-    ulong currentIndex = 0;
 
 public:
 
