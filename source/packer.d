@@ -42,6 +42,9 @@ private:
     pragma(inline, true)
     void potpack() {
 
+        //? You can thank them: https://github.com/mapbox/potpack
+        //? I just translated and tweaked this.
+
         // Calculate total box area and maximum box width.
         int area = 0;
         int maxWidth = 0;
