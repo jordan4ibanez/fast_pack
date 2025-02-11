@@ -61,8 +61,12 @@ void main() {
         Color(245, 245, 245, 255), // My own White (raylib logo)
     ];
 
-    InitWindow(cast(int) min(16_364, packer.canvasWidth) + (offset * 2),
-        cast(int) min(16_364, packer.canvasHeight) + (offset * 2), "Hello, Raylib-D!");
+    immutable int padding = packer.getPadding();
+    immutable int canvasWidth = packer.getCanvasWidth();
+    immutable int canvasHeight = packer.getCanvasHeight();
+
+    InitWindow(cast(int) min(16_364, canvasWidth) + (offset * 2),
+        cast(int) min(16_364, canvasHeight) + (offset * 2), "Hello, Raylib-D!");
 
     SetTargetFPS(60);
     while (!WindowShouldClose()) {
