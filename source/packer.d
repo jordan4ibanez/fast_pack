@@ -14,7 +14,7 @@ struct PackRect {
 }
 
 struct TexturePacker {
-    // private:
+private:
     PackRect[] boxes;
     int canvasWidth = 0;
     int canvasHeight = 0;
@@ -35,6 +35,14 @@ public:
     pragma(inline, true)
     void finalize() {
         this.potpack();
+    }
+
+    int getCanvasWidth() {
+        return canvasWidth;
+    }
+
+    int getCanvasHeight() {
+        return canvasHeight;
     }
 
 private:
