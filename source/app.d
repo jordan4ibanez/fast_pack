@@ -73,7 +73,7 @@ void main() {
         BeginDrawing();
         ClearBackground(Colors.BLACK);
 
-        DrawRectangle(offset, offset, packer.canvasWidth, packer.canvasHeight, Colors
+        DrawRectangle(offset, offset, canvasWidth, canvasHeight, Colors
                 .WHITE);
 
         foreach (i, box; packer.boxes) {
