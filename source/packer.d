@@ -13,6 +13,12 @@ struct PackRect {
     int h = 0;
 }
 
+/**
+The TexturePacker struct.
+You can add more things in after you finalize. But, you will 
+need to finalize again. Also, you'll have to re-upload into
+the gpu if it's Vulkan or OpenGL.
+*/
 struct TexturePacker {
 private:
     PackRect[] boxes;
