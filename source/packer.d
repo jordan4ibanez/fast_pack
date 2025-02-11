@@ -83,21 +83,23 @@ private:
             immutable int width = thisBox.w - this.padding;
             immutable int height = thisBox.h - this.padding;
 
-            // for (int x = thisX; x < thisX + thisWidth; x++) {
-            //     for (int y = thisY; y < thisY + thisHeight; y++) {
-            //         constructingImage.setPixel(
-            //             x,
-            //             y,
-            //             thisTexture.getPixel(
-            //                 x - thisX,
-            //                 y - thisY
-            //         )
-            //         );
-            //     }
-            // }
+            foreach (immutable int inImageX; 0 .. width) {
+                immutable int inAtlasX = inImageX + xPos;
 
+                foreach (immutable int inImageY; 0 .. height) {
+                    immutable int inAtlasY = inImageY + yPos;
+
+                    atlas.setPixel(
+                        inAtlasX,
+                        inAtlasY,
+                        thisTexture.getPixel(
+                            inImageX,
+                            inImageY
+                    ));
+                }
+            }
         }
-
+        writeImageToPngFile(outputFileName, atlas);
     }
 
     pragma(inline, true)
