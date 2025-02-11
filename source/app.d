@@ -19,7 +19,7 @@ void main() {
 
     packer.finalize();
 
-    writeln(packer.canvasWidth, " ", packer.canvasHeight);
+    writeln(packer.getCanvasWidth(), " ", packer.getCanvasHeight());
 
     // writeln("======");
 
