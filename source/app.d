@@ -3,6 +3,7 @@ module app;
 import packer;
 import raylib;
 import std.algorithm.comparison;
+import std.conv;
 import std.random;
 import std.stdio;
 
@@ -11,13 +12,15 @@ void main() {
     auto rnd = Random(unpredictableSeed());
     TexturePacker packer = TexturePacker(10);
 
-    foreach (_; 0 .. 1024) {
-        packer.pack(uniform(32, 64, rnd), uniform(32, 64, rnd));
+    foreach (j; 0 .. 100) {
+        foreach (uint i; 0 .. 10) {
+            packer.pack(to!string(i) ~ to!string(j), "assets/" ~ to!string(i + 1) ~ ".png");
+        }
     }
 
     // packer.pack(256, 64);
 
-    packer.finalize();
+    packer.finalize("atlas.png");
 
     writeln(packer.getCanvasWidth(), " ", packer.getCanvasHeight());
 
