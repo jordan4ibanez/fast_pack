@@ -18,7 +18,6 @@ struct TexturePacker {
     PackRect[] boxes;
     int canvasWidth = 0;
     int canvasHeight = 0;
-    double canvasFill = 0;
     immutable int padding = 0;
 
 public:
@@ -152,6 +151,5 @@ private:
 
         canvasWidth = width + padding; // container width
         canvasHeight = height + padding; // container height
-        canvasFill = (cast(double) area / (cast(double) width * cast(double) height)) || 0; // space utilization
     }
 }
