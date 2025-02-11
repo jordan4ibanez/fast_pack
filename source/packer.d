@@ -1,16 +1,10 @@
 module packer;
 
-
 import std.algorithm.comparison;
 import std.algorithm.sorting;
 import std.math.algebraic;
 import std.math.rounding;
 import std.range.primitives;
-
-// import ldc.attributes;
-// import std.stdio;
-
-// todo: maybe template this.
 
 struct PackRect {
     int x = 0;
