@@ -5,7 +5,9 @@ import std.algorithm.comparison;
 import std.algorithm.sorting;
 import std.math.algebraic;
 import std.math.rounding;
+import std.range;
 import std.range.primitives;
+import std.stdio;
 
 private struct PackRect {
     int x = 0;
@@ -25,8 +27,8 @@ struct TexturePacker {
     // private:
 
     // These two are synchronized.
-    TrueColorImage[] textures;
-    string[] keys;
+    immutable(TrueColorImage)[] textures;
+    immutable(string)[] keys;
 
     PackRect[] boxes;
     int canvasWidth = 0;
@@ -66,12 +68,41 @@ private:
 
     pragma(inline, true)
     void flushToDisk(string outputFileName) {
+        TrueColorImage atlas = new TrueColorImage(this.canvasWidth, this.canvasHeight);
+
+        foreach (const ref PackRect thisBox; boxes) {
+
+            immutable ulong indexOf = thisBox.pointingTo;
+
+            immutable TrueColorImage thisTexture = this.textures[indexOf];
+            immutable(string) thisKey = this.keys[indexOf];
+
+            immutable int xPos = thisBox.x + this.padding;
+            immutable int yPos = thisBox.y + this.padding;
+
+            immutable int width = thisBox.w - this.padding;
+            immutable int height = thisBox.h - this.padding;
+
+            // for (int x = thisX; x < thisX + thisWidth; x++) {
+            //     for (int y = thisY; y < thisY + thisHeight; y++) {
+            //         constructingImage.setPixel(
+            //             x,
+            //             y,
+            //             thisTexture.getPixel(
+            //                 x - thisX,
+            //                 y - thisY
+            //         )
+            //         );
+            //     }
+            // }
+
+        }
 
     }
 
     pragma(inline, true)
     void uploadTexture(string key, string textureLocation) {
-        TrueColorImage tempTextureObject = loadImageFromFile(textureLocation).getAsTrueColorImage();
+        immutable TrueColorImage tempTextureObject = loadImageFromFile(textureLocation).getAsTrueColorImage();
 
         if (tempTextureObject is null) {
             throw new Error(key ~ " is null");
