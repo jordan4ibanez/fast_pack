@@ -35,8 +35,6 @@ void main() {
 
     int offset = 10;
 
-    immutable int padding = packer.padding;
-
     static immutable Color[23] c = [
         Color(200, 200, 200, 255), // Light Gray
         Color(130, 130, 130, 255), // Gray
