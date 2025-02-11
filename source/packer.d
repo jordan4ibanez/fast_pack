@@ -150,8 +150,8 @@ private:
             }
         }
 
-        canvasWidth = width; // container width
-        canvasHeight = height; // container height
+        canvasWidth = width + padding; // container width
+        canvasHeight = height + padding; // container height
         canvasFill = (cast(double) area / (cast(double) width * cast(double) height)) || 0; // space utilization
     }
 }
