@@ -86,8 +86,8 @@ void main() {
             DrawRectangle(offset + box.x + padding, offset + box.y + padding, box.w - padding, box.h - padding,
                 c[selection]);
 
-            DrawRectangleLines(offset + box.x + padding, offset + box.y + padding, box.w - padding, box.h - padding, Colors
-                    .BLACK);
+            DrawRectangleLines(offset + box.x + padding, offset + box.y + padding,
+                box.w - padding, box.h - padding, Colors.BLACK);
         }
 
         EndDrawing();
