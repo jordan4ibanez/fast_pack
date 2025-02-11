@@ -97,6 +97,8 @@ private:
                 return a.w > b.w;
             }
             return a.h > b.h;
+            // This is by area.
+            // return a.w * a.h > b.w * b.h;
         }).release();
 
         // Aim for a squarish resulting container,
