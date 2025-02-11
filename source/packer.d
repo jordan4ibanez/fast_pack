@@ -19,8 +19,13 @@ struct TexturePacker {
     int canvasWidth = 0;
     int canvasHeight = 0;
     double canvasFill = 0;
+    immutable int padding = 0;
 
 public:
+
+    this(int padding) {
+        this.padding = padding;
+    }
 
     void pack(immutable int width, immutable int height) {
         boxes ~= PackRect(
