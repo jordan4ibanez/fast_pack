@@ -413,4 +413,5 @@ unittest {
     // TexturePoints!TestVec2Wrong test5 = packer.getTexturePoints!TestVec2Wrong("1");
     // writeln(test5);
 
+    writeln("=== BEGIN REFERENCE STYLE ===");
 }
