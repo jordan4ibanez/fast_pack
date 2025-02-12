@@ -69,6 +69,12 @@ public:
         this.flushToDisk(outputFileName);
     }
 
+    pragma(inline, true)
+    ubyte[] finalizeToMemory() {
+        this.potpack();
+        return this.flushToMemory();
+    }
+
     int getCanvasWidth() const {
         return canvasWidth;
     }
@@ -162,6 +168,50 @@ public:
     }
 
 private:
+
+    pragma(inline, true)
+    ubyte[] flushToMemory() {
+        TrueColorImage atlas = new TrueColorImage(this.canvasWidth, this.canvasHeight);
+
+        foreach (const ref PackRect thisBox; boxes) {
+
+            immutable ulong indexOf = thisBox.pointingTo;
+
+            immutable TrueColorImage thisTexture = this.textures[indexOf];
+            immutable(T) thisKey = this.keys[indexOf];
+
+            immutable int xPos = thisBox.x + this.padding;
+            immutable int yPos = thisBox.y + this.padding;
+
+            immutable int width = thisBox.w - this.padding;
+            immutable int height = thisBox.h - this.padding;
+
+            floatingLookupTable[thisKey] = FloatingRectangle(
+                cast(double) xPos / cast(double) this.canvasWidth,
+                cast(double) yPos / cast(double) this.canvasHeight,
+                cast(double) width / cast(double) this.canvasWidth,
+                cast(double) height / cast(double) this.canvasHeight
+            );
+
+            foreach (immutable int inImageX; 0 .. width) {
+                immutable int inAtlasX = inImageX + xPos;
+
+                foreach (immutable int inImageY; 0 .. height) {
+                    immutable int inAtlasY = inImageY + yPos;
+
+                    atlas.setPixel(
+                        inAtlasX,
+                        inAtlasY,
+                        thisTexture.getPixel(
+                            inImageX,
+                            inImageY
+                    ));
+                }
+            }
+        }
+
+        return atlas.imageData.bytes;
+    }
 
     pragma(inline, true)
     void flushToDisk(string outputFileName) {
@@ -466,4 +516,5 @@ unittest {
         writeln(packer.getTexturePoints!TestVec2Double(to!string(i)));
     }
 
+    writeln(packer.flushToMemory());
 }
