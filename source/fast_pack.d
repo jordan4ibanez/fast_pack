@@ -74,6 +74,13 @@ public:
         return textures.length;
     }
 
+    FloatingRectangle getPosition(T key) {
+        if (key !in floatingLookupTable) {
+            throw new Error("Key " ~ to!string(key) ~ " does not exist.");
+        }
+        return floatingLookupTable[key];
+    }
+
 private:
 
     pragma(inline, true)
