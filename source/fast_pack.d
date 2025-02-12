@@ -109,6 +109,25 @@ public:
         return result;
     }
 
+    TexturePoints!C getTexturePoints(C)(T key) {
+        // This allows you to automatically downcast and insert into custom types.
+        static assert(is(typeof(C.x) == float) || is(typeof(C.x) == double), "x must be floating point.");
+        static assert(is(typeof(C.y) == float) || is(typeof(C.y) == double), "y must be floating point.");
+
+        const(FloatingRectangle)* thisRectangle = key in floatingLookupTable;
+
+        if (!thisRectangle) {
+            throw new Error("Key " ~ to!string(key) ~ " does not exist.");
+        }
+
+        // x,y (float or double) and a this(x,y) constructor is all your type needs.
+        TexturePoints!C result;
+
+        result.topLeft = C(thisRectangle.x, thisRectangle.y);
+        result.bottomLeft = C(thisRectangle.x, thisRectangle.y + thisRectangle.h);
+        result.topLeft = C(thisRectangle.x + thisRectangle.w, thisRectangle.y + thisRectangle.h);
+        result.topLeft = C(thisRectangle.x + thisRectangle.w, thisRectangle.y);
+
         return result;
     }
 
@@ -322,15 +341,40 @@ unittest {
     writeln("took: ", sw.peek.total!"msecs", "ms");
 
     // This is to make sure downcasting in getPositionCustom works.
-    struct Vector2TestCool {
+    struct Vector2TestFloat {
         float x = 0;
         float y = 0;
         float w = 0;
         float h = 0;
     }
 
-    auto blah = packer.getRectangle!Vector2TestCool("1");
+    Vector2TestFloat test1 = packer.getRectangle!Vector2TestFloat("1");
 
-    writeln(blah);
+    writeln(test1);
+
+    struct Vector2TestDouble {
+        float x = 0;
+        float y = 0;
+        float w = 0;
+        float h = 0;
+    }
+
+    Vector2TestDouble test2 = packer.getRectangle!Vector2TestDouble("1");
+
+    writeln(test2);
+
+    // struct Vector2TestWrong {
+    //     int x = 0;
+    //     float y = 0;
+    //     float w = 0;
+    //     float h = 0;
+    // }
+    // Vector2TestWrong test3 = packer.getRectangle!Vector2TestWrong("1");
+    // writeln(test3);
+
+    struct TestVec2 {
+        float x = 0;
+        float y = 0;
+    }
 
 }
