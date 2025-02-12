@@ -128,6 +128,7 @@ public:
     /// Type C must implement this (x,y) as (float or double).
     /// It will be within scale (0.0 - 1.0) of the atlas.
     /// Top to bottom, left to right.
+    /// Returns: TexturePoints!Vec2Type
     TexturePoints!Vec2Type getTexturePoints(Vec2Type)(immutable T key) {
         // This allows you to automatically downcast and insert into custom types.
         static assert(is(typeof(Vec2Type.x) == float) || is(typeof(Vec2Type.x) == double), "x must be floating point.");
