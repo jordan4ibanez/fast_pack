@@ -157,7 +157,7 @@ public:
     /// It will be within scale (0.0 - 1.0) of the atlas.
     /// Top to bottom, left to right.
     /// Mutates the variable you give it as a ref.
-    void getTexturePoints(Vec2Type)(immutable T key, ref Vec2Type referenceOutput) {
+    void getTexturePoints(Vec2Type)(immutable T key, ref TexturePoints!Vec2Type referenceOutput) {
         referenceOutput = getTexturePoints!Vec2Type(key);
     }
 
