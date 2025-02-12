@@ -239,3 +239,28 @@ private:
         canvasHeight = height + padding; // container height
     }
 }
+
+unittest {
+    import std.conv;
+    import std.stdio;
+
+    import std.datetime.stopwatch;
+
+    StopWatch sw = StopWatch(AutoStart.yes);
+
+    TexturePacker packer = TexturePacker(10);
+
+    // Only works with PNG for now.
+    foreach (j; 0 .. 100) {
+        foreach (uint i; 0 .. 10) {
+            packer.pack(to!string(i) ~ to!string(j), "assets/" ~ to!string(i + 1) ~ ".png");
+        }
+    }
+
+    packer.finalize("atlas.png");
+
+    writeln(packer.getCanvasWidth(), " ", packer.getCanvasHeight());
+
+    writeln("took: ", sw.peek.total!"msecs", "ms");
+
+}
