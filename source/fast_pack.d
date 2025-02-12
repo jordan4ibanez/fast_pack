@@ -74,15 +74,22 @@ public:
         return textures.length;
     }
 
-    // This is as pragmatic as I could make this.
+    /// This is getting raw xPos, yPos, width, height.
+    /// Type C must implement this (x,y,w,h) as (float or double).
+    /// This is as pragmatic as I could make this.
     pragma(inline, true)
     C getRectangle(C)(T key) const {
-        // This allows you to automatically downcast or convert into custom types.
-        if (key !in floatingLookupTable) {
+        // This allows you to automatically downcast and insert into custom types.
+        static assert(is(typeof(C.x) == float) || is(typeof(C.x) == double));
+        static assert(is(typeof(C.y) == float) || is(typeof(C.y) == double));
+        static assert(is(typeof(C.w) == float) || is(typeof(C.w) == double));
+        static assert(is(typeof(C.h) == float) || is(typeof(C.h) == double));
+
+        const(FloatingRectangle)* instance = key in floatingLookupTable;
+
+        if (!instance) {
             throw new Error("Key " ~ to!string(key) ~ " does not exist.");
         }
-
-        FloatingRectangle instance = floatingLookupTable[key];
 
         // x,y,w,h (float or double) is all your type needs.
         C result;
@@ -307,6 +314,8 @@ unittest {
     struct Vector2TestCool {
         float x = 0;
         float y = 0;
+        float w = 0;
+        float h = 0;
     }
 
     auto blah = packer.getRectangle!Vector2TestCool("1");
