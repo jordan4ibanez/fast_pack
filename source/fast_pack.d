@@ -50,8 +50,8 @@ private:
     immutable(T)[] keys;
 
     PackRect[] boxes;
-    int canvasWidth = 0;
-    int canvasHeight = 0;
+    int atlasWidth = 0;
+    int atlasHeight = 0;
     immutable int padding = 0;
 
 public:
@@ -86,12 +86,12 @@ public:
 
     /// The total width of the atlas.
     int getCanvasWidth() const {
-        return canvasWidth;
+        return atlasWidth;
     }
 
     /// The total height of the atlas.
     int getCanvasHeight() const {
-        return canvasHeight;
+        return atlasHeight;
     }
 
     /// Number of textures stored in the atlas.
@@ -183,7 +183,7 @@ private:
 
     pragma(inline, true)
     ubyte[] flushToMemory() {
-        TrueColorImage atlas = new TrueColorImage(this.canvasWidth, this.canvasHeight);
+        TrueColorImage atlas = new TrueColorImage(this.atlasWidth, this.atlasHeight);
 
         foreach (const ref PackRect thisBox; boxes) {
 
@@ -199,10 +199,10 @@ private:
             immutable int height = thisBox.h - this.padding;
 
             floatingLookupTable[thisKey] = FloatingRectangle(
-                cast(double) xPos / cast(double) this.canvasWidth,
-                cast(double) yPos / cast(double) this.canvasHeight,
-                cast(double) width / cast(double) this.canvasWidth,
-                cast(double) height / cast(double) this.canvasHeight
+                cast(double) xPos / cast(double) this.atlasWidth,
+                cast(double) yPos / cast(double) this.atlasHeight,
+                cast(double) width / cast(double) this.atlasWidth,
+                cast(double) height / cast(double) this.atlasHeight
             );
 
             foreach (immutable int inImageX; 0 .. width) {
@@ -227,7 +227,7 @@ private:
 
     pragma(inline, true)
     void flushToDisk(string outputFileName) {
-        TrueColorImage atlas = new TrueColorImage(this.canvasWidth, this.canvasHeight);
+        TrueColorImage atlas = new TrueColorImage(this.atlasWidth, this.atlasHeight);
 
         foreach (const ref PackRect thisBox; boxes) {
 
@@ -243,10 +243,10 @@ private:
             immutable int height = thisBox.h - this.padding;
 
             floatingLookupTable[thisKey] = FloatingRectangle(
-                cast(double) xPos / cast(double) this.canvasWidth,
-                cast(double) yPos / cast(double) this.canvasHeight,
-                cast(double) width / cast(double) this.canvasWidth,
-                cast(double) height / cast(double) this.canvasHeight
+                cast(double) xPos / cast(double) this.atlasWidth,
+                cast(double) yPos / cast(double) this.atlasHeight,
+                cast(double) width / cast(double) this.atlasWidth,
+                cast(double) height / cast(double) this.atlasHeight
             );
 
             foreach (immutable int inImageX; 0 .. width) {
@@ -401,8 +401,8 @@ private:
             }
         }
 
-        canvasWidth = width + padding; // container width
-        canvasHeight = height + padding; // container height
+        atlasWidth = width + padding; // container width
+        atlasHeight = height + padding; // container height
     }
 }
 
