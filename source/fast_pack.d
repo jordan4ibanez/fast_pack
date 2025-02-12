@@ -81,6 +81,25 @@ public:
         }
         return floatingLookupTable[key];
     }
+    // note for ^-these-v : This is as pragmatic as I could make this.
+    pragma(inline, true)
+    C getRectangle(C)(T key) const {
+        // This allows you to automatically downcast or convert into custom types.
+        if (key !in floatingLookupTable) {
+            throw new Error("Key " ~ to!string(key) ~ " does not exist.");
+        }
+
+        FloatingRectangle instance = floatingLookupTable[key];
+
+        // x,y,w,h (float or double) is all your type needs.
+        C result;
+        result.x = instance.x;
+        result.y = instance.y;
+        result.w = instance.w;
+        result.h = instance.h;
+
+        return result;
+    }
 
 private:
 
