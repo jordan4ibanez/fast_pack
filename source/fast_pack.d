@@ -83,6 +83,7 @@ public:
 
     /// This is getting raw xPos, yPos, width, height.
     /// Type C must implement this (x,y,w,h) as (float or double).
+    /// It will be within scale (0.0 - 1.0) of the atlas.
     /// This is as pragmatic as I could make this.
     pragma(inline, true)
     C getRectangle(C)(T key) const {
@@ -92,18 +93,21 @@ public:
         static assert(is(typeof(C.w) == float) || is(typeof(C.w) == double), "w must be floating point.");
         static assert(is(typeof(C.h) == float) || is(typeof(C.h) == double), "h must be floating point.");
 
-        const(FloatingRectangle)* instance = key in floatingLookupTable;
+        const(FloatingRectangle)* thisRectangle = key in floatingLookupTable;
 
-        if (!instance) {
+        if (!thisRectangle) {
             throw new Error("Key " ~ to!string(key) ~ " does not exist.");
         }
 
         // x,y,w,h (float or double) is all your type needs.
         C result;
-        result.x = instance.x;
-        result.y = instance.y;
-        result.w = instance.w;
-        result.h = instance.h;
+        result.x = thisRectangle.x;
+        result.y = thisRectangle.y;
+        result.w = thisRectangle.w;
+        result.h = thisRectangle.h;
+
+        return result;
+    }
 
         return result;
     }
