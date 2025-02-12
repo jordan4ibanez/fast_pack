@@ -86,7 +86,7 @@ public:
     /// It will be within scale (0.0 - 1.0) of the atlas.
     /// Returns: RectangleType
     pragma(inline, true)
-    RectangleType getRectangle(RectangleType)(immutable T key) const {
+    RectangleType getRectangle(RectangleType)(immutable T key) {
         // This allows you to automatically downcast and insert into custom types.
         static assert(is(typeof(RectangleType.x) == float) || is(typeof(RectangleType.x) == double),
             "x must be floating point.");
