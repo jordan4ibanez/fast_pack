@@ -1,4 +1,4 @@
-module packer;
+module fast_pack;
 
 import image;
 import std.algorithm.comparison;
@@ -15,6 +15,13 @@ private struct PackRect {
     int w = 0;
     int h = 0;
     ulong pointingTo = 0;
+}
+
+struct FloatingRectangle {
+    double x = 0;
+    double y = 0;
+    double w = 0;
+    double h = 0;
 }
 
 /**
