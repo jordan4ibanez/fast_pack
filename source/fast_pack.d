@@ -82,7 +82,7 @@ public:
     }
 
     /// This is getting raw xPos, yPos, width, height.
-    /// Type C must implement this (x,y,w,h) as (float or double).
+    /// RectangleType must implement (x,y,w,h) as (float or double).
     /// It will be within scale (0.0 - 1.0) of the atlas.
     /// Top to bottom, left to right.
     /// Returns: RectangleType
@@ -115,7 +115,7 @@ public:
     }
 
     /// This is getting raw xPos, yPos, width, height.
-    /// Type C must implement this (x,y,w,h) as (float or double).
+    /// RectangleType must implement (x,y,w,h) as (float or double).
     /// It will be within scale (0.0 - 1.0) of the atlas.
     /// Top to bottom, left to right.
     /// Mutates the variable you give it as a ref.
@@ -125,7 +125,7 @@ public:
     }
 
     /// This is getting raw 2D points of a rectangle on the atlas..
-    /// Type C must implement this (x,y) as (float or double).
+    /// Vec2Type must implement this(x,y) as (float or double).
     /// It will be within scale (0.0 - 1.0) of the atlas.
     /// Top to bottom, left to right.
     /// Returns: TexturePoints!Vec2Type
