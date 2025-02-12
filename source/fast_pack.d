@@ -24,6 +24,13 @@ private struct FloatingRectangle {
     double h = 0;
 }
 
+struct TexturePoints(T) {
+    T topLeft;
+    T bottomLeft;
+    T bottomRight;
+    T topRight;
+}
+
 /**
 The TexturePacker struct.
 You can add more things in after you finalize. But, you will 
