@@ -358,6 +358,8 @@ unittest {
 
     writeln("took: ", sw.peek.total!"msecs", "ms");
 
+    //? Basically, these tests should look the same for all outputs.
+
     writeln("=== BEGIN OUTPUT STYLE ===");
 
     // This is to make sure downcasting in getPositionCustom works.
@@ -381,6 +383,7 @@ unittest {
     RectangleTestDouble test2 = packer.getRectangle!RectangleTestDouble("1");
     writeln(test2);
 
+    //? This should never compile.
     // struct RectangleTestWrong {
     //     int x = 0;
     //     float y = 0;
@@ -406,6 +409,7 @@ unittest {
     TexturePoints!TestVec2Double test4 = packer.getTexturePoints!TestVec2Double("1");
     writeln(test4);
 
+    //? This should never compile.
     // struct TestVec2Wrong {
     //     int x = 0;
     //     double y = 0;
