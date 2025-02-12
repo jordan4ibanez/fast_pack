@@ -86,7 +86,7 @@ public:
     /// It will be within scale (0.0 - 1.0) of the atlas.
     /// Returns: RectangleType
     pragma(inline, true)
-    RectangleType getRectangle(RectangleType)(T key) const {
+    RectangleType getRectangle(RectangleType)(immutable T key) const {
         // This allows you to automatically downcast and insert into custom types.
         static assert(is(typeof(RectangleType.x) == float) || is(typeof(RectangleType.x) == double),
             "x must be floating point.");
@@ -117,7 +117,7 @@ public:
     /// Type C must implement this (x,y) as (float or double).
     /// It will be within scale (0.0 - 1.0) of the atlas.
     /// Top to bottom, left to right.
-    TexturePoints!Vec2Type getTexturePoints(Vec2Type)(T key) {
+    TexturePoints!Vec2Type getTexturePoints(Vec2Type)(immutable T key) {
         // This allows you to automatically downcast and insert into custom types.
         static assert(is(typeof(Vec2Type.x) == float) || is(typeof(Vec2Type.x) == double), "x must be floating point.");
         static assert(is(typeof(Vec2Type.y) == float) || is(typeof(Vec2Type.y) == double), "y must be floating point.");
