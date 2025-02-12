@@ -84,7 +84,6 @@ public:
     /// This is getting raw xPos, yPos, width, height.
     /// Type C must implement this (x,y,w,h) as (float or double).
     /// It will be within scale (0.0 - 1.0) of the atlas.
-    /// This is as pragmatic as I could make this.
     pragma(inline, true)
     C getRectangle(C)(T key) const {
         // This allows you to automatically downcast and insert into custom types.
