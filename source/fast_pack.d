@@ -31,7 +31,7 @@ need to finalize again. Also, you'll have to re-upload into
 the gpu if it's Vulkan or OpenGL.
 */
 struct TexturePacker {
-    // private:
+private:
 
     // These two are synchronized.
     immutable(TrueColorImage)[] textures;
