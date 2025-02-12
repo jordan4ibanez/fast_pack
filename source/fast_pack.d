@@ -3,11 +3,11 @@ module fast_pack;
 import image;
 import std.algorithm.comparison;
 import std.algorithm.sorting;
+import std.conv;
 import std.math.algebraic;
 import std.math.rounding;
 import std.range;
 import std.range.primitives;
-import std.stdio;
 
 private struct PackRect {
     int x = 0;
@@ -30,12 +30,12 @@ You can add more things in after you finalize. But, you will
 need to finalize again. Also, you'll have to re-upload into
 the gpu if it's Vulkan or OpenGL.
 */
-struct TexturePacker {
+struct TexturePacker(T) {
 private:
 
     // These two are synchronized.
     immutable(TrueColorImage)[] textures;
-    immutable(string)[] keys;
+    immutable(T)[] keys;
 
     PackRect[] boxes;
     int canvasWidth = 0;
@@ -49,7 +49,7 @@ public:
     }
 
     pragma(inline, true)
-    void pack(string key, string textureLocation) {
+    void pack(T key, string textureLocation) {
         this.uploadTexture(key, textureLocation);
     }
 
@@ -82,7 +82,7 @@ private:
             immutable ulong indexOf = thisBox.pointingTo;
 
             immutable TrueColorImage thisTexture = this.textures[indexOf];
-            immutable(string) thisKey = this.keys[indexOf];
+            immutable(T) thisKey = this.keys[indexOf];
 
             immutable int xPos = thisBox.x + this.padding;
             immutable int yPos = thisBox.y + this.padding;
@@ -110,11 +110,11 @@ private:
     }
 
     pragma(inline, true)
-    void uploadTexture(string key, string textureLocation) {
+    void uploadTexture(T key, string textureLocation) {
         immutable TrueColorImage tempTextureObject = loadImageFromFile(textureLocation).getAsTrueColorImage();
 
         if (tempTextureObject is null) {
-            throw new Error(key ~ " is null");
+            throw new Error(to!string(key) ~ " is null");
         }
 
         boxes ~= PackRect(
@@ -255,7 +255,7 @@ unittest {
 
     StopWatch sw = StopWatch(AutoStart.yes);
 
-    TexturePacker packer = TexturePacker(10);
+    TexturePacker!string packer = TexturePacker!string(2);
 
     // Only works with PNG for now.
 
