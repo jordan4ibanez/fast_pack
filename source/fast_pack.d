@@ -354,15 +354,10 @@ unittest {
 
     TexturePacker!string packer = TexturePacker!string(2);
 
-    // Only works with PNG for now.
-
-    //? This is 1_000 textures.
-    // foreach (j; 0 .. 100) {
+    //! Only works with PNG for now.
     foreach (uint i; 0 .. 10) {
-        // ~ to!string(j)
         packer.pack(to!string(i), "assets/" ~ to!string(i + 1) ~ ".png");
     }
-    // }
 
     packer.finalize("atlas.png");
 
