@@ -85,12 +85,12 @@ public:
     }
 
     /// The total width of the atlas.
-    int getCanvasWidth() const {
+    int getAtlasWidth() const {
         return atlasWidth;
     }
 
     /// The total height of the atlas.
-    int getCanvasHeight() const {
+    int getAtlasHeight() const {
         return atlasHeight;
     }
 
