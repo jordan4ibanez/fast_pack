@@ -142,7 +142,7 @@ void main() {
 }
 ```
 
-The DUB repo image is the output of the current unit test modified to use 430 textures.
+**Note:** The DUB repo icon is the output of the current unit test modified to use 430 textures.
 
 Here is a development screenshot I found fun. (Running in raylib-d)
 ![nosey, eh?](https://raw.githubusercontent.com/jordan4ibanez/jordan4ibanez/refs/heads/main/images/image.png)
