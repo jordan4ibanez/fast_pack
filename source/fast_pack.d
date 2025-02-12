@@ -440,14 +440,21 @@ unittest {
     writeln(test6);
 
     //? This should never compile.
-    // struct RectangleTestWrong {
-    //     int x = 0;
-    //     float y = 0;
-    //     float w = 0;
-    //     float h = 0;
-    // }
     // RectangleTestWrong test7;
     // packer.getRectangle("1", test7);
     // writeln(test7);
+
+    TexturePoints!TestVec2Float test7;
+    packer.getTexturePoints!TestVec2Float("1", test7);
+    writeln(test7);
+
+    TexturePoints!TestVec2Double test8;
+    packer.getTexturePoints!TestVec2Double("1", test8);
+    writeln(test8);
+
+    // ? This should never compile.
+    // TexturePoints!TestVec2Wrong test9;
+    // packer.getRectangle("1", test9);
+    // writeln(test9);
 
 }
