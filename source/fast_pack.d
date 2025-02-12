@@ -112,10 +112,10 @@ public:
     /// Type C must implement this (x,y) as (float or double).
     /// It will be within scale (0.0 - 1.0) of the atlas.
     /// Top to bottom, left to right.
-    TexturePoints!C getTexturePoints(C)(T key) {
+    TexturePoints!Vec2Type getTexturePoints(Vec2Type)(T key) {
         // This allows you to automatically downcast and insert into custom types.
-        static assert(is(typeof(C.x) == float) || is(typeof(C.x) == double), "x must be floating point.");
-        static assert(is(typeof(C.y) == float) || is(typeof(C.y) == double), "y must be floating point.");
+        static assert(is(typeof(Vec2Type.x) == float) || is(typeof(Vec2Type.x) == double), "x must be floating point.");
+        static assert(is(typeof(Vec2Type.y) == float) || is(typeof(Vec2Type.y) == double), "y must be floating point.");
 
         const(FloatingRectangle)* thisRectangle = key in floatingLookupTable;
 
@@ -124,12 +124,13 @@ public:
         }
 
         // x,y (float or double) and a this(x,y) constructor is all your type needs.
-        TexturePoints!C result;
+        TexturePoints!Vec2Type result;
 
-        result.topLeft = C(thisRectangle.x, thisRectangle.y);
-        result.bottomLeft = C(thisRectangle.x, thisRectangle.y + thisRectangle.h);
-        result.bottomRight = C(thisRectangle.x + thisRectangle.w, thisRectangle.y + thisRectangle.h);
-        result.topRight = C(thisRectangle.x + thisRectangle.w, thisRectangle.y);
+        result.topLeft = Vec2Type(thisRectangle.x, thisRectangle.y);
+        result.bottomLeft = Vec2Type(thisRectangle.x, thisRectangle.y + thisRectangle.h);
+        result.bottomRight = Vec2Type(thisRectangle.x + thisRectangle.w, thisRectangle.y + thisRectangle
+                .h);
+        result.topRight = Vec2Type(thisRectangle.x + thisRectangle.w, thisRectangle.y);
 
         return result;
     }
