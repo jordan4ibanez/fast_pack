@@ -1,14 +1,9 @@
 {
-    "libs" : ["raylib"],
-    "lflags-posix" : ["-L."],
-    "lflags-osx" : ["-rpath", "@executable_path/"],
-    "lflags-linux" : ["-rpath=$$ORIGIN"],
     "authors" : ["jordan4ibanez"],
-    "libs-posix" : ["z"],
     "license" : "MIT",
-    "copyright" : "Copyright © 2022, jordan4ibanez",
+    "copyright" : "Copyright © 2025, jordan4ibanez",
     "name" : "fast_pack",
-    "description" : "A fast texture packer for D",
+    "description" : "A fast texture packer for D.",
     "dependencies" : {
         "mini_png" : "~>1.0.1"
     }
