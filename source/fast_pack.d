@@ -358,6 +358,8 @@ unittest {
 
     writeln("took: ", sw.peek.total!"msecs", "ms");
 
+    writeln("=== BEGIN OUTPUT STYLE ===");
+
     // This is to make sure downcasting in getPositionCustom works.
     struct RectangleTestFloat {
         float x = 0;
