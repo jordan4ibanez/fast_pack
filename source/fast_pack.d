@@ -352,7 +352,6 @@ unittest {
     }
 
     Vector2TestFloat test1 = packer.getRectangle!Vector2TestFloat("1");
-
     writeln(test1);
 
     struct Vector2TestDouble {
@@ -363,7 +362,6 @@ unittest {
     }
 
     Vector2TestDouble test2 = packer.getRectangle!Vector2TestDouble("1");
-
     writeln(test2);
 
     // struct Vector2TestWrong {
@@ -375,9 +373,27 @@ unittest {
     // Vector2TestWrong test3 = packer.getRectangle!Vector2TestWrong("1");
     // writeln(test3);
 
-    struct TestVec2 {
+    struct TestVec2Float {
         float x = 0;
         float y = 0;
     }
+
+    TexturePoints!TestVec2Float test3 = packer.getTexturePoints!TestVec2Float("1");
+    writeln(test3);
+
+    struct TestVec2Double {
+        double x = 0;
+        double y = 0;
+    }
+
+    TexturePoints!TestVec2Double test4 = packer.getTexturePoints!TestVec2Double("1");
+    writeln(test4);
+
+    // struct TestVec2Wrong {
+    //     int x = 0;
+    //     double y = 0;
+    // }
+    // TexturePoints!TestVec2Wrong test5 = packer.getTexturePoints!TestVec2Wrong("1");
+    // writeln(test5);
 
 }
