@@ -9,7 +9,11 @@ Note: Image trimming has been removed in this version, I didn't use it, I don't 
 
 The implementation has been supercharged and simplified in this version.
 
-The best way I can show you how to use this is by showing you the unit test at this current point in time.
+**Note:** Only works with PNG (for now).
+
+The best way I can show you how to use this is by showing you the original unit test at this current point in time.
+
+
 
 ```d
 void main() {
@@ -137,6 +141,8 @@ void main() {
     writeln(packer.flushToMemory());
 }
 ```
+
+The DUB repo image is the output of the current unit test modified to use 430 textures.
 
 Here is a development screenshot I found fun. (Running in raylib-d)
 ![nosey, eh?](https://raw.githubusercontent.com/jordan4ibanez/jordan4ibanez/refs/heads/main/images/image.png)
