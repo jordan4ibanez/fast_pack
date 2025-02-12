@@ -1,9 +1,9 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"bolts": "1.3.1",
-		"mini_png": "1.0.1",
-		"optional": "1.3.0",
+		"gamut": "3.1.5",
+		"intel-intrinsics": "1.11.25",
+		"miniz": "0.0.1",
 		"raylib-d": "5.5.1"
 	}
 }

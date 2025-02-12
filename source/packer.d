@@ -48,7 +48,15 @@ public:
     pragma(inline, true)
     void finalize(string outputFileName) {
         this.potpack();
+
+        import std.datetime.stopwatch;
+
+        StopWatch sw = StopWatch(AutoStart.yes);
+
         this.flushToDisk(outputFileName);
+
+        writeln("took: ", sw.peek.total!"msecs", "ms");
+        sw.reset();
     }
 
     int getCanvasWidth() {
@@ -69,6 +77,8 @@ private:
     pragma(inline, true)
     void flushToDisk(string outputFileName) {
         TrueColorImage atlas = new TrueColorImage(this.canvasWidth, this.canvasHeight);
+
+        // this takes around 100ms
 
         foreach (const ref PackRect thisBox; boxes) {
 
