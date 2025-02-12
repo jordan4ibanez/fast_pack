@@ -66,11 +66,6 @@ public:
         return canvasHeight;
     }
 
-    // todo: remove this.
-    int getPadding() {
-        return padding;
-    }
-
 private:
 
     pragma(inline, true)
