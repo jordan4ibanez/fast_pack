@@ -252,7 +252,7 @@ unittest {
 
     // Only works with PNG for now.
 
-    //? This is 10_000 textures.
+    //? This is 1_000 textures.
     foreach (j; 0 .. 100) {
         foreach (uint i; 0 .. 10) {
             packer.pack(to!string(i) ~ to!string(j), "assets/" ~ to!string(i + 1) ~ ".png");

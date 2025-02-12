@@ -9,5 +9,9 @@
     "copyright" : "Copyright © 2022, jordan4ibanez",
     "name" : "fast_pack",
     "description" : "A fast texture packer for D",
-    "dependencies" : {"mini_png" : "~>1.0.1", "raylib-d" : "~>5.5.1", "optional" : "~>1.3.0"}
+    "dependencies" : {
+        "mini_png" : "~>1.0.1",
+        "raylib-d" : "~>5.5.1",
+        "optional" : "~>1.3.0"
+    }
 }
