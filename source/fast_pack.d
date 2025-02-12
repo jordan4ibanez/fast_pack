@@ -108,6 +108,10 @@ public:
         return result;
     }
 
+    /// This is getting raw 2D points of a rectangle on the atlas..
+    /// Type C must implement this (x,y) as (float or double).
+    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Top to bottom, left to right.
     TexturePoints!C getTexturePoints(C)(T key) {
         // This allows you to automatically downcast and insert into custom types.
         static assert(is(typeof(C.x) == float) || is(typeof(C.x) == double), "x must be floating point.");
@@ -124,8 +128,8 @@ public:
 
         result.topLeft = C(thisRectangle.x, thisRectangle.y);
         result.bottomLeft = C(thisRectangle.x, thisRectangle.y + thisRectangle.h);
-        result.topLeft = C(thisRectangle.x + thisRectangle.w, thisRectangle.y + thisRectangle.h);
-        result.topLeft = C(thisRectangle.x + thisRectangle.w, thisRectangle.y);
+        result.bottomRight = C(thisRectangle.x + thisRectangle.w, thisRectangle.y + thisRectangle.h);
+        result.topRight = C(thisRectangle.x + thisRectangle.w, thisRectangle.y);
 
         return result;
     }
