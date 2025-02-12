@@ -60,6 +60,8 @@ public:
         this.padding = padding;
     }
 
+    /// Queue up a texture to be packed with a key to store it with.
+    /// Key is used for retrieving Rectangle and Texture point data.
     pragma(inline, true)
     void pack(T key, string textureLocation) {
         this.uploadTexture(key, textureLocation);
