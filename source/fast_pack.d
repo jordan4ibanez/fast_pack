@@ -418,4 +418,24 @@ unittest {
     // writeln(test5);
 
     writeln("=== BEGIN REFERENCE STYLE ===");
+
+    RectangleTestFloat test5;
+    packer.getRectangle("1", test5);
+    writeln(test5);
+
+    RectangleTestDouble test6;
+    packer.getRectangle("1", test6);
+    writeln(test6);
+
+    //? This should never compile.
+    // struct RectangleTestWrong {
+    //     int x = 0;
+    //     float y = 0;
+    //     float w = 0;
+    //     float h = 0;
+    // }
+    // RectangleTestWrong test7;
+    // packer.getRectangle("1", test7);
+    // writeln(test7);
+
 }
