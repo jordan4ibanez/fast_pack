@@ -84,14 +84,17 @@ public:
         return this.flushToMemory();
     }
 
+    /// The total width of the atlas.
     int getCanvasWidth() const {
         return canvasWidth;
     }
 
+    /// The total height of the atlas.
     int getCanvasHeight() const {
         return canvasHeight;
     }
 
+    /// Number of textures stored in the atlas.
     ulong getCount() const {
         return textures.length;
     }
