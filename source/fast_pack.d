@@ -84,13 +84,18 @@ public:
     /// This is getting raw xPos, yPos, width, height.
     /// Type C must implement this (x,y,w,h) as (float or double).
     /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Returns: RectangleType
     pragma(inline, true)
-    C getRectangle(C)(T key) const {
+    RectangleType getRectangle(RectangleType)(T key) const {
         // This allows you to automatically downcast and insert into custom types.
-        static assert(is(typeof(C.x) == float) || is(typeof(C.x) == double), "x must be floating point.");
-        static assert(is(typeof(C.y) == float) || is(typeof(C.y) == double), "y must be floating point.");
-        static assert(is(typeof(C.w) == float) || is(typeof(C.w) == double), "w must be floating point.");
-        static assert(is(typeof(C.h) == float) || is(typeof(C.h) == double), "h must be floating point.");
+        static assert(is(typeof(RectangleType.x) == float) || is(typeof(RectangleType.x) == double),
+            "x must be floating point.");
+        static assert(is(typeof(RectangleType.y) == float) || is(typeof(RectangleType.y) == double),
+            "y must be floating point.");
+        static assert(is(typeof(RectangleType.w) == float) || is(typeof(RectangleType.w) == double),
+            "w must be floating point.");
+        static assert(is(typeof(RectangleType.h) == float) || is(typeof(RectangleType.h) == double),
+            "h must be floating point.");
 
         const(FloatingRectangle)* thisRectangle = key in floatingLookupTable;
 
@@ -99,7 +104,7 @@ public:
         }
 
         // x,y,w,h (float or double) is all your type needs.
-        C result;
+        RectangleType result;
         result.x = thisRectangle.x;
         result.y = thisRectangle.y;
         result.w = thisRectangle.w;
