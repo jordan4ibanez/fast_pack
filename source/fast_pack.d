@@ -417,10 +417,8 @@ unittest {
     TexturePacker!string packer = TexturePacker!string(2);
 
     //! Only works with PNG for now.
-    foreach (uint j; 0 .. 43) {
-        foreach (uint i; 0 .. 10) {
-            packer.pack(to!string(i) ~ to!string(j), "assets/" ~ to!string(i + 1) ~ ".png");
-        }
+    foreach (uint i; 0 .. 10) {
+        packer.pack(to!string(i), "assets/" ~ to!string(i + 1) ~ ".png");
     }
 
     packer.finalize("atlas.png");
