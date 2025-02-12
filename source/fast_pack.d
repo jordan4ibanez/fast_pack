@@ -63,12 +63,17 @@ public:
         this.uploadTexture(key, textureLocation);
     }
 
+    /// Packs the textures into the atlas.
+    /// Then, writes it to disk at outputFileName.
     pragma(inline, true)
     void finalize(string outputFileName) {
         this.potpack();
         this.flushToDisk(outputFileName);
     }
 
+    /// Packs the textures into the atlas.
+    /// Then, returns you the ubyte[] of the raw png data.
+    /// The data is RGBA ubytes. Stored left to right, top to bottom, no padding.
     pragma(inline, true)
     ubyte[] finalizeToMemory() {
         this.potpack();
