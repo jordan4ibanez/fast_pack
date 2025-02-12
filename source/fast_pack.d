@@ -42,6 +42,8 @@ private:
 
     // This is used to get the data to texture map to the atlas.
     FloatingRectangle[T] floatingLookupTable;
+    
+    // todo: maybe an integer lookup table if someone asks for it.
 
     // These two are synchronized.
     immutable(TrueColorImage)[] textures;
