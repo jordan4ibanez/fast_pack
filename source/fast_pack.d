@@ -1,531 +1,469 @@
-/**
-* A fast texture packer for D.
-*/
 module fast_pack;
 
 import image;
-import std.algorithm.iteration;
+import std.algorithm.comparison;
 import std.algorithm.sorting;
+import std.conv;
+import std.math.algebraic;
+import std.math.rounding;
 import std.range;
+import std.range.primitives;
 
-/**
-* A double based struct to directly map textures to vertices in your rendering api.
-* This has different variables because it is easier to understand when mapping textures
-*/
-struct TextureRectangle {
-    /// Left
-    double minX = 0.0;
-    /// Top
-    double minY = 0.0;
-    /// Right
-    double maxX = 0.0;
-    /// Bottom
-    double maxY = 0.0;
+private struct PackRect {
+    int x = 0;
+    int y = 0;
+    int w = 0;
+    int h = 0;
+    ulong pointingTo = 0;
+}
+
+private struct FloatingRectangle {
+    double x = 0;
+    double y = 0;
+    double w = 0;
+    double h = 0;
+}
+
+struct TexturePoints(T) {
+    T topLeft;
+    T bottomLeft;
+    T bottomRight;
+    T topRight;
 }
 
 /**
-* The configuration for the texture packer with defaults
-* Please note: The fields in this structure are left public so you can create a blank slate
-* with defaults, then piecemeal your changes in if you don't like the defaults!
+The TexturePacker struct.
+You can add more things in after you finalize. But, you will 
+need to finalize again. Also, you'll have to re-upload into
+the gpu if it's Vulkan or OpenGL.
 */
-struct TexturePackerConfig {
+struct TexturePacker(T) {
+private:
 
-    /**
-    * Enables fast canvas exporting.
-    * If this is enabled edgeColor and blankSpaceColor will be ignored.
-    * Default is: true
-    */
-    bool fastCanvasExport = true;
+    // This is used to get the data to texture map to the atlas.
+    FloatingRectangle[T] floatingLookupTable;
 
-    /**
-    * Blank pixel border padding around each texture
-    * Default is: 0;
-    */
-    uint padding = 0;
+    // These two are synchronized.
+    immutable(TrueColorImage)[] textures;
+    immutable(T)[] keys;
 
-    /**
-    * The edge color.
-    * Default is: nothing
-    */
-    Color edgeColor = Color(0, 0, 0, 255);
+    PackRect[] boxes;
+    int canvasWidth = 0;
+    int canvasHeight = 0;
+    immutable int padding = 0;
 
-    /**
-    * The blank space border.
-    * Default is nothing
-    */
-    Color blankSpaceColor = Color(0, 0, 0, 0);
+public:
 
-    /**
-    * The auto resizer algorithm's resize amount.
-    * When the canvas runs out of space, it will expand it by this many pixels.
-    * It may have to loop a few times if this is too small to pack a new texture if this is too small.
-    * AKA: Too small with thrash it and it will have to continuously rebuild. AKA: Slower
-    * Too big and you'll have wasted space, I recommend to experiment with it and print it to png!
-    * Default is: 100
-    */
-    uint expansionAmount = 100;
-
-    /**
-    * Trim alpha space out of textures to shrink them
-    * This will create a new object in memory for each texture trimmed!
-    * Default is: false
-    */
-    bool trim = false;
-
-    /**
-    * Enables the edge debug, with the color specified
-    * Please note: This will overwrite the edge pixels in your texture!
-    * Default is: false
-    */
-    bool showDebugEdge = false;
-
-    /**
-    * The width of the texture packer's canvas
-    * Default is: 400
-    */
-    uint width = 400;
-
-    /**
-    * The height of the texture packer's canvas
-    * Default is: 400
-    */
-    uint height = 400;
-}
-
-/**
-* The texture packer structure. Can also be allocated to heap via:
-* TexturePacker blah = new TexturePacker();
-* This works as a static component, component system
-*/
-class TexturePacker(T) {
-
-    /// Maintains the current ID that will be created for collision boxes
-    private uint currentID = 0;
-
-    /// The configuration of the texture packer
-    private TexturePackerConfig config;
-
-    // Holds the keys for the textures, hashmap for faster index retreival
-    private uint[T] keys;
-
-    /// This holds the collision boxes of the textures
-    private uint[] positionX;
-    private uint[] positionY;
-    private uint[] boxWidth;
-    private uint[] boxHeight;
-
-    /// This holds the actual texture data
-    private TrueColorImage[] textures;
-
-    // Free slots for the next texture to be packed into
-    private uint[] availableX = [0];
-    private uint[] availableY = [0];
-
-    /// The current width of the canvas
-    private uint canvasWidth = 0;
-
-    /// The current height of the canvas
-    private uint canvasHeight = 0;
-
-    /**
-    * A constructor with a predefined configuration
-    */
-    this(TexturePackerConfig config) {
-        this.config = config;
-
-        this.availableX[0] = this.config.padding;
-        this.availableY[0] = this.config.padding;
+    this(int padding) {
+        this.padding = padding;
     }
 
-    /**
-    * This allows game developers to add in textures to the texture packer canvas with a generic key and string file location.
-    */
-    void pack(T key, string fileLocation) {
-
-        /// Automate upload internally
-        uint currentIndex = this.uploadTexture(key, fileLocation);
-
-        this.internalPack(currentIndex);
+    pragma(inline, true)
+    void pack(T key, string textureLocation) {
+        this.uploadTexture(key, textureLocation);
     }
 
-    /**
-    * This allows game developers to add in textures to the texture packer canvas with a generic key and TrueColorImage from memory.
-    */
-    void pack(T key, TrueColorImage memoryImage) {
-        /// Automate upload internally
-        uint currentIndex = this.uploadTexture(key, memoryImage);
-
-        this.internalPack(currentIndex);
+    pragma(inline, true)
+    void finalize(string outputFileName) {
+        this.potpack();
+        this.flushToDisk(outputFileName);
     }
 
-    /**
-    * Internally packs the image from the key provided when it was uploaded
-    */
-    private void internalPack(uint currentIndex) {
+    int getCanvasWidth() const {
+        return canvasWidth;
+    }
 
-        while (!tetrisPack(currentIndex)) {
-            this.config.width += this.config.expansionAmount;
-            this.config.height += this.config.expansionAmount;
+    int getCanvasHeight() const {
+        return canvasHeight;
+    }
+
+    ulong getCount() const {
+        return textures.length;
+    }
+
+    /// This is getting raw xPos, yPos, width, height.
+    /// RectangleType must implement (x,y,w,h) as (float or double).
+    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Top to bottom, left to right.
+    /// Returns: RectangleType
+    pragma(inline, true)
+    RectangleType getRectangle(RectangleType)(immutable T key) {
+        // This allows you to automatically downcast and insert into custom types.
+        static assert(is(typeof(RectangleType.x) == float) || is(typeof(RectangleType.x) == double),
+            "x must be floating point.");
+        static assert(is(typeof(RectangleType.y) == float) || is(typeof(RectangleType.y) == double),
+            "y must be floating point.");
+        static assert(is(typeof(RectangleType.w) == float) || is(typeof(RectangleType.w) == double),
+            "w must be floating point.");
+        static assert(is(typeof(RectangleType.h) == float) || is(typeof(RectangleType.h) == double),
+            "h must be floating point.");
+
+        const(FloatingRectangle)* thisRectangle = key in floatingLookupTable;
+
+        if (!thisRectangle) {
+            throw new Error("Key " ~ to!string(key) ~ " does not exist.");
         }
 
-        /// Finally, update the canvas's size in memory
-        this.updateCanvasSize(currentIndex);
+        // x,y,w,h (float or double) is all your type needs.
+        RectangleType result;
+        result.x = thisRectangle.x;
+        result.y = thisRectangle.y;
+        result.w = thisRectangle.w;
+        result.h = thisRectangle.h;
+
+        return result;
     }
 
-    /**
-    * Internal inverse tetris scan pack with scoring algorithm
-    */
-    private bool tetrisPack(uint currentIndex) {
+    /// This is getting raw xPos, yPos, width, height.
+    /// RectangleType must implement (x,y,w,h) as (float or double).
+    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Top to bottom, left to right.
+    /// Mutates the variable you give it as a ref.
+    pragma(inline, true)
+    void getRectangle(RectangleType)(immutable T key, ref RectangleType referenceOutput) {
+        referenceOutput = getRectangle!RectangleType(key);
+    }
 
-        bool found = false;
+    /// This is getting raw 2D points of a rectangle on the atlas.
+    /// Vec2Type must implement this(x,y) as (float or double).
+    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Top to bottom, left to right.
+    /// Returns: TexturePoints!Vec2Type
+    TexturePoints!Vec2Type getTexturePoints(Vec2Type)(immutable T key) {
+        // This allows you to automatically downcast and insert into custom types.
+        static assert(is(typeof(Vec2Type.x) == float) || is(typeof(Vec2Type.x) == double), "x must be floating point.");
+        static assert(is(typeof(Vec2Type.y) == float) || is(typeof(Vec2Type.y) == double), "y must be floating point.");
 
-        /// Cache padding
-        immutable uint padding = this.config.padding;
+        const(FloatingRectangle)* thisRectangle = key in floatingLookupTable;
 
-        uint score = uint.max;
-
-        /// Cache widths
-        immutable uint maxX = this.config.width;
-        immutable uint maxY = this.config.height;
-
-        uint bestX = padding;
-        uint bestY = padding;
-
-        immutable uint thisWidth = this.boxWidth[currentIndex];
-        immutable uint thisHeight = this.boxHeight[currentIndex];
-
-        /// Iterate all available positions
-        outer: foreach (uint y; this.availableY) {
-
-            foreach (uint x; this.availableX) {
-
-                immutable uint newScore = x + y;
-
-                if (newScore >= score) {
-                    continue;
-                }
-
-                /// In bounds check
-                if (x + thisWidth + padding >= maxX || y + thisHeight + padding >= maxY) {
-                    continue;
-                }
-
-                bool failed = false;
-
-                /// Collided with other box failure
-                /// Index each collision box to check if within
-
-                foreach (int i; 0 .. currentIndex) {
-
-                    immutable uint otherX = this.positionX[i];
-                    immutable uint otherY = this.positionY[i];
-                    immutable uint otherWidth = this.boxWidth[i];
-                    immutable uint otherHeight = this.boxHeight[i];
-
-                    // If it found a free slot, first come first plop
-                    if (otherX + otherWidth + padding > x &&
-                        otherX <= x + thisWidth + padding &&
-                        otherY + otherHeight + padding > y &&
-                        otherY <= y + thisHeight + padding
-                        ) {
-                        failed = true;
-                        break;
-                    }
-                }
-
-                if (!failed) {
-                    bestX = x;
-                    bestY = y;
-                    score = newScore;
-                    found = true;
-                    break outer;
-                }
-            }
+        if (!thisRectangle) {
+            throw new Error("Key " ~ to!string(key) ~ " does not exist.");
         }
 
-        if (!found) {
-            return false;
-        }
+        // x,y (float or double) and a this(x,y) constructor is all your type needs.
+        TexturePoints!Vec2Type result;
 
-        this.positionX[currentIndex] = bestX;
-        this.positionY[currentIndex] = bestY;
+        result.topLeft = Vec2Type(thisRectangle.x, thisRectangle.y);
+        result.bottomLeft = Vec2Type(thisRectangle.x, thisRectangle.y + thisRectangle.h);
+        result.bottomRight = Vec2Type(thisRectangle.x + thisRectangle.w, thisRectangle.y + thisRectangle
+                .h);
+        result.topRight = Vec2Type(thisRectangle.x + thisRectangle.w, thisRectangle.y);
 
-        this.availableX ~= bestX + thisWidth + padding;
-        this.availableY ~= bestY + thisHeight + padding;
-
-        return true;
+        return result;
     }
 
-    /// Get texture coordinates for working with your graphics api in double floating point precision
-    TextureRectangle getTextureCoordinatesDouble(T key) {
-
-        ulong index = keys[key];
-
-        double thisX = positionX[index];
-        double thisY = positionY[index];
-        double thisWidth = boxWidth[index];
-        double thisHeight = boxHeight[index];
-
-        double canWidth = cast(double) canvasWidth;
-        double canHeight = cast(double) canvasHeight;
-
-        return TextureRectangle(
-            thisX / canWidth,
-            thisY / canHeight,
-            (thisX + thisWidth) / canWidth,
-            (thisY + thisHeight) / canHeight
-        );
+    /// This is getting raw 2D points of a rectangle on the atlas.
+    /// Vec2Type must implement this(x,y) as (float or double).
+    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Top to bottom, left to right.
+    /// Mutates the variable you give it as a ref.
+    void getTexturePoints(Vec2Type)(immutable T key, ref TexturePoints!Vec2Type referenceOutput) {
+        referenceOutput = getTexturePoints!Vec2Type(key);
     }
 
-    /// Constructs a memory image of the current canvas
-    TrueColorImage saveToTrueColorImage() {
-        /// Creates a blank image with the current canvas size
-        TrueColorImage constructingImage = new TrueColorImage(this.canvasWidth, this
-                .canvasHeight);
+private:
 
-        /// Iterate through all collision boxes and blit the pixels (fast)
-        for (uint i = 0; i < this.currentID; i++) {
-            TrueColorImage thisTexture = this.textures[i];
-            uint thisX = this.positionX[i];
-            uint thisY = this.positionY[i];
-            uint thisWidth = this.boxWidth[i];
-            uint thisHeight = this.boxHeight[i];
+    pragma(inline, true)
+    void flushToDisk(string outputFileName) {
+        TrueColorImage atlas = new TrueColorImage(this.canvasWidth, this.canvasHeight);
 
-            for (int x = thisX; x < thisX + thisWidth; x++) {
-                for (int y = thisY; y < thisY + thisHeight; y++) {
-                    constructingImage.setPixel(
-                        x,
-                        y,
+        foreach (const ref PackRect thisBox; boxes) {
+
+            immutable ulong indexOf = thisBox.pointingTo;
+
+            immutable TrueColorImage thisTexture = this.textures[indexOf];
+            immutable(T) thisKey = this.keys[indexOf];
+
+            immutable int xPos = thisBox.x + this.padding;
+            immutable int yPos = thisBox.y + this.padding;
+
+            immutable int width = thisBox.w - this.padding;
+            immutable int height = thisBox.h - this.padding;
+
+            floatingLookupTable[thisKey] = FloatingRectangle(
+                cast(double) xPos / cast(double) this.canvasWidth,
+                cast(double) yPos / cast(double) this.canvasHeight,
+                cast(double) width / cast(double) this.canvasWidth,
+                cast(double) height / cast(double) this.canvasHeight
+            );
+
+            foreach (immutable int inImageX; 0 .. width) {
+                immutable int inAtlasX = inImageX + xPos;
+
+                foreach (immutable int inImageY; 0 .. height) {
+                    immutable int inAtlasY = inImageY + yPos;
+
+                    atlas.setPixel(
+                        inAtlasX,
+                        inAtlasY,
                         thisTexture.getPixel(
-                            x - thisX,
-                            y - thisY
-                    )
-                    );
+                            inImageX,
+                            inImageY
+                    ));
                 }
             }
         }
-        return constructingImage;
+        writeImageToPngFile(outputFileName, atlas);
     }
 
-    /// Construct the components of the texture packer into a usable image, then save it to file
-    void saveToFile(string fileName) {
+    pragma(inline, true)
+    void uploadTexture(T key, string textureLocation) {
+        immutable TrueColorImage tempTextureObject = loadImageFromFile(textureLocation).getAsTrueColorImage();
 
-        TrueColorImage constructingImage = this.saveToTrueColorImage();
-
-        /// Use in asdr built in api to save it to a file for debugging
-        writeImageToPngFile(fileName, constructingImage);
-    }
-
-    /// Update the width of the texture packer's canvas
-    private void updateCanvasSize(uint currentIndex) {
-        uint newRight = this.positionX[currentIndex] + this.boxWidth[currentIndex];
-        uint newTop = this.positionY[currentIndex] + this.boxHeight[currentIndex];
-        uint padding = this.config.padding;
-        if (newRight > this.canvasWidth) {
-            this.canvasWidth = newRight + padding;
-        }
-        if (newTop > this.canvasHeight) {
-            this.canvasHeight = newTop + padding;
-        }
-    }
-
-    /**
-    * Uploads a texture into the associative arrays of the texture packer.
-    * This allows game developers to handle a lot less boilerplate
-    */
-    private uint uploadTexture(T key, string fileLocation) {
-        TrueColorImage tempTextureObject = loadImageFromFile(fileLocation).getAsTrueColorImage();
-        return this.uploadTexture(key, tempTextureObject);
-    }
-
-    /**
-    * Uploads a texture into the associative arrays of the texture packer.
-    * This allows game developers to handle a lot less boilerplate
-    */
-    private uint uploadTexture(T key, TrueColorImage tempTextureObject) {
-
-        /// Trim it and generate a new trimmed texture
-        if (this.config.trim) {
-            tempTextureObject = this.trimTexture(tempTextureObject);
-        }
-
-        /// Throw exception if something crazy happens
         if (tempTextureObject is null) {
-            throw new Exception("An unkown error has occurred on upload!");
+            throw new Error(to!string(key) ~ " is null");
         }
 
-        /// Get an AABB of the texture, with specific internally handled ID
-        uint id = this.currentID;
-        uint posX = 0;
-        uint posY = 0;
-        uint width = tempTextureObject.width();
-        uint height = tempTextureObject.height();
+        boxes ~= PackRect(
+            0, 0, tempTextureObject.width() + padding, tempTextureObject.height() + padding, textures
+                .length
+        );
 
-        // Throw exception if the texture size is 0 on x or y axis
-        if (width == 0 || height == 0) {
-            throw new Exception("Tried to upload a completely transparent texture!");
-        }
-
-        currentID++;
-
-        /// Plop it into the internal keys
-        this.keys[key] = id;
-        this.positionX ~= posX;
-        this.positionY ~= posY;
-        this.boxWidth ~= width;
-        this.boxHeight ~= height;
-        this.textures ~= tempTextureObject;
-
-        this.trimAndSortAvailableSlots();
-
-        return id;
+        textures ~= tempTextureObject;
+        keys ~= key;
     }
 
-    /**
-    * Removes duplicates, automatically sorts smallest to biggest
-    */
-    private void trimAndSortAvailableSlots() {
-        this.availableX = this.availableX.sort!((a, b) => a > b).uniq().retro().array;
-        this.availableY = this.availableY.sort!((a, b) => a > b).uniq().retro().array;
-    }
+    /// This is the very nice packing algorithm. :)
+    pragma(inline, true)
+    void potpack() {
 
-    /**
-    * Trims and creates a new texture in memory, then returns it
-    */
-    private TrueColorImage trimTexture(TrueColorImage untrimmedTexture) {
+        //? You can thank them: https://github.com/mapbox/potpack
+        //? I just translated and tweaked this.
 
-        /// This is basically the worlds lamest linear 2d voxel raycast
+        // Calculate total box area and maximum box width.
+        int area = 0;
+        int maxWidth = 0;
 
-        uint textureWidth = untrimmedTexture.width();
-        uint textureHeight = untrimmedTexture.height();
+        foreach (immutable box; boxes) {
+            area += box.w * box.h;
+            maxWidth = max(maxWidth, box.w);
+        }
 
-        uint minX = 0;
-
-        /// Scan rows for alpha
-        for (int x = 0; x < textureWidth; x++) {
-            bool found = false;
-            for (int y = 0; y < textureHeight; y++) {
-                if (untrimmedTexture.getPixel(x, y).a > 0) {
-                    minX = x;
-                    found = true;
-                    break;
-                }
+        // Sort the boxes for insertion by height, descending.
+        boxes = boxes.sort!((a, b) {
+            if (a.h == b.h) {
+                return a.w > b.w;
             }
-            if (found) {
+            return a.h > b.h;
+            // This is by area.
+            // return a.w * a.h > b.w * b.h;
+        }).release();
+
+        // Aim for a squarish resulting container,
+        // slightly adjusted for sub-100% space utilization.
+        immutable int startWidth = cast(int) max(ceil(sqrt(area / 0.95)), maxWidth);
+
+        // Start with a single empty space, unbounded at the bottom.
+        PackRect[] spaces = [PackRect(0, 0, startWidth, 1_000_000)];
+
+        int width = 0;
+        int height = 0;
+
+        foreach (ref box; this.boxes) {
+            // Look through spaces backwards so that we check smaller spaces first.
+            for (int i = cast(int)(spaces.length) - 1; i >= 0; i--) {
+
+                PackRect space = spaces[i];
+
+                // look for empty spaces that can accommodate the current box
+                if (box.w > space.w || box.h > space.h) {
+                    continue;
+                }
+
+                // found the space; add the box to its top-left corner
+                // |-------|-------|
+                // |  box  |       |
+                // |_______|       |
+                // |         space |
+                // |_______________|
+
+                box.x = space.x;
+                box.y = space.y;
+
+                height = max(height, box.y + box.h);
+                width = max(width, box.x + box.w);
+
+                if (box.w == space.w && box.h == space.h) {
+                    // space matches the box exactly; remove it
+                    const last = spaces[(spaces.length) - 1];
+                    spaces.popBack();
+                    if (i < spaces.length)
+                        spaces[i] = last;
+
+                } else if (box.h == space.h) {
+                    // space matches the box height; update it accordingly
+                    // |-------|---------------|
+                    // |  box  | updated space |
+                    // |_______|_______________|
+                    space.x += box.w;
+                    space.w -= box.w;
+
+                    spaces[i] = space;
+
+                } else if (box.w == space.w) {
+                    // space matches the box width; update it accordingly
+                    // |---------------|
+                    // |      box      |
+                    // |_______________|
+                    // | updated space |
+                    // |_______________|
+                    space.y += box.h;
+                    space.h -= box.h;
+
+                    spaces[i] = space;
+
+                } else {
+                    // otherwise the box splits the space into two spaces
+                    // |-------|-----------|
+                    // |  box  | new space |
+                    // |_______|___________|
+                    // | updated space     |
+                    // |___________________|
+
+                    auto blah = PackRect(
+                        space.x + box.w,
+                        space.y,
+                        space.w - box.w,
+                        box.h);
+
+                    spaces ~= blah;
+
+                    space.y += box.h;
+                    space.h -= box.h;
+
+                    spaces[i] = space;
+
+                }
+
                 break;
             }
         }
 
-        uint maxX = 0;
-
-        /// Scan rows for alpha
-        for (int x = textureWidth - 1; x >= 0; x--) {
-            bool found = false;
-            for (int y = 0; y < textureHeight; y++) {
-                if (untrimmedTexture.getPixel(x, y).a > 0) {
-                    maxX = x + 1;
-                    found = true;
-                    break;
-                }
-            }
-            if (found) {
-                break;
-            }
-        }
-
-        uint minY = 0;
-
-        /// Scan columns for alpha
-        for (int y = 0; y < textureHeight; y++) {
-            bool found = false;
-            for (int x = 0; x < textureWidth; x++) {
-                if (untrimmedTexture.getPixel(x, y).a > 0) {
-                    minY = y;
-                    found = true;
-                    break;
-                }
-            }
-            if (found) {
-                break;
-            }
-        }
-
-        uint maxY = 0;
-
-        /// Scan columns for alpha
-        for (int y = textureHeight - 1; y >= 0; y--) {
-            bool found = false;
-            for (int x = 0; x < textureWidth; x++) {
-                if (untrimmedTexture.getPixel(x, y).a > 0) {
-                    maxY = y + 1;
-                    found = true;
-                    break;
-                }
-            }
-            if (found) {
-                break;
-            }
-        }
-
-        /// Create a new texture with trimmed size
-        uint newSizeX = maxX - minX;
-        uint newSizeY = maxY - minY;
-
-        TrueColorImage trimmedTexture = new TrueColorImage(newSizeX, newSizeY);
-
-        /// Blit the old pixels into the new texture with modified location
-        for (uint x = 0; x < newSizeX; x++) {
-            for (uint y = 0; y < newSizeY; y++) {
-                trimmedTexture.setPixel(x, y, untrimmedTexture.getPixel(x + minX, y + minY));
-            }
-        }
-
-        return trimmedTexture;
-    }
-
-    /**
-    * Gets the canvas width and height as a uint[2]
-    */
-    uint[2] getCanvasSize() {
-        return [this.canvasWidth, this.canvasHeight];
+        canvasWidth = width + padding; // container width
+        canvasHeight = height + padding; // container height
     }
 }
 
 unittest {
-
-    import std.conv : to;
-    import std.datetime.stopwatch;
+    import std.conv;
     import std.stdio;
 
-    TexturePackerConfig config;
-    config.trim = true;
-    config.padding = 2;
-    config.fastCanvasExport = true;
-    TexturePacker!string packer = new TexturePacker!string(config);
-
-    int testLimiter = 10;
-
-    TrueColorImage[] textures = new TrueColorImage[10];
+    import std.datetime.stopwatch;
 
     StopWatch sw = StopWatch(AutoStart.yes);
 
+    TexturePacker!string packer = TexturePacker!string(2);
+
+    //! Only works with PNG for now.
     foreach (uint i; 0 .. 10) {
-        textures[i] = loadImageFromFile("assets/" ~ to!string(i + 1) ~ ".png").getAsTrueColorImage();
+        packer.pack(to!string(i), "assets/" ~ to!string(i + 1) ~ ".png");
     }
 
-    writeln("insertion took: ", sw.peek.total!"msecs", "ms");
-    sw.reset();
+    packer.finalize("atlas.png");
 
-    foreach (int i; 1 .. testLimiter + 1) {
-        writeln(i);
-        int value = ((i - 1) % 10);
-        packer.pack("blah" ~ to!string(i), textures[value]);
+    // writeln(packer.getCanvasWidth(), " ", packer.getCanvasHeight());
+
+    writeln("took: ", sw.peek.total!"msecs", "ms");
+
+    //? Basically, these tests should look the same for all outputs.
+
+    writeln("=== BEGIN OUTPUT STYLE ===");
+
+    // This is to make sure downcasting in getPositionCustom works.
+    struct RectangleTestFloat {
+        float x = 0;
+        float y = 0;
+        float w = 0;
+        float h = 0;
     }
 
-    writeln("packing took: ", sw.peek.total!"msecs", "ms");
-    sw.reset();
+    RectangleTestFloat test1 = packer.getRectangle!RectangleTestFloat("1");
+    writeln(test1);
 
-    packer.saveToFile("newTest.png");
+    struct RectangleTestDouble {
+        float x = 0;
+        float y = 0;
+        float w = 0;
+        float h = 0;
+    }
 
-    writeln("saving took: ", sw.peek.total!"msecs", "ms");
+    RectangleTestDouble test2 = packer.getRectangle!RectangleTestDouble("1");
+    writeln(test2);
+
+    //? This should never compile.
+    // struct RectangleTestWrong {
+    //     int x = 0;
+    //     float y = 0;
+    //     float w = 0;
+    //     float h = 0;
+    // }
+    // RectangleTestWrong test3 = packer.getRectangle!RectangleTestWrong("1");
+    // writeln(test3);
+
+    struct TestVec2Float {
+        float x = 0;
+        float y = 0;
+    }
+
+    TexturePoints!TestVec2Float test3 = packer.getTexturePoints!TestVec2Float("1");
+    writeln(test3);
+
+    struct TestVec2Double {
+        double x = 0;
+        double y = 0;
+    }
+
+    TexturePoints!TestVec2Double test4 = packer.getTexturePoints!TestVec2Double("1");
+    writeln(test4);
+
+    //? This should never compile.
+    // struct TestVec2Wrong {
+    //     int x = 0;
+    //     double y = 0;
+    // }
+    // TexturePoints!TestVec2Wrong test5 = packer.getTexturePoints!TestVec2Wrong("1");
+    // writeln(test5);
+
+    writeln("=== BEGIN REFERENCE STYLE ===");
+
+    RectangleTestFloat test5;
+    packer.getRectangle("1", test5);
+    writeln(test5);
+
+    RectangleTestDouble test6;
+    packer.getRectangle("1", test6);
+    writeln(test6);
+
+    //? This should never compile.
+    // RectangleTestWrong test7;
+    // packer.getRectangle("1", test7);
+    // writeln(test7);
+
+    TexturePoints!TestVec2Float test7;
+    packer.getTexturePoints!TestVec2Float("1", test7);
+    writeln(test7);
+
+    TexturePoints!TestVec2Double test8;
+    packer.getTexturePoints!TestVec2Double("1", test8);
+    writeln(test8);
+
+    // ? This should never compile.
+    // TexturePoints!TestVec2Wrong test9;
+    // packer.getRectangle("1", test9);
+    // writeln(test9);
+
+    writeln("=== BEGIN GET RECTANGLE ===");
+
+    foreach (uint i; 0 .. 10) {
+        writeln(packer.getRectangle!RectangleTestFloat(to!string(i)));
+        writeln(packer.getRectangle!RectangleTestDouble(to!string(i)));
+    }
+
+    writeln("=== BEGIN GET TEXTURE POINTS ===");
+
+    foreach (uint i; 0 .. 10) {
+        writeln(packer.getTexturePoints!TestVec2Float(to!string(i)));
+        writeln(packer.getTexturePoints!TestVec2Double(to!string(i)));
+    }
+
 }
