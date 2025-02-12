@@ -528,5 +528,5 @@ unittest {
         writeln(packer.getTexturePoints!TestVec2Double(to!string(i)));
     }
 
-    writeln(packer.flushToMemory());
+    packer.flushToMemory();
 }
