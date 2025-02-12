@@ -297,16 +297,27 @@ unittest {
     // Only works with PNG for now.
 
     //? This is 1_000 textures.
-    foreach (j; 0 .. 100) {
-        foreach (uint i; 0 .. 10) {
-            packer.pack(to!string(i) ~ to!string(j), "assets/" ~ to!string(i + 1) ~ ".png");
-        }
+    // foreach (j; 0 .. 100) {
+    foreach (uint i; 0 .. 10) {
+        // ~ to!string(j)
+        packer.pack(to!string(i), "assets/" ~ to!string(i + 1) ~ ".png");
     }
+    // }
 
     packer.finalize("atlas.png");
 
-    writeln(packer.getCanvasWidth(), " ", packer.getCanvasHeight());
+    // writeln(packer.getCanvasWidth(), " ", packer.getCanvasHeight());
 
     writeln("took: ", sw.peek.total!"msecs", "ms");
+
+    // This is to make sure downcasting in getPositionCustom works.
+    struct Vector2TestCool {
+        float x = 0;
+        float y = 0;
+    }
+
+    auto blah = packer.getRectangle!Vector2TestCool("1");
+
+    writeln(blah);
 
 }
