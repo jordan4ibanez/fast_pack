@@ -359,33 +359,33 @@ unittest {
     writeln("took: ", sw.peek.total!"msecs", "ms");
 
     // This is to make sure downcasting in getPositionCustom works.
-    struct Vector2TestFloat {
+    struct RectangleTestFloat {
         float x = 0;
         float y = 0;
         float w = 0;
         float h = 0;
     }
 
-    Vector2TestFloat test1 = packer.getRectangle!Vector2TestFloat("1");
+    RectangleTestFloat test1 = packer.getRectangle!RectangleTestFloat("1");
     writeln(test1);
 
-    struct Vector2TestDouble {
+    struct RectangleTestDouble {
         float x = 0;
         float y = 0;
         float w = 0;
         float h = 0;
     }
 
-    Vector2TestDouble test2 = packer.getRectangle!Vector2TestDouble("1");
+    RectangleTestDouble test2 = packer.getRectangle!RectangleTestDouble("1");
     writeln(test2);
 
-    // struct Vector2TestWrong {
+    // struct RectangleTestWrong {
     //     int x = 0;
     //     float y = 0;
     //     float w = 0;
     //     float h = 0;
     // }
-    // Vector2TestWrong test3 = packer.getRectangle!Vector2TestWrong("1");
+    // RectangleTestWrong test3 = packer.getRectangle!RectangleTestWrong("1");
     // writeln(test3);
 
     struct TestVec2Float {
