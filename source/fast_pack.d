@@ -423,7 +423,7 @@ unittest {
 
     packer.finalize("atlas.png");
 
-    writeln(packer.getCanvasWidth(), " ", packer.getCanvasHeight());
+    writeln(packer.getAtlasWidth(), " ", packer.getAtlasHeight());
 
     writeln("took: ", sw.peek.total!"msecs", "ms");
 
