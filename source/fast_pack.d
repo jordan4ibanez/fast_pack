@@ -33,6 +33,9 @@ the gpu if it's Vulkan or OpenGL.
 struct TexturePacker(T) {
 private:
 
+    // This is used to get the data to texture map to the atlas.
+    FloatingRectangle[T] floatingLookupTable;
+
     // These two are synchronized.
     immutable(TrueColorImage)[] textures;
     immutable(T)[] keys;
@@ -89,6 +92,13 @@ private:
 
             immutable int width = thisBox.w - this.padding;
             immutable int height = thisBox.h - this.padding;
+
+            floatingLookupTable[thisKey] = FloatingRectangle(
+                cast(double) xPos / cast(double) this.canvasWidth,
+                cast(double) yPos / cast(double) this.canvasHeight,
+                cast(double) width / cast(double) this.canvasWidth,
+                cast(double) height / cast(double) this.canvasHeight
+            );
 
             foreach (immutable int inImageX; 0 .. width) {
                 immutable int inAtlasX = inImageX + xPos;
