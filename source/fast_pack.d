@@ -17,7 +17,7 @@ private struct PackRect {
     ulong pointingTo = 0;
 }
 
-struct FloatingRectangle {
+private struct FloatingRectangle {
     double x = 0;
     double y = 0;
     double w = 0;
@@ -74,14 +74,7 @@ public:
         return textures.length;
     }
 
-    pragma(inline, true)
-    FloatingRectangle getRectangle(T key) const {
-        if (key !in floatingLookupTable) {
-            throw new Error("Key " ~ to!string(key) ~ " does not exist.");
-        }
-        return floatingLookupTable[key];
-    }
-    // note for ^-these-v : This is as pragmatic as I could make this.
+    // This is as pragmatic as I could make this.
     pragma(inline, true)
     C getRectangle(C)(T key) const {
         // This allows you to automatically downcast or convert into custom types.
