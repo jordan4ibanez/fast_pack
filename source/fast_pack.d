@@ -80,10 +80,10 @@ public:
     pragma(inline, true)
     C getRectangle(C)(T key) const {
         // This allows you to automatically downcast and insert into custom types.
-        static assert(is(typeof(C.x) == float) || is(typeof(C.x) == double));
-        static assert(is(typeof(C.y) == float) || is(typeof(C.y) == double));
-        static assert(is(typeof(C.w) == float) || is(typeof(C.w) == double));
-        static assert(is(typeof(C.h) == float) || is(typeof(C.h) == double));
+        static assert(is(typeof(C.x) == float) || is(typeof(C.x) == double), "x must be floating point.");
+        static assert(is(typeof(C.y) == float) || is(typeof(C.y) == double), "y must be floating point.");
+        static assert(is(typeof(C.w) == float) || is(typeof(C.w) == double), "w must be floating point.");
+        static assert(is(typeof(C.h) == float) || is(typeof(C.h) == double), "h must be floating point.");
 
         const(FloatingRectangle)* instance = key in floatingLookupTable;
 
