@@ -67,6 +67,10 @@ public:
         return canvasHeight;
     }
 
+    ulong getCount() {
+        return textures.length;
+    }
+
 private:
 
     pragma(inline, true)
