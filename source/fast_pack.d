@@ -113,6 +113,15 @@ public:
         return result;
     }
 
+    /// This is getting raw xPos, yPos, width, height.
+    /// Type C must implement this (x,y,w,h) as (float or double).
+    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Mutates the variable you give it as a ref.
+    pragma(inline, true)
+    void getRectangle(RectangleType)(immutable T key, ref RectangleType referenceOutput) {
+        referenceOutput = getRectangle!RectangleType(key);
+    }
+
     /// This is getting raw 2D points of a rectangle on the atlas..
     /// Type C must implement this (x,y) as (float or double).
     /// It will be within scale (0.0 - 1.0) of the atlas.
