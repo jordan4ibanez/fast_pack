@@ -452,4 +452,18 @@ unittest {
     // packer.getRectangle("1", test9);
     // writeln(test9);
 
+    writeln("=== BEGIN GET RECTANGLE ===");
+
+    foreach (uint i; 0 .. 10) {
+        writeln(packer.getRectangle!RectangleTestFloat(to!string(i)));
+        writeln(packer.getRectangle!RectangleTestDouble(to!string(i)));
+    }
+
+    writeln("=== BEGIN GET TEXTURE POINTS ===");
+
+    foreach (uint i; 0 .. 10) {
+        writeln(packer.getTexturePoints!TestVec2Float(to!string(i)));
+        writeln(packer.getTexturePoints!TestVec2Double(to!string(i)));
+    }
+
 }
