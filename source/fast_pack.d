@@ -62,19 +62,20 @@ public:
         this.flushToDisk(outputFileName);
     }
 
-    int getCanvasWidth() {
+    int getCanvasWidth() const {
         return canvasWidth;
     }
 
-    int getCanvasHeight() {
+    int getCanvasHeight() const {
         return canvasHeight;
     }
 
-    ulong getCount() {
+    ulong getCount() const {
         return textures.length;
     }
 
-    FloatingRectangle getPosition(T key) {
+    pragma(inline, true)
+    FloatingRectangle getRectangle(T key) const {
         if (key !in floatingLookupTable) {
             throw new Error("Key " ~ to!string(key) ~ " does not exist.");
         }
