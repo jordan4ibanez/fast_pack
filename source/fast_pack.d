@@ -152,6 +152,15 @@ public:
         return result;
     }
 
+    /// This is getting raw 2D points of a rectangle on the atlas.
+    /// Vec2Type must implement this(x,y) as (float or double).
+    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Top to bottom, left to right.
+    /// Mutates the variable you give it as a ref.
+    void getTexturePoints(Vec2Type)(immutable T key, ref Vec2Type referenceOutput) {
+        referenceOutput = getTexturePoints!Vec2Type(key);
+    }
+
 private:
 
     pragma(inline, true)
