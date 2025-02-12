@@ -48,6 +48,7 @@ public:
         this.padding = padding;
     }
 
+    pragma(inline, true)
     void pack(string key, string textureLocation) {
         this.uploadTexture(key, textureLocation);
     }
