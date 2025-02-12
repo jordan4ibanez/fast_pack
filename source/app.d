@@ -72,7 +72,7 @@ void main() {
         cast(int) min(16_364, canvasHeight) + (offset * 2), "Hello, Raylib-D!");
 
     SetTargetFPS(60);
-    while (WindowShouldClose()) {
+    while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(Colors.BLACK);
 
