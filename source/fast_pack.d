@@ -262,6 +262,8 @@ private:
     void flushToDisk(string outputFileName) {
         import std.datetime.stopwatch;
 
+       
+
         Image atlas = Image(this.atlasWidth, this.atlasHeight, PixelType.rgba8);
 
         foreach (const ref PackRect thisBox; boxes) {
@@ -301,7 +303,10 @@ private:
 
         int flags = ENCODE_PNG_COMPRESSION_1 | ENCODE_PNG_FILTER_FAST;
 
-        import std.datetime.stopwatch;
+        writeln(flags & ~ENCODE_PNG_FILTER_FAST);
+        writeln(((flags & ENCODE_PNG_FILTER_FAST) == ENCODE_PNG_FILTER_FAST));
+
+         import std.datetime.stopwatch;
 
         StopWatch sw = StopWatch(AutoStart.yes);
 
