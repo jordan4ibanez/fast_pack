@@ -98,7 +98,7 @@ LICENSE
 
 */
 
-version(encodePNG)
+
     version = compileSTBImageWrite;
 version(encodeJPEG)
     version = compileSTBImageWrite;

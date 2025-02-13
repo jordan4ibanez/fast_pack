@@ -16,8 +16,8 @@ import gamut.image;
 import gamut.internals.errors;
 import gamut.internals.types;
 
-version(decodePNG) import gamut.codecs.stbdec;
-version(encodePNG) import gamut.codecs.stb_image_write;
+ import gamut.codecs.stbdec;
+ import gamut.codecs.stb_image_write;
 
 ImageFormatPlugin makePNGPlugin()
 {
@@ -25,14 +25,12 @@ ImageFormatPlugin makePNGPlugin()
     p.format = "PNG";
     p.extensionList = "png";
     p.mimeTypes = "image/png";
-    version(decodePNG)
+    
         p.loadProc = &loadPNG;
-    else
-        p.loadProc = null;
-    version(encodePNG)
+    
+    
         p.saveProc = &savePNG;
-    else
-        p.saveProc = null;
+    
     p.detectProc = &detectPNG;
     return p;
 }
@@ -40,7 +38,7 @@ ImageFormatPlugin makePNGPlugin()
 
 // PERF: STB callbacks could disappear in favor of our own callbakcs, to avoid one step.
 
-version(decodePNG)
+
 void loadPNG(ref Image image, IOStream *io, IOHandle handle, int page, int flags, void *data) @trusted
 {
     IOAndHandle ioh;
@@ -168,7 +166,7 @@ bool detectPNG(IOStream *io, IOHandle handle) @trusted
     return fileIsStartingWithSignature(io, handle, pngSignature);
 }
 
-version(encodePNG)
+
 bool savePNG(ref const(Image) image, IOStream *io, IOHandle handle, int page, int flags, void *data) @trusted
 {
     if (page != 0)

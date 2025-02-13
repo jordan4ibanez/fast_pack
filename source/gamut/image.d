@@ -2146,10 +2146,10 @@ unittest
         }
     }
 
-    version(encodePNG)
+    
     {
         ubyte[] png = image.saveToMemory(ImageFormat.PNG);
-        version(decodePNG) checkEncode(png, true);
+        checkEncode(png, true);
         freeEncodedImage(png);
     }
     version(encodeJPEG)
