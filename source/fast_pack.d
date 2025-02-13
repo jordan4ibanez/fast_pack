@@ -33,6 +33,37 @@ struct TexturePoints(T) {
     T topRight;
 }
 
+private struct Pixel {
+    ubyte r = 0;
+    ubyte g = 0;
+    ubyte b = 0;
+    ubyte a = 0;
+}
+
+// Packer stores as rgba8.
+pragma(inline, true)
+private void getPixel(const Image* inputTexture, immutable int x, immutable int y, ref Pixel result) {
+    // This is written like this to be as fast as possible.
+    const ubyte* scan = cast(ubyte*) inputTexture.scanptr(y);
+    immutable int inScanX = x * 4;
+    result.r = scan[inScanX];
+    result.g = scan[inScanX + 1];
+    result.b = scan[inScanX + 2];
+    result.a = scan[inScanX + 3];
+}
+
+// Packer stores as rgba8.
+pragma(inline, true)
+private void setPixel(Image* inputTexture, immutable int x, immutable int y, ref Pixel pixel) {
+    // This is written like this to be as fast as possible.
+    ubyte* scan = cast(ubyte*) inputTexture.scanptr(y);
+    immutable int inScanX = x * 4;
+    scan[inScanX] = pixel.r;
+    scan[inScanX + 1] = pixel.g;
+    scan[inScanX + 2] = pixel.b;
+    scan[inScanX + 3] = pixel.a;
+}
+
 /**
 The TexturePacker struct.
 You can add more things in after you finalize. But, you will 
@@ -48,7 +79,7 @@ private:
     // todo: maybe an integer lookup table if someone asks for it.
 
     // These two are synchronized.
-    Image[] textures;
+    Image*[] textures;
     immutable(T)[] keys;
 
     PackRect[] boxes;
@@ -231,76 +262,84 @@ private:
     void flushToDisk(string outputFileName) {
         import std.datetime.stopwatch;
 
-        Image image = Image(3000, 3000, PixelType.rgba8);
+        Image atlas = Image(this.atlasWidth, this.atlasHeight, PixelType.rgba8);
 
-        assert(image.isValid());
+        foreach (const ref PackRect thisBox; boxes) {
+
+            immutable ulong indexOf = thisBox.pointingTo;
+
+            Image* thisTexture = this.textures[indexOf];
+            immutable(T) thisKey = this.keys[indexOf];
+
+            immutable int xPos = thisBox.x + this.padding;
+            immutable int yPos = thisBox.y + this.padding;
+
+            immutable int width = thisBox.w - this.padding;
+            immutable int height = thisBox.h - this.padding;
+
+            floatingLookupTable[thisKey] = FloatingRectangle(
+                cast(double) xPos / cast(double) this.atlasWidth,
+                cast(double) yPos / cast(double) this.atlasHeight,
+                cast(double) width / cast(double) this.atlasWidth,
+                cast(double) height / cast(double) this.atlasHeight
+            );
+
+            foreach (immutable int inImageY; 0 .. height) {
+                immutable int inAtlasY = inImageY + yPos;
+
+                foreach (immutable int inImageX; 0 .. width) {
+                    immutable int inAtlasX = inImageX + xPos;
+
+                    Pixel thisPixel;
+                    getPixel(thisTexture, inImageX, inImageY, thisPixel);
+
+                    setPixel(&atlas, inAtlasX, inAtlasY, thisPixel);
+
+                    // atlas.setPixel(
+                    //     inAtlasX,
+                    //     inAtlasY,
+                    //     thisTexture.getPixel(
+                    //         inImageX,
+                    //         inImageY
+                    // ));
+                }
+            }
+        }
+
+        assert(atlas.isValid());
 
         StopWatch sw = StopWatch(AutoStart.yes);
         writeln("START");
 
         int flags = PNGCompressionLevel.One | PngFilter.Disable;
 
-        if (!image.saveToFile(outputFileName, flags)) {
+        if (!atlas.saveToFile(outputFileName, flags)) {
             throw new Error("Writing output.png failed");
         }
 
         writeln("took: ", sw.peek.total!"msecs", "ms");
-
-        // foreach (const ref PackRect thisBox; boxes) {
-
-        //     immutable ulong indexOf = thisBox.pointingTo;
-
-        //     Image* thisTexture = &this.textures[indexOf];
-        //     immutable(T) thisKey = this.keys[indexOf];
-
-        //     immutable int xPos = thisBox.x + this.padding;
-        //     immutable int yPos = thisBox.y + this.padding;
-
-        //     immutable int width = thisBox.w - this.padding;
-        //     immutable int height = thisBox.h - this.padding;
-
-        //     floatingLookupTable[thisKey] = FloatingRectangle(
-        //         cast(double) xPos / cast(double) this.atlasWidth,
-        //         cast(double) yPos / cast(double) this.atlasHeight,
-        //         cast(double) width / cast(double) this.atlasWidth,
-        //         cast(double) height / cast(double) this.atlasHeight
-        //     );
-
-        //     foreach (immutable int inImageX; 0 .. width) {
-        //         immutable int inAtlasX = inImageX + xPos;
-
-        //         foreach (immutable int inImageY; 0 .. height) {
-        //             immutable int inAtlasY = inImageY + yPos;
-
-        //             // atlas.setPixel(
-        //             //     inAtlasX,
-        //             //     inAtlasY,
-        //             //     thisTexture.getPixel(
-        //             //         inImageX,
-        //             //         inImageY
-        //             // ));
-        //         }
-        //     }
-        // }
-
-        // writeImageToPngFile(outputFileName, atlas);
     }
 
     pragma(inline, true)
     void uploadTexture(T key, string textureLocation) {
-        // immutable TrueColorImage tempTextureObject = loadImageFromFile(textureLocation).getAsTrueColorImage();
+        Image* tempTextureObject = new Image();
+        tempTextureObject.loadFromFile(textureLocation);
 
-        // if (tempTextureObject is null) {
-        //     throw new Error(to!string(key) ~ " is null");
-        // }
+        if (tempTextureObject.type != PixelType.rgba8) {
+            tempTextureObject.convertTo(PixelType.rgba8);
+        }
 
-        // boxes ~= PackRect(
-        //     0, 0, tempTextureObject.width() + padding, tempTextureObject.height() + padding, textures
-        //         .length
-        // );
+        if (!tempTextureObject.isValid()) {
+            throw new Error(to!string(key) ~ " is invalid.");
+        }
 
-        // textures ~= tempTextureObject;
-        // keys ~= key;
+        boxes ~= PackRect(
+            0, 0, tempTextureObject.width() + padding, tempTextureObject.height() + padding, textures
+                .length
+        );
+
+        textures ~= tempTextureObject;
+        keys ~= key;
     }
 
     /// This is the very nice packing algorithm. :)
