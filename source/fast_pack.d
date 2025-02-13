@@ -292,32 +292,18 @@ private:
 
                     Pixel thisPixel;
                     getPixel(thisTexture, inImageX, inImageY, thisPixel);
-
                     setPixel(&atlas, inAtlasX, inAtlasY, thisPixel);
-
-                    // atlas.setPixel(
-                    //     inAtlasX,
-                    //     inAtlasY,
-                    //     thisTexture.getPixel(
-                    //         inImageX,
-                    //         inImageY
-                    // ));
                 }
             }
         }
 
         assert(atlas.isValid());
 
-        StopWatch sw = StopWatch(AutoStart.yes);
-        writeln("START");
-
         int flags = PNGCompressionLevel.One | PngFilter.Disable;
 
         if (!atlas.saveToFile(outputFileName, flags)) {
-            throw new Error("Writing output.png failed");
+            throw new Error("Writing " ~ outputFileName ~ " failed");
         }
-
-        writeln("took: ", sw.peek.total!"msecs", "ms");
     }
 
     pragma(inline, true)
