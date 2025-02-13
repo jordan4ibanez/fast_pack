@@ -1,6 +1,7 @@
 module fast_pack;
 
-import image;
+import gamut;
+import gamut.plugins.png;
 import std.algorithm.comparison;
 import std.algorithm.sorting;
 import std.conv;
@@ -8,6 +9,7 @@ import std.math.algebraic;
 import std.math.rounding;
 import std.range;
 import std.range.primitives;
+import std.stdio;
 
 private struct PackRect {
     int x = 0;
@@ -46,7 +48,7 @@ private:
     // todo: maybe an integer lookup table if someone asks for it.
 
     // These two are synchronized.
-    immutable(TrueColorImage)[] textures;
+    Image[] textures;
     immutable(T)[] keys;
 
     PackRect[] boxes;
@@ -78,11 +80,11 @@ public:
     /// Packs the textures into the atlas.
     /// Then, returns you the ubyte[] of the raw png data.
     /// The data is RGBA ubytes. Stored left to right, top to bottom, no padding.
-    pragma(inline, true)
-    ubyte[] finalizeToMemory() {
-        this.potpack();
-        return this.flushToMemory();
-    }
+    // pragma(inline, true)
+    // ubyte[] finalizeToMemory() {
+    //     this.potpack();
+    //     return this.flushToMemory();
+    // }
 
     /// The total width of the atlas.
     int getAtlasWidth() const {
@@ -181,108 +183,124 @@ public:
 
 private:
 
-    pragma(inline, true)
-    ubyte[] flushToMemory() {
-        TrueColorImage atlas = new TrueColorImage(this.atlasWidth, this.atlasHeight);
+    // pragma(inline, true)
+    // ubyte[] flushToMemory() {
+    //     Image atlas = Image(this.atlasWidth, this.atlasHeight);
 
-        foreach (const ref PackRect thisBox; boxes) {
+    //     foreach (const ref PackRect thisBox; boxes) {
 
-            immutable ulong indexOf = thisBox.pointingTo;
+    //         immutable ulong indexOf = thisBox.pointingTo;
 
-            immutable TrueColorImage thisTexture = this.textures[indexOf];
-            immutable(T) thisKey = this.keys[indexOf];
+    //         Image* thisTexture = &this.textures[indexOf];
+    //         immutable(T) thisKey = this.keys[indexOf];
 
-            immutable int xPos = thisBox.x + this.padding;
-            immutable int yPos = thisBox.y + this.padding;
+    //         immutable int xPos = thisBox.x + this.padding;
+    //         immutable int yPos = thisBox.y + this.padding;
 
-            immutable int width = thisBox.w - this.padding;
-            immutable int height = thisBox.h - this.padding;
+    //         immutable int width = thisBox.w - this.padding;
+    //         immutable int height = thisBox.h - this.padding;
 
-            floatingLookupTable[thisKey] = FloatingRectangle(
-                cast(double) xPos / cast(double) this.atlasWidth,
-                cast(double) yPos / cast(double) this.atlasHeight,
-                cast(double) width / cast(double) this.atlasWidth,
-                cast(double) height / cast(double) this.atlasHeight
-            );
+    //         floatingLookupTable[thisKey] = FloatingRectangle(
+    //             cast(double) xPos / cast(double) this.atlasWidth,
+    //             cast(double) yPos / cast(double) this.atlasHeight,
+    //             cast(double) width / cast(double) this.atlasWidth,
+    //             cast(double) height / cast(double) this.atlasHeight
+    //         );
 
-            foreach (immutable int inImageX; 0 .. width) {
-                immutable int inAtlasX = inImageX + xPos;
+    //         foreach (immutable int inImageX; 0 .. width) {
+    //             immutable int inAtlasX = inImageX + xPos;
 
-                foreach (immutable int inImageY; 0 .. height) {
-                    immutable int inAtlasY = inImageY + yPos;
+    //             foreach (immutable int inImageY; 0 .. height) {
+    //                 immutable int inAtlasY = inImageY + yPos;
 
-                    atlas.setPixel(
-                        inAtlasX,
-                        inAtlasY,
-                        thisTexture.getPixel(
-                            inImageX,
-                            inImageY
-                    ));
-                }
-            }
-        }
+    //                 atlas.setPixel(
+    //                     inAtlasX,
+    //                     inAtlasY,
+    //                     thisTexture.getPixel(
+    //                         inImageX,
+    //                         inImageY
+    //                 ));
+    //             }
+    //         }
+    //     }
 
-        return atlas.imageData.bytes;
-    }
+    //     return atlas.imageData.bytes;
+    // }
 
     pragma(inline, true)
     void flushToDisk(string outputFileName) {
-        TrueColorImage atlas = new TrueColorImage(this.atlasWidth, this.atlasHeight);
+        import std.datetime.stopwatch;
 
-        foreach (const ref PackRect thisBox; boxes) {
+        Image image = Image(3000, 3000, PixelType.rgba8);
 
-            immutable ulong indexOf = thisBox.pointingTo;
+        assert(image.isValid());
 
-            immutable TrueColorImage thisTexture = this.textures[indexOf];
-            immutable(T) thisKey = this.keys[indexOf];
+        StopWatch sw = StopWatch(AutoStart.yes);
+        writeln("START");
 
-            immutable int xPos = thisBox.x + this.padding;
-            immutable int yPos = thisBox.y + this.padding;
+        int flags = PNGCompressionLevel.One | PngFilter.Disable;
 
-            immutable int width = thisBox.w - this.padding;
-            immutable int height = thisBox.h - this.padding;
-
-            floatingLookupTable[thisKey] = FloatingRectangle(
-                cast(double) xPos / cast(double) this.atlasWidth,
-                cast(double) yPos / cast(double) this.atlasHeight,
-                cast(double) width / cast(double) this.atlasWidth,
-                cast(double) height / cast(double) this.atlasHeight
-            );
-
-            foreach (immutable int inImageX; 0 .. width) {
-                immutable int inAtlasX = inImageX + xPos;
-
-                foreach (immutable int inImageY; 0 .. height) {
-                    immutable int inAtlasY = inImageY + yPos;
-
-                    atlas.setPixel(
-                        inAtlasX,
-                        inAtlasY,
-                        thisTexture.getPixel(
-                            inImageX,
-                            inImageY
-                    ));
-                }
-            }
+        if (!image.saveToFile(outputFileName, flags)) {
+            throw new Error("Writing output.png failed");
         }
-        writeImageToPngFile(outputFileName, atlas);
+
+        writeln("took: ", sw.peek.total!"msecs", "ms");
+
+        // foreach (const ref PackRect thisBox; boxes) {
+
+        //     immutable ulong indexOf = thisBox.pointingTo;
+
+        //     Image* thisTexture = &this.textures[indexOf];
+        //     immutable(T) thisKey = this.keys[indexOf];
+
+        //     immutable int xPos = thisBox.x + this.padding;
+        //     immutable int yPos = thisBox.y + this.padding;
+
+        //     immutable int width = thisBox.w - this.padding;
+        //     immutable int height = thisBox.h - this.padding;
+
+        //     floatingLookupTable[thisKey] = FloatingRectangle(
+        //         cast(double) xPos / cast(double) this.atlasWidth,
+        //         cast(double) yPos / cast(double) this.atlasHeight,
+        //         cast(double) width / cast(double) this.atlasWidth,
+        //         cast(double) height / cast(double) this.atlasHeight
+        //     );
+
+        //     foreach (immutable int inImageX; 0 .. width) {
+        //         immutable int inAtlasX = inImageX + xPos;
+
+        //         foreach (immutable int inImageY; 0 .. height) {
+        //             immutable int inAtlasY = inImageY + yPos;
+
+        //             // atlas.setPixel(
+        //             //     inAtlasX,
+        //             //     inAtlasY,
+        //             //     thisTexture.getPixel(
+        //             //         inImageX,
+        //             //         inImageY
+        //             // ));
+        //         }
+        //     }
+        // }
+
+        // writeImageToPngFile(outputFileName, atlas);
     }
 
     pragma(inline, true)
     void uploadTexture(T key, string textureLocation) {
-        immutable TrueColorImage tempTextureObject = loadImageFromFile(textureLocation).getAsTrueColorImage();
+        // immutable TrueColorImage tempTextureObject = loadImageFromFile(textureLocation).getAsTrueColorImage();
 
-        if (tempTextureObject is null) {
-            throw new Error(to!string(key) ~ " is null");
-        }
+        // if (tempTextureObject is null) {
+        //     throw new Error(to!string(key) ~ " is null");
+        // }
 
-        boxes ~= PackRect(
-            0, 0, tempTextureObject.width() + padding, tempTextureObject.height() + padding, textures
-                .length
-        );
+        // boxes ~= PackRect(
+        //     0, 0, tempTextureObject.width() + padding, tempTextureObject.height() + padding, textures
+        //         .length
+        // );
 
-        textures ~= tempTextureObject;
-        keys ~= key;
+        // textures ~= tempTextureObject;
+        // keys ~= key;
     }
 
     /// This is the very nice packing algorithm. :)
