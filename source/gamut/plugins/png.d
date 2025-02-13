@@ -8,35 +8,41 @@ module gamut.plugins.png;
 
 nothrow @nogc @safe:
 
-import core.stdc.stdlib : free, malloc, realloc;
+import core.stdc.stdlib: malloc, free, realloc;
+import gamut.types;
+import gamut.io;
+import gamut.plugin;
 import gamut.image;
 import gamut.internals.errors;
 import gamut.internals.types;
-import gamut.io;
-import gamut.plugin;
-import gamut.types;
-import std.traits : EnumMembers;
 
-import gamut.codecs.stb_image_write;
-import gamut.codecs.stbdec;
+version(decodePNG) import gamut.codecs.stbdec;
+version(encodePNG) import gamut.codecs.stb_image_write;
 
-ImageFormatPlugin makePNGPlugin() {
+ImageFormatPlugin makePNGPlugin()
+{
     ImageFormatPlugin p;
     p.format = "PNG";
     p.extensionList = "png";
     p.mimeTypes = "image/png";
-
-    p.loadProc = &loadPNG;
-
-    p.saveProc = &savePNG;
-
+    version(decodePNG)
+        p.loadProc = &loadPNG;
+    else
+        p.loadProc = null;
+    version(encodePNG)
+        p.saveProc = &savePNG;
+    else
+        p.saveProc = null;
     p.detectProc = &detectPNG;
     return p;
 }
 
+
 // PERF: STB callbacks could disappear in favor of our own callbakcs, to avoid one step.
 
-void loadPNG(ref Image image, IOStream* io, IOHandle handle, int page, int flags, void* data) @trusted {
+version(decodePNG)
+void loadPNG(ref Image image, IOStream *io, IOHandle handle, int page, int flags, void *data) @trusted
+{
     IOAndHandle ioh;
     stbi_io_callbacks stb_callback;
     initSTBCallbacks(io, handle, &ioh, &stb_callback);
@@ -53,7 +59,8 @@ void loadPNG(ref Image image, IOStream* io, IOHandle handle, int page, int flags
         requestedComp = 0; // auto
 
     // rewind stream
-    if (!io.rewind(handle)) {
+    if (!io.rewind(handle))
+    {
         image.error(kStrImageDecodingIOFailure);
         return;
     }
@@ -68,28 +75,31 @@ void loadPNG(ref Image image, IOStream* io, IOHandle handle, int page, int flags
     // PERF: this could be overriden to use internal 8-bit <-> 10-bit stb conversion
 
     bool decodeTo16bit = is16bit;
-    if (flags & LOAD_8BIT)
-        decodeTo16bit = false;
-    if (flags & LOAD_16BIT)
-        decodeTo16bit = true;
+    if (flags & LOAD_8BIT) decodeTo16bit = false;
+    if (flags & LOAD_16BIT) decodeTo16bit = true;
 
-    if (decodeTo16bit) {
+    if (decodeTo16bit)
+    {
         decoded = cast(ubyte*) stbi_load_16_from_callbacks(&stb_callback, &ioh, &width, &height, &components, requestedComp,
-            &ppmX, &ppmY, &pixelRatio);
-    } else {
+                                                           &ppmX, &ppmY, &pixelRatio);
+    }
+    else
+    {
         decoded = stbi_load_from_callbacks(&stb_callback, &ioh, &width, &height, &components, requestedComp,
-            &ppmX, &ppmY, &pixelRatio);
+                                           &ppmX, &ppmY, &pixelRatio);
     }
 
     if (requestedComp != 0)
         components = requestedComp;
 
-    if (decoded is null) {
+    if (decoded is null)
+    {
         image.error(kStrImageDecodingFailed);
         return;
     }
 
-    if (!imageIsValidSize(1, width, height)) {
+    if (!imageIsValidSize(1, width, height))
+    {
         image.error(kStrImageTooLarge);
         free(decoded);
         return;
@@ -98,7 +108,7 @@ void loadPNG(ref Image image, IOStream* io, IOHandle handle, int page, int flags
     image._allocArea = decoded; // works because codec.pngload and gamut both use malloc/free
     image._width = width;
     image._height = height;
-    image._data = decoded;
+    image._data = decoded; 
     image._pitch = width * components * (decodeTo16bit ? 2 : 1);
 
     image._pixelAspectRatio = (pixelRatio == -1) ? GAMUT_UNKNOWN_ASPECT_RATIO : pixelRatio;
@@ -107,24 +117,41 @@ void loadPNG(ref Image image, IOStream* io, IOHandle handle, int page, int flags
     image._layerCount = 1;
     image._layerOffset = 0;
 
-    if (!decodeTo16bit) {
-        if (components == 1) {
+    if (!decodeTo16bit)
+    {
+        if (components == 1)
+        {
             image._type = PixelType.l8;
-        } else if (components == 2) {
+        }
+        else if (components == 2)
+        {
             image._type = PixelType.la8;
-        } else if (components == 3) {
+        }
+        else if (components == 3)
+        {
             image._type = PixelType.rgb8;
-        } else if (components == 4) {
+        }
+        else if (components == 4)
+        {
             image._type = PixelType.rgba8;
         }
-    } else {
-        if (components == 1) {
+    }
+    else
+    {
+        if (components == 1)
+        {
             image._type = PixelType.l16;
-        } else if (components == 2) {
+        }
+        else if (components == 2)
+        {
             image._type = PixelType.la16;
-        } else if (components == 3) {
+        }
+        else if (components == 3)
+        {
             image._type = PixelType.rgb16;
-        } else if (components == 4) {
+        }
+        else if (components == 4)
+        {
             image._type = PixelType.rgba16;
         }
     }
@@ -135,70 +162,32 @@ void loadPNG(ref Image image, IOStream* io, IOHandle handle, int page, int flags
     image.convertTo(targetType, cast(LayoutConstraints) flags);
 }
 
-bool detectPNG(IOStream* io, IOHandle handle) @trusted {
-    static immutable ubyte[8] pngSignature = [
-        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a
-    ];
+bool detectPNG(IOStream *io, IOHandle handle) @trusted
+{
+    static immutable ubyte[8] pngSignature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
     return fileIsStartingWithSignature(io, handle, pngSignature);
 }
 
-public enum PNGCompressionLevel {
-    // None is horrendously slow.
-    None = 11_223_344,
-    // The more compression, the smaller the file, but longer it takes to write.
-    One = 1_111_185,
-    Two = 2_222_254,
-    Three = 333_331_123,
-    Four = 4_444_412,
-    Five = 55_555,
-    Six = 66_666,
-    Seven = 77_777,
-    Eight = 88_888,
-    Nine = 99_999
-}
-
-public enum PngFilter {
-    Disable = 98_765,
-    Enable = 745_258_032
-}
-
-bool savePNG(ref const(Image) image, IOStream* io, IOHandle handle, int page, int flags, void* data) @trusted {
+version(encodePNG)
+bool savePNG(ref const(Image) image, IOStream *io, IOHandle handle, int page, int flags, void *data) @trusted
+{
     if (page != 0)
         return false;
 
     int channels = 0;
     bool is16Bit = false;
-    switch (image._type) {
-    case PixelType.l8:
-        channels = 1;
-        break;
-    case PixelType.la8:
-        channels = 2;
-        break;
-    case PixelType.rgb8:
-        channels = 3;
-        break;
-    case PixelType.rgba8:
-        channels = 4;
-        break;
-    case PixelType.l16:
-        channels = 1;
-        is16Bit = true;
-        break;
-    case PixelType.la16:
-        channels = 2;
-        is16Bit = true;
-        break;
-    case PixelType.rgb16:
-        channels = 3;
-        is16Bit = true;
-        break;
-    case PixelType.rgba16:
-        channels = 4;
-        is16Bit = true;
-        break;
-    default:
-        return false;
+    switch (image._type)
+    {
+        case PixelType.l8:     channels = 1; break;
+        case PixelType.la8:    channels = 2; break;
+        case PixelType.rgb8:   channels = 3; break;
+        case PixelType.rgba8:  channels = 4; break;
+        case PixelType.l16:    channels = 1; is16Bit = true; break;
+        case PixelType.la16:   channels = 2; is16Bit = true; break;
+        case PixelType.rgb16:  channels = 3; is16Bit = true; break;
+        case PixelType.rgba16: channels = 4; is16Bit = true; break;
+        default:
+            return false;
     }
 
     int width = image._width;
@@ -208,30 +197,15 @@ bool savePNG(ref const(Image) image, IOStream* io, IOHandle handle, int page, in
     int len;
     const(ubyte)* pixels = image._data;
 
-    int compression_level = 5;
-    int force_filter = -1;
-
-    foreach (index, level; EnumMembers!PNGCompressionLevel) {
-        if ((level & flags) == level) {
-            compression_level = index;
-            break;
-        }
-    }
-
-    foreach (index, filter; EnumMembers!PngFilter) {
-        if ((filter & flags) == filter) {
-            force_filter = -(cast(int) index);
-            break;
-        }
-    }
+    int force_filter = flags >= ENCODE_PNG_FILTER_FAST ? 0 : -1;
+    int compression_level = flags >= ENCODE_PNG_FILTER_FAST ? flags - ENCODE_PNG_FILTER_FAST : flags;
 
     // PERF: use stb_image_write stbi_write_png_to_func instead.
-    ubyte* encoded = gamut.codecs.stb_image_write.stbi_write_png_to_mem(pixels, pitch, width, height, channels, &len, is16Bit, force_filter, compression_level);
+    ubyte *encoded = gamut.codecs.stb_image_write.stbi_write_png_to_mem(pixels, pitch, width, height, channels, &len, is16Bit, force_filter, compression_level);
     if (encoded == null)
         return false;
 
-    scope (exit)
-        free(encoded);
+    scope(exit) free(encoded);
 
     // Write all output at once. This is rather bad, could be done progressively.
     // PERF: adapt stb_image_write.h to output in our own buffer directly.
