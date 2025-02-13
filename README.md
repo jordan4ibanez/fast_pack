@@ -11,9 +11,9 @@ The implementation has been supercharged and simplified in this version.
 
 **Note:** Only works with PNG (for now).
 
+**NOTE: This is an experimental release!**
+
 The best way I can show you how to use this is by showing you the original unit test at this current point in time.
-
-
 
 ```d
 void main() {
