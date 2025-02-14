@@ -233,6 +233,88 @@ public:
         referenceOutput = getTexturePoints!Vec2Type(key);
     }
 
+    //* INTEGRAL:
+
+    /// This is getting raw xPos, yPos, width, height.
+    /// RectangleType must implement (x,y,w,h) as (float or double).
+    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Top to bottom, left to right.
+    /// Returns: RectangleType
+    pragma(inline, true)
+    RectangleType getRectangle(RectangleType)(immutable T key) {
+        // This allows you to automatically downcast and insert into custom types.
+        static assert(is(typeof(RectangleType.x) == float) || is(typeof(RectangleType.x) == double),
+            "x must be floating point.");
+        static assert(is(typeof(RectangleType.y) == float) || is(typeof(RectangleType.y) == double),
+            "y must be floating point.");
+        static assert(is(typeof(RectangleType.w) == float) || is(typeof(RectangleType.w) == double),
+            "w must be floating point.");
+        static assert(is(typeof(RectangleType.h) == float) || is(typeof(RectangleType.h) == double),
+            "h must be floating point.");
+
+        const(FloatingRectangle)* thisRectangle = key in floatingLookupTable;
+
+        if (!thisRectangle) {
+            throw new Error("Key " ~ to!string(key) ~ " does not exist.");
+        }
+
+        // x,y,w,h (float or double) is all your type needs.
+        RectangleType result;
+        result.x = thisRectangle.x;
+        result.y = thisRectangle.y;
+        result.w = thisRectangle.w;
+        result.h = thisRectangle.h;
+
+        return result;
+    }
+
+    /// This is getting raw xPos, yPos, width, height.
+    /// RectangleType must implement (x,y,w,h) as (float or double).
+    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Top to bottom, left to right.
+    /// Mutates the variable you give it as a ref.
+    pragma(inline, true)
+    void getRectangle(RectangleType)(immutable T key, ref RectangleType referenceOutput) {
+        referenceOutput = getRectangle!RectangleType(key);
+    }
+
+    /// This is getting raw 2D points of a rectangle on the atlas.
+    /// Vec2Type must implement this(x,y) as (float or double).
+    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Top to bottom, left to right.
+    /// Returns: TexturePoints!Vec2Type
+    TexturePoints!Vec2Type getTexturePoints(Vec2Type)(immutable T key) {
+        // This allows you to automatically downcast and insert into custom types.
+        static assert(is(typeof(Vec2Type.x) == float) || is(typeof(Vec2Type.x) == double), "x must be floating point.");
+        static assert(is(typeof(Vec2Type.y) == float) || is(typeof(Vec2Type.y) == double), "y must be floating point.");
+
+        const(FloatingRectangle)* thisRectangle = key in floatingLookupTable;
+
+        if (!thisRectangle) {
+            throw new Error("Key " ~ to!string(key) ~ " does not exist.");
+        }
+
+        // x,y (float or double) and a this(x,y) constructor is all your type needs.
+        TexturePoints!Vec2Type result;
+
+        result.topLeft = Vec2Type(thisRectangle.x, thisRectangle.y);
+        result.bottomLeft = Vec2Type(thisRectangle.x, thisRectangle.y + thisRectangle.h);
+        result.bottomRight = Vec2Type(thisRectangle.x + thisRectangle.w, thisRectangle.y + thisRectangle
+                .h);
+        result.topRight = Vec2Type(thisRectangle.x + thisRectangle.w, thisRectangle.y);
+
+        return result;
+    }
+
+    /// This is getting raw 2D points of a rectangle on the atlas.
+    /// Vec2Type must implement this(x,y) as (float or double).
+    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Top to bottom, left to right.
+    /// Mutates the variable you give it as a ref.
+    void getTexturePoints(Vec2Type)(immutable T key, ref TexturePoints!Vec2Type referenceOutput) {
+        referenceOutput = getTexturePoints!Vec2Type(key);
+    }
+
 private:
 
     // pragma(inline, true)
