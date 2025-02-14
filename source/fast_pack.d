@@ -410,7 +410,7 @@ public:
         static assert(is(typeof(RectangleTypeIntegral.w) == int), "w must be integral.");
         static assert(is(typeof(RectangleTypeIntegral.h) == int), "h must be integral.");
 
-        foreach (key, r; floatingRectangleLookupTable) {
+        foreach (key, r; integralRectangleLookupTable) {
             RectangleTypeIntegral thisRect = RectangleTypeIntegral();
             thisRect.x = r.x;
             thisRect.y = r.y;
@@ -430,7 +430,7 @@ public:
         static assert(is(typeof(Vec2TypeIntegral.x) == int), "x must be integral.");
         static assert(is(typeof(Vec2TypeIntegral.y) == int), "y must be integral.");
 
-        foreach (key, thesePoints; floatingVec2LookupTable) {
+        foreach (key, thesePoints; integralVec2LookupTable) {
             TexturePoints!Vec2TypeIntegral result;
 
             result.topLeft.x = thesePoints.topLeft.x;
@@ -913,6 +913,20 @@ unittest {
     packer.extractTexturePoints(unit2);
 
     foreach (k, v; unit2) {
+        writeln(k, " ", v);
+    }
+
+    RectangleTestIntegral[string] unit3;
+    packer.extractRectanglesIntegral(unit3);
+
+    foreach (k, v; unit3) {
+        writeln(k, " ", v);
+    }
+
+    TexturePoints!Vec2Integral[string] unit4;
+    packer.extractTexturePointsIntegral(unit4);
+
+    foreach (k, v; unit4) {
         writeln(k, " ", v);
     }
 
