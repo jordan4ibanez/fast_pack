@@ -410,11 +410,23 @@ private:
             immutable int width = thisBox.w - this.padding;
             immutable int height = thisBox.h - this.padding;
 
-            floatingRectangleLookupTable[thisKey] = FloatingRectangle(
+            immutable FloatingRectangle thisRectangleFloating = FloatingRectangle(
                 cast(double) xPos / cast(double) this.atlasWidth,
                 cast(double) yPos / cast(double) this.atlasHeight,
                 cast(double) width / cast(double) this.atlasWidth,
                 cast(double) height / cast(double) this.atlasHeight
+            );
+
+            floatingRectangleLookupTable[thisKey] = thisRectangleFloating;
+
+            floatingVec2LookupTable[thisKey] = TexturePoints!FPVec2Floating(
+                FPVec2Floating(thisRectangleFloating.x, thisRectangleFloating.y),
+                FPVec2Floating(thisRectangleFloating.x, thisRectangleFloating.y + thisRectangleFloating
+                    .h),
+                FPVec2Floating(thisRectangleFloating.x + thisRectangleFloating.w, thisRectangleFloating.y +
+                    thisRectangleFloating.h),
+                FPVec2Floating(thisRectangleFloating.x + thisRectangleFloating.w, thisRectangleFloating
+                    .y)
             );
 
             integralRectangleLookupTable[thisKey] = IntegralRectangle(xPos, yPos, width, height);
