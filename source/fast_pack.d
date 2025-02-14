@@ -410,22 +410,22 @@ private:
             immutable int width = thisBox.w - this.padding;
             immutable int height = thisBox.h - this.padding;
 
-            immutable FloatingRectangle thisRectangleFloating = FloatingRectangle(
+            immutable FloatingRectangle thisFloatingRectangle = FloatingRectangle(
                 cast(double) xPos / cast(double) this.atlasWidth,
                 cast(double) yPos / cast(double) this.atlasHeight,
                 cast(double) width / cast(double) this.atlasWidth,
                 cast(double) height / cast(double) this.atlasHeight
             );
 
-            floatingRectangleLookupTable[thisKey] = thisRectangleFloating;
+            floatingRectangleLookupTable[thisKey] = thisFloatingRectangle;
 
             floatingVec2LookupTable[thisKey] = TexturePoints!FPVec2Floating(
-                FPVec2Floating(thisRectangleFloating.x, thisRectangleFloating.y),
-                FPVec2Floating(thisRectangleFloating.x, thisRectangleFloating.y + thisRectangleFloating
+                FPVec2Floating(thisFloatingRectangle.x, thisFloatingRectangle.y),
+                FPVec2Floating(thisFloatingRectangle.x, thisFloatingRectangle.y + thisFloatingRectangle
                     .h),
-                FPVec2Floating(thisRectangleFloating.x + thisRectangleFloating.w, thisRectangleFloating.y +
-                    thisRectangleFloating.h),
-                FPVec2Floating(thisRectangleFloating.x + thisRectangleFloating.w, thisRectangleFloating
+                FPVec2Floating(thisFloatingRectangle.x + thisFloatingRectangle.w, thisFloatingRectangle.y +
+                    thisFloatingRectangle.h),
+                FPVec2Floating(thisFloatingRectangle.x + thisFloatingRectangle.w, thisFloatingRectangle
                     .y)
             );
 
