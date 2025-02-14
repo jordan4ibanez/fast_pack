@@ -610,6 +610,26 @@ unittest {
 
     writeln("took: ", sw.peek.total!"msecs", "ms");
 
+    struct RectangleTestIntegral {
+        int x = 0;
+        int y = 0;
+        int w = 0;
+        int h = 0;
+    }
+
+    RectangleTestIntegral test1 = packer.getRectangleIntegral!RectangleTestIntegral("1");
+    writeln(test1);
+
+    //? This should never compile.
+    // struct RectangleTestIntegralFailure {
+    //     int x = 0;
+    //     int y = 0;
+    //     int w = 0;
+    //     float h = 0;
+    // }
+    // RectangleTestIntegralFailure test2 = packer.getRectangleIntegral!RectangleTestIntegralFailure("1");
+    // writeln(test2);
+
     //     //? Basically, these tests should look the same for all outputs.
 
     //     writeln("=== BEGIN OUTPUT STYLE ===");
