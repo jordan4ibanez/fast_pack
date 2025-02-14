@@ -88,6 +88,7 @@ private:
 
     // This is used to get the data to texture map to the atlas.
     FloatingRectangle[T] floatingRectangleLookupTable;
+    TexturePoints!FPVec2Floating[T] floatingVec2LookupTable;
 
     IntegralRectangle[T] integralRectangleLookupTable;
 
