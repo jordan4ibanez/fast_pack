@@ -82,7 +82,7 @@ struct TexturePacker(T) {
 private:
 
     // This is used to get the data to texture map to the atlas.
-    FloatingRectangle[T] floatingLookupTable;
+    FloatingRectangle[T] floatingRectangleLookupTable;
 
     IntegralRectangle[T] integralLookupTable;
 
@@ -107,11 +107,11 @@ public:
     /// Key is used for retrieving Rectangle and Texture point data.
     pragma(inline, true)
     void pack(T key, string textureLocation) {
-        if (key in floatingLookupTable) {
+        if (key in floatingRectangleLookupTable) {
             throw new Error("Tried to overwrite " ~ to!string(key) ~ " during pack");
         }
         //? Allows looking up if key in database.
-        floatingLookupTable[key] = FloatingRectangle();
+        floatingRectangleLookupTable[key] = FloatingRectangle();
         this.uploadTexture(key, textureLocation);
     }
 
@@ -149,7 +149,7 @@ public:
 
     /// Check if packer has an item by this key.
     bool contains(T key) {
-        return (key in floatingLookupTable) ? true : false;
+        return (key in floatingRectangleLookupTable) ? true : false;
     }
 
     //
@@ -175,7 +175,7 @@ public:
         static assert(is(typeof(RectangleType.h) == float) || is(typeof(RectangleType.h) == double),
             "h must be floating point.");
 
-        const(FloatingRectangle)* thisRectangle = key in floatingLookupTable;
+        const(FloatingRectangle)* thisRectangle = key in floatingRectangleLookupTable;
 
         if (!thisRectangle) {
             throw new Error("Key " ~ to!string(key) ~ " does not exist.");
@@ -212,7 +212,7 @@ public:
         static assert(is(typeof(Vec2Type.x) == float) || is(typeof(Vec2Type.x) == double), "x must be floating point.");
         static assert(is(typeof(Vec2Type.y) == float) || is(typeof(Vec2Type.y) == double), "y must be floating point.");
 
-        const(FloatingRectangle)* thisRectangle = key in floatingLookupTable;
+        const(FloatingRectangle)* thisRectangle = key in floatingRectangleLookupTable;
 
         if (!thisRectangle) {
             throw new Error("Key " ~ to!string(key) ~ " does not exist.");
@@ -246,7 +246,7 @@ public:
     /// Top to bottom, left to right.
     pragma(inline, true)
     void extractRectangles(RectangleType)(ref RectangleType[T] output) {
-        foreach (key, rectangle; floatingLookupTable) {
+        foreach (key, rectangle; floatingRectangleLookupTable) {
             output[k] = rectangle;
         }
     }
@@ -404,7 +404,7 @@ private:
             immutable int width = thisBox.w - this.padding;
             immutable int height = thisBox.h - this.padding;
 
-            floatingLookupTable[thisKey] = FloatingRectangle(
+            floatingRectangleLookupTable[thisKey] = FloatingRectangle(
                 cast(double) xPos / cast(double) this.atlasWidth,
                 cast(double) yPos / cast(double) this.atlasHeight,
                 cast(double) width / cast(double) this.atlasWidth,
