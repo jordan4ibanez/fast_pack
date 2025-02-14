@@ -239,6 +239,16 @@ public:
         referenceOutput = getTexturePoints!Vec2Type(key);
     }
 
+    /// Extract the raw xPos, yPos, width, height into an associative array.
+    /// RectangleType must implement (x,y,w,h) as (float or double).
+    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Top to bottom, left to right.
+    pragma(inline, true)
+    void extractRectangles(RectangleType)(ref RectangleType[T] output) {
+        foreach (key, rectangle; floatingLookupTable) {
+            output[k] = rectangle;
+        }
+    }
     //
 
     //* INTEGRAL:
