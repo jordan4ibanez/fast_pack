@@ -249,15 +249,19 @@ public:
     /// Top to bottom, left to right.
     /// Returns: RectangleTypeIntegral
     pragma(inline, true)
-    RectangleType getRectangle(RectangleType)(immutable T key) {
+    RectangleType getRectangle(RectangleTypeIntegral)(immutable T key) {
         // This allows you to automatically downcast and insert into custom types.
-        static assert(is(typeof(RectangleType.x) == float) || is(typeof(RectangleType.x) == double),
+        static assert(is(typeof(RectangleTypeIntegral.x) == float) || is(
+                typeof(RectangleTypeIntegral.x) == double),
             "x must be floating point.");
-        static assert(is(typeof(RectangleType.y) == float) || is(typeof(RectangleType.y) == double),
+        static assert(is(typeof(RectangleTypeIntegral.y) == float) || is(
+                typeof(RectangleTypeIntegral.y) == double),
             "y must be floating point.");
-        static assert(is(typeof(RectangleType.w) == float) || is(typeof(RectangleType.w) == double),
+        static assert(is(typeof(RectangleTypeIntegral.w) == float) || is(
+                typeof(RectangleTypeIntegral.w) == double),
             "w must be floating point.");
-        static assert(is(typeof(RectangleType.h) == float) || is(typeof(RectangleType.h) == double),
+        static assert(is(typeof(RectangleTypeIntegral.h) == float) || is(
+                typeof(RectangleTypeIntegral.h) == double),
             "h must be floating point.");
 
         const(FloatingRectangle)* thisRectangle = key in floatingLookupTable;
@@ -267,7 +271,7 @@ public:
         }
 
         // x,y,w,h (float or double) is all your type needs.
-        RectangleType result;
+        RectangleTypeIntegral result;
         result.x = thisRectangle.x;
         result.y = thisRectangle.y;
         result.w = thisRectangle.w;
@@ -282,8 +286,8 @@ public:
     /// Top to bottom, left to right.
     /// Mutates the variable you give it as a ref.
     pragma(inline, true)
-    void getRectangle(RectangleType)(immutable T key, ref RectangleType referenceOutput) {
-        referenceOutput = getRectangle!RectangleType(key);
+    void getRectangle(RectangleTypeIntegral)(immutable T key, ref RectangleTypeIntegral referenceOutput) {
+        referenceOutput = getRectangle!RectangleTypeIntegral(key);
     }
 
     /// This is getting raw 2D points of a rectangle on the atlas.
@@ -291,10 +295,12 @@ public:
     /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
     /// Returns: TexturePoints!Vec2Type
-    TexturePoints!Vec2Type getTexturePoints(Vec2Type)(immutable T key) {
+    TexturePoints!Vec2Type getTexturePoints(Vec2TypeIntegral)(immutable T key) {
         // This allows you to automatically downcast and insert into custom types.
-        static assert(is(typeof(Vec2Type.x) == float) || is(typeof(Vec2Type.x) == double), "x must be floating point.");
-        static assert(is(typeof(Vec2Type.y) == float) || is(typeof(Vec2Type.y) == double), "y must be floating point.");
+        static assert(is(typeof(Vec2TypeIntegral.x) == float) || is(
+                typeof(Vec2TypeIntegral.x) == double), "x must be floating point.");
+        static assert(is(typeof(Vec2TypeIntegral.y) == float) || is(
+                typeof(Vec2TypeIntegral.y) == double), "y must be floating point.");
 
         const(FloatingRectangle)* thisRectangle = key in floatingLookupTable;
 
@@ -303,13 +309,13 @@ public:
         }
 
         // x,y (float or double) and a this(x,y) constructor is all your type needs.
-        TexturePoints!Vec2Type result;
+        TexturePoints!Vec2TypeIntegral result;
 
-        result.topLeft = Vec2Type(thisRectangle.x, thisRectangle.y);
-        result.bottomLeft = Vec2Type(thisRectangle.x, thisRectangle.y + thisRectangle.h);
-        result.bottomRight = Vec2Type(thisRectangle.x + thisRectangle.w, thisRectangle.y + thisRectangle
+        result.topLeft = Vec2TypeIntegral(thisRectangle.x, thisRectangle.y);
+        result.bottomLeft = Vec2TypeIntegral(thisRectangle.x, thisRectangle.y + thisRectangle.h);
+        result.bottomRight = Vec2TypeIntegral(thisRectangle.x + thisRectangle.w, thisRectangle.y + thisRectangle
                 .h);
-        result.topRight = Vec2Type(thisRectangle.x + thisRectangle.w, thisRectangle.y);
+        result.topRight = Vec2TypeIntegral(thisRectangle.x + thisRectangle.w, thisRectangle.y);
 
         return result;
     }
@@ -319,8 +325,8 @@ public:
     /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
     /// Mutates the variable you give it as a ref.
-    void getTexturePoints(Vec2Type)(immutable T key, ref TexturePoints!Vec2Type referenceOutput) {
-        referenceOutput = getTexturePoints!Vec2Type(key);
+    void getTexturePoints(Vec2TypeIntegral)(immutable T key, ref TexturePoints!Vec2TypeIntegral referenceOutput) {
+        referenceOutput = getTexturePoints!Vec2TypeIntegral(key);
     }
 
 private:
