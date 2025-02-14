@@ -83,6 +83,7 @@ private:
 
     // This is used to get the data to texture map to the atlas.
     FloatingRectangle[T] floatingLookupTable;
+    IntegralRectangle[T] integralLookupTable;
 
     // todo: maybe an integer lookup table if someone asks for it.
 
@@ -301,6 +302,8 @@ private:
                 cast(double) width / cast(double) this.atlasWidth,
                 cast(double) height / cast(double) this.atlasHeight
             );
+
+            integralLookupTable[thisKey] = IntegralRectangle(xPos, yPos, width, height);
 
             foreach (immutable int inImageY; 0 .. height) {
                 immutable int inAtlasY = inImageY + yPos;
