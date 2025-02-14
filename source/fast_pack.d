@@ -96,7 +96,7 @@ private:
     TexturePoints!FPFloatingVec2[T] floatingVec2LookupTable;
 
     IntegralRectangle[T] integralRectangleLookupTable;
-    // TexturePoints!
+    TexturePoints!FPIntegralVec2[T] integralVec2LookupTable;
 
     // todo: maybe an integer lookup table if someone asks for it.
 
@@ -435,7 +435,19 @@ private:
                     .y)
             );
 
-            integralRectangleLookupTable[thisKey] = IntegralRectangle(xPos, yPos, width, height);
+            immutable IntegralRectangle thisIntegralRectangle = IntegralRectangle(xPos, yPos, width, height);
+
+            integralRectangleLookupTable[thisKey] = thisIntegralRectangle;
+
+            integralVec2LookupTable[thisKey] = TexturePoints!FPIntegralVec2(
+                FPIntegralVec2(thisIntegralRectangle.x, thisIntegralRectangle.y),
+                FPIntegralVec2(thisIntegralRectangle.x, thisIntegralRectangle.y + thisIntegralRectangle
+                    .h),
+                FPIntegralVec2(thisIntegralRectangle.x + thisIntegralRectangle.w, thisIntegralRectangle.y +
+                    thisIntegralRectangle.h),
+                FPIntegralVec2(thisIntegralRectangle.x + thisIntegralRectangle.w, thisIntegralRectangle
+                    .y)
+            );
 
             foreach (immutable int inImageY; 0 .. height) {
                 immutable int inAtlasY = inImageY + yPos;
