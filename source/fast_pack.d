@@ -325,20 +325,23 @@ public:
         static assert(is(typeof(Vec2TypeIntegral.x) == int), "x must be floating point.");
         static assert(is(typeof(Vec2TypeIntegral.y) == int), "y must be floating point.");
 
-        const(IntegralRectangle)* thisRectangle = key in integralRectangleLookupTable;
+        const(TexturePoints!FPIntegralVec2)* thesePoints = key in integralVec2LookupTable;
 
-        if (!thisRectangle) {
+        if (!thesePoints) {
             throw new Error("Key " ~ to!string(key) ~ " does not exist.");
         }
 
-        // x,y (int) and a this(x,y) constructor is all your type needs.
+        // x,y (int) is all your type needs.
         TexturePoints!Vec2TypeIntegral result;
 
-        result.topLeft = Vec2TypeIntegral(thisRectangle.x, thisRectangle.y);
-        result.bottomLeft = Vec2TypeIntegral(thisRectangle.x, thisRectangle.y + thisRectangle.h);
-        result.bottomRight = Vec2TypeIntegral(thisRectangle.x + thisRectangle.w, thisRectangle.y + thisRectangle
-                .h);
-        result.topRight = Vec2TypeIntegral(thisRectangle.x + thisRectangle.w, thisRectangle.y);
+        result.topLeft.x = thesePoints.topLeft.x;
+        result.topLeft.y = thesePoints.topLeft.y;
+        result.bottomLeft.x = thesePoints.bottomLeft.x;
+        result.bottomLeft.y = thesePoints.bottomLeft.y;
+        result.bottomRight.x = thesePoints.bottomRight.x;
+        result.bottomRight.y = thesePoints.bottomRight.y;
+        result.topRight.x = thesePoints.topRight.x;
+        result.topRight.y = thesePoints.topRight.y;
 
         return result;
     }
@@ -752,30 +755,39 @@ unittest {
     // packer.getRectangle("1", test9);
     // writeln(test9);
 
-    writeln("=== BEGIN GET RECTANGLE ===");
-
-    foreach (uint i; 0 .. 10) {
-        writeln(packer.getRectangle!RectangleTestFloat(to!string(i)));
-        writeln(packer.getRectangle!RectangleTestDouble(to!string(i)));
-    }
-
-    writeln("=== BEGIN GET TEXTURE POINTS ===");
-
-    foreach (uint i; 0 .. 10) {
-        writeln(packer.getTexturePoints!TestVec2Float(to!string(i)));
-        writeln(packer.getTexturePoints!TestVec2Double(to!string(i)));
-    }
-
-    //     packer.flushToMemory();
-
-    ////? TESTING EXTRACTION
-
     struct RectangleTestIntegral {
         int x = 0;
         int y = 0;
         int w = 0;
         int h = 0;
     }
+
+    writeln("=== BEGIN GET RECTANGLE ===");
+
+    foreach (uint i; 0 .. 10) {
+        writeln(packer.getRectangle!RectangleTestFloat(to!string(i)));
+        writeln(packer.getRectangle!RectangleTestDouble(to!string(i)));
+        writeln(packer.getRectangleIntegral!RectangleTestIntegral(to!string(i)));
+    }
+
+    writeln("=== BEGIN GET TEXTURE POINTS ===");
+
+    struct Vec2Integral {
+        int x = 0;
+        int y = 0;
+    }
+
+    foreach (uint i; 0 .. 10) {
+        writeln(packer.getTexturePoints!TestVec2Float(to!string(i)));
+        writeln(packer.getTexturePoints!TestVec2Double(to!string(i)));
+        writeln(packer.getTexturePointsIntegral!Vec2Integral(to!string(i)));
+    }
+
+    writeln("=== END TEST ===");
+
+    //     packer.flushToMemory();
+
+    ////? TESTING EXTRACTION
 
     RectangleTestIntegral test10 = packer.getRectangleIntegral!RectangleTestIntegral("1");
     writeln(test10);
@@ -789,11 +801,6 @@ unittest {
     // }
     // RectangleTestIntegralFailure test2 = packer.getRectangleIntegral!RectangleTestIntegralFailure("1");
     // writeln(test2);
-
-    struct Vec2Integral {
-        int x = 0;
-        int y = 0;
-    }
 
     TexturePoints!Vec2Integral test11 = packer.getTexturePointsIntegral!Vec2Integral("1");
     writeln(test11);
