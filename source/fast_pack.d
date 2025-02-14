@@ -306,17 +306,9 @@ private:
         writeln(flags & ~ENCODE_PNG_FILTER_FAST);
         writeln(((flags & ENCODE_PNG_FILTER_FAST) == ENCODE_PNG_FILTER_FAST));
 
-         import std.datetime.stopwatch;
-
-        StopWatch sw = StopWatch(AutoStart.yes);
-
         if (!atlas.saveToFile(outputFileName, flags)) {
             throw new Error("Writing " ~ outputFileName ~ " failed");
         }
-
-        // writeln(.getAtlasWidth(), " ", packer.getAtlasHeight());
-
-        writeln("took: ", sw.peek.total!"msecs", "ms");
     }
 
     pragma(inline, true)
