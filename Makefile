@@ -1,8 +1,8 @@
 default:
 	@dub test
 
-#fast:
-#	@dub run --build=release
+fast:
+	@DFLAGS="-release -unittest" dub test
 
 clean:
 	dub clean
