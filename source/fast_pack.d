@@ -321,7 +321,7 @@ public:
     /// Returns: RectangleTypeIntegral
     pragma(inline, true)
     RectangleTypeIntegral getRectangleIntegral(RectangleTypeIntegral)(immutable T key) {
-        // This allows you to automatically downcast and insert into custom types.
+        // This allows you to automatically insert into custom types.
         static assert(is(typeof(RectangleTypeIntegral.x) == int), "x must be integral.");
         static assert(is(typeof(RectangleTypeIntegral.y) == int), "y must be integral.");
         static assert(is(typeof(RectangleTypeIntegral.w) == int), "w must be integral.");
@@ -362,7 +362,7 @@ public:
     /// Returns: TexturePoints!Vec2TypeIntegral
     pragma(inline, true)
     TexturePoints!Vec2TypeIntegral getTexturePointsIntegral(Vec2TypeIntegral)(immutable T key) {
-        // This allows you to automatically downcast and insert into custom types.
+        // This allows you to automatically insert into custom types.
         static assert(is(typeof(Vec2TypeIntegral.x) == int), "x must be integral.");
         static assert(is(typeof(Vec2TypeIntegral.y) == int), "y must be integral.");
 
