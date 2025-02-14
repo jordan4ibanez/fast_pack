@@ -251,7 +251,7 @@ public:
     /// Top to bottom, left to right.
     /// Returns: RectangleTypeIntegral
     pragma(inline, true)
-    RectangleType getRectangleIntegral(RectangleTypeIntegral)(immutable T key) {
+    RectangleTypeIntegral getRectangleIntegral(RectangleTypeIntegral)(immutable T key) {
         // This allows you to automatically downcast and insert into custom types.
         static assert(is(typeof(RectangleTypeIntegral.x) == int), "x must be floating point.");
         static assert(is(typeof(RectangleTypeIntegral.y) == int), "y must be floating point.");
@@ -290,7 +290,7 @@ public:
     /// Top to bottom, left to right.
     /// Returns: TexturePoints!Vec2Type
     pragma(inline, true)
-    TexturePoints!Vec2Type getTexturePointsIntegral(Vec2TypeIntegral)(immutable T key) {
+    TexturePoints!Vec2TypeIntegral getTexturePointsIntegral(Vec2TypeIntegral)(immutable T key) {
         // This allows you to automatically downcast and insert into custom types.
         static assert(is(typeof(Vec2TypeIntegral.x) == int), "x must be floating point.");
         static assert(is(typeof(Vec2TypeIntegral.y) == int), "y must be floating point.");
