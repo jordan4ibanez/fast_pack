@@ -249,6 +249,7 @@ public:
     /// RectangleTypeIntegral must implement (x,y,w,h) as (int).
     /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
+    /// Useful for: Working with libraries like raylib and direct pixel access.
     /// Returns: RectangleTypeIntegral
     pragma(inline, true)
     RectangleTypeIntegral getRectangleIntegral(RectangleTypeIntegral)(immutable T key) {
@@ -278,6 +279,7 @@ public:
     /// RectangleTypeIntegral must implement (x,y,w,h) as (int).
     /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
+    /// Useful for: Working with libraries like raylib and direct pixel access.
     /// Mutates the variable you give it as a ref.
     pragma(inline, true)
     void getRectangleIntegral(RectangleTypeIntegral)(immutable T key, ref RectangleTypeIntegral referenceOutput) {
@@ -288,6 +290,7 @@ public:
     /// Vec2TypeIntegral must implement this(x,y) as (int).
     /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
+    /// Useful for: Working with libraries like raylib and direct pixel access.
     /// Returns: TexturePoints!Vec2TypeIntegral
     pragma(inline, true)
     TexturePoints!Vec2TypeIntegral getTexturePointsIntegral(Vec2TypeIntegral)(immutable T key) {
@@ -317,6 +320,7 @@ public:
     /// Vec2TypeIntegral must implement this(x,y) as (int).
     /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
+    /// Useful for: Working with libraries like raylib and direct pixel access.
     /// Mutates the variable you give it as a ref.
     pragma(inline, true)
     void getTexturePointsIntegral(Vec2TypeIntegral)(immutable T key, ref TexturePoints!Vec2TypeIntegral referenceOutput) {
