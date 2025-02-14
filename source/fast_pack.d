@@ -151,6 +151,8 @@ public:
         return (key in floatingLookupTable) ? true : false;
     }
 
+    //* FLOATING POINT:
+
     /// This is getting raw xPos, yPos, width, height.
     /// RectangleType must implement (x,y,w,h) as (float or double).
     /// It will be within scale (0.0 - 1.0) of the atlas.
