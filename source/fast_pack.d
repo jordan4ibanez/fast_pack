@@ -46,6 +46,11 @@ private struct FPFloatingVec2 {
     double y = 0;
 }
 
+private struct FPIntegralVec2 {
+    int x = 0;
+    int y = 0;
+}
+
 struct TexturePoints(T) {
     T topLeft;
     T bottomLeft;
