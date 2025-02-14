@@ -26,6 +26,14 @@ private struct FloatingRectangle {
     double h = 0;
 }
 
+// Not the same as PackRect!
+private struct IntegralRectangle {
+    int x = 0;
+    int y = 0;
+    int w = 0;
+    int h = 0;
+}
+
 struct TexturePoints(T) {
     T topLeft;
     T bottomLeft;
