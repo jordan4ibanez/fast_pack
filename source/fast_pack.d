@@ -6,9 +6,7 @@ import std.algorithm.sorting;
 import std.conv;
 import std.math.algebraic;
 import std.math.rounding;
-import std.range;
 import std.range.primitives;
-import std.stdio;
 
 private struct PackRect {
     int x = 0;
@@ -559,9 +557,6 @@ private:
         assert(atlas.isValid());
 
         int flags = ENCODE_PNG_COMPRESSION_FAST | ENCODE_PNG_FILTER_FAST;
-
-        writeln(flags & ~ENCODE_PNG_FILTER_FAST);
-        writeln(((flags & ENCODE_PNG_FILTER_FAST) == ENCODE_PNG_FILTER_FAST));
 
         if (!atlas.saveToFile(outputFileName, flags)) {
             throw new Error("Writing " ~ outputFileName ~ " failed");
