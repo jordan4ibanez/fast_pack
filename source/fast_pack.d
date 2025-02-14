@@ -106,12 +106,12 @@ public:
     /// Key is used for retrieving Rectangle and Texture point data.
     pragma(inline, true)
     void pack(T key, string textureLocation) {
-        this.uploadTexture(key, textureLocation);
         if (key in floatingLookupTable) {
             throw new Error("Tried to overwrite " ~ to!string(key) ~ " during pack");
         }
         //? Allows looking up if key in database.
         floatingLookupTable[key] = FloatingRectangle();
+        this.uploadTexture(key, textureLocation);
     }
 
     /// Packs the textures into the atlas.
