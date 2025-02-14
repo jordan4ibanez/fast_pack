@@ -399,8 +399,8 @@ public:
     }
 
     /// Extract the raw xPos, yPos, width, height into an associative array.
-    /// RectangleType must implement (x,y,w,h) as (float or double).
-    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// RectangleTypeIntegral must implement (x,y,w,h) as (int).
+    /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
     pragma(inline, true)
     void extractRectanglesIntegral(RectangleTypeIntegral)(ref RectangleTypeIntegral[T] output) {
@@ -421,8 +421,8 @@ public:
     }
 
     /// Extract raw 2D points of a rectangle on the atlas into an associative array.
-    /// Vec2Type must implement this(x,y) as (float or double).
-    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Vec2TypeIntegral must implement this(x,y) as (int).
+    /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
     pragma(inline, true)
     void extractTexturePointsIntegral(Vec2TypeIntegral)(ref TexturePoints!Vec2TypeIntegral[T] output) {
