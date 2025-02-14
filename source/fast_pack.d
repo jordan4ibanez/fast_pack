@@ -98,6 +98,9 @@ public:
     pragma(inline, true)
     void pack(T key, string textureLocation) {
         this.uploadTexture(key, textureLocation);
+        if (key in floatingLookupTable) {
+            throw new Error("Tried to overwrite " ~ to!string(key) ~ " during pack");
+        }
         //? Allows looking up if key in database.
         floatingLookupTable[key] = FloatingRectangle();
     }
