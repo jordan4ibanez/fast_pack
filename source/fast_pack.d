@@ -322,10 +322,10 @@ public:
     pragma(inline, true)
     RectangleTypeIntegral getRectangleIntegral(RectangleTypeIntegral)(immutable T key) {
         // This allows you to automatically downcast and insert into custom types.
-        static assert(is(typeof(RectangleTypeIntegral.x) == int), "x must be floating point.");
-        static assert(is(typeof(RectangleTypeIntegral.y) == int), "y must be floating point.");
-        static assert(is(typeof(RectangleTypeIntegral.w) == int), "w must be floating point.");
-        static assert(is(typeof(RectangleTypeIntegral.h) == int), "h must be floating point.");
+        static assert(is(typeof(RectangleTypeIntegral.x) == int), "x must be integral.");
+        static assert(is(typeof(RectangleTypeIntegral.y) == int), "y must be integral.");
+        static assert(is(typeof(RectangleTypeIntegral.w) == int), "w must be integral.");
+        static assert(is(typeof(RectangleTypeIntegral.h) == int), "h must be integral.");
 
         const(IntegralRectangle)* thisRectangle = key in integralRectangleLookupTable;
 
@@ -363,8 +363,8 @@ public:
     pragma(inline, true)
     TexturePoints!Vec2TypeIntegral getTexturePointsIntegral(Vec2TypeIntegral)(immutable T key) {
         // This allows you to automatically downcast and insert into custom types.
-        static assert(is(typeof(Vec2TypeIntegral.x) == int), "x must be floating point.");
-        static assert(is(typeof(Vec2TypeIntegral.y) == int), "y must be floating point.");
+        static assert(is(typeof(Vec2TypeIntegral.x) == int), "x must be integral.");
+        static assert(is(typeof(Vec2TypeIntegral.y) == int), "y must be integral.");
 
         const(TexturePoints!FPIntegralVec2)* thesePoints = key in integralVec2LookupTable;
 
