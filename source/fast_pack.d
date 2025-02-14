@@ -244,10 +244,10 @@ public:
     //
 
     /// This is getting raw xPos, yPos, width, height.
-    /// RectangleType must implement (x,y,w,h) as (float or double).
-    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// RectangleType must implement (x,y,w,h) as (int).
+    /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
-    /// Returns: RectangleType
+    /// Returns: RectangleTypeIntegral
     pragma(inline, true)
     RectangleType getRectangle(RectangleType)(immutable T key) {
         // This allows you to automatically downcast and insert into custom types.
@@ -277,8 +277,8 @@ public:
     }
 
     /// This is getting raw xPos, yPos, width, height.
-    /// RectangleType must implement (x,y,w,h) as (float or double).
-    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// RectangleType must implement (x,y,w,h) as (int).
+    /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
     /// Mutates the variable you give it as a ref.
     pragma(inline, true)
@@ -287,8 +287,8 @@ public:
     }
 
     /// This is getting raw 2D points of a rectangle on the atlas.
-    /// Vec2Type must implement this(x,y) as (float or double).
-    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Vec2TypeIntegral must implement this(x,y) as (int).
+    /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
     /// Returns: TexturePoints!Vec2Type
     TexturePoints!Vec2Type getTexturePoints(Vec2Type)(immutable T key) {
@@ -315,8 +315,8 @@ public:
     }
 
     /// This is getting raw 2D points of a rectangle on the atlas.
-    /// Vec2Type must implement this(x,y) as (float or double).
-    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Vec2TypeIntegral must implement this(x,y) as (int).
+    /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
     /// Mutates the variable you give it as a ref.
     void getTexturePoints(Vec2Type)(immutable T key, ref TexturePoints!Vec2Type referenceOutput) {
