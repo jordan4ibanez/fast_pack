@@ -41,6 +41,11 @@ private struct Pixel {
     ubyte a = 0;
 }
 
+private struct FPVec2Floating {
+    double x = 0;
+    double y = 0;
+}
+
 struct TexturePoints(T) {
     T topLeft;
     T bottomLeft;
