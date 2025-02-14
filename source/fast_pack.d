@@ -854,4 +854,18 @@ unittest {
     // TexturePoints!Vec2IntegralFailure test4 = packer.getTexturePointsIntegral!Vec2IntegralFailure("1");
     // writeln(test4);
 
+    RectangleTestDouble[string] unit1;
+    packer.extractRectangles(unit1);
+
+    foreach (k, v; unit1) {
+        writeln(k, " ", v);
+    }
+
+    TexturePoints!TestVec2Double[string] unit2;
+    packer.extractTexturePoints(unit2);
+
+    foreach (k, v; unit2) {
+        writeln(k, " ", v);
+    }
+
 }
