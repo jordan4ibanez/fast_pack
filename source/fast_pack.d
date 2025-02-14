@@ -505,7 +505,7 @@ unittest {
 
     //     writeln(packer.getAtlasWidth(), " ", packer.getAtlasHeight());
 
-    //     writeln("took: ", sw.peek.total!"msecs", "ms");
+        writeln("took: ", sw.peek.total!"msecs", "ms");
 
     //     //? Basically, these tests should look the same for all outputs.
 
