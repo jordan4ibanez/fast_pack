@@ -34,18 +34,18 @@ private struct IntegralRectangle {
     int h = 0;
 }
 
-struct TexturePoints(T) {
-    T topLeft;
-    T bottomLeft;
-    T bottomRight;
-    T topRight;
-}
-
 private struct Pixel {
     ubyte r = 0;
     ubyte g = 0;
     ubyte b = 0;
     ubyte a = 0;
+}
+
+struct TexturePoints(T) {
+    T topLeft;
+    T bottomLeft;
+    T bottomRight;
+    T topRight;
 }
 
 // Packer stores as rgba8.
