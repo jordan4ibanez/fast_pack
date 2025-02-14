@@ -249,7 +249,7 @@ public:
     /// Top to bottom, left to right.
     /// Returns: RectangleTypeIntegral
     pragma(inline, true)
-    RectangleType getRectangle(RectangleTypeIntegral)(immutable T key) {
+    RectangleType getRectangleIntegral(RectangleTypeIntegral)(immutable T key) {
         // This allows you to automatically downcast and insert into custom types.
         static assert(is(typeof(RectangleTypeIntegral.x) == int), "x must be floating point.");
         static assert(is(typeof(RectangleTypeIntegral.y) == int), "y must be floating point.");
@@ -278,8 +278,8 @@ public:
     /// Top to bottom, left to right.
     /// Mutates the variable you give it as a ref.
     pragma(inline, true)
-    void getRectangle(RectangleTypeIntegral)(immutable T key, ref RectangleTypeIntegral referenceOutput) {
-        referenceOutput = getRectangle!RectangleTypeIntegral(key);
+    void getRectangleIntegral(RectangleTypeIntegral)(immutable T key, ref RectangleTypeIntegral referenceOutput) {
+        referenceOutput = getRectangleIntegral!RectangleTypeIntegral(key);
     }
 
     /// This is getting raw 2D points of a rectangle on the atlas.
