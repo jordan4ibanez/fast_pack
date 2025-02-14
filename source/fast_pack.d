@@ -261,8 +261,25 @@ public:
     /// Top to bottom, left to right.
     pragma(inline, true)
     void extractRectangles(RectangleType)(ref RectangleType[T] output) {
-        foreach (key, rectangle; floatingRectangleLookupTable) {
-            output[k] = rectangle;
+        // This allows you to automatically downcast and insert into custom types.
+        static assert(is(typeof(RectangleType.x) == float) || is(typeof(RectangleType.x) == double),
+            "x must be floating point.");
+        static assert(is(typeof(RectangleType.y) == float) || is(typeof(RectangleType.y) == double),
+            "y must be floating point.");
+        static assert(is(typeof(RectangleType.w) == float) || is(typeof(RectangleType.w) == double),
+            "w must be floating point.");
+        static assert(is(typeof(RectangleType.h) == float) || is(typeof(RectangleType.h) == double),
+            "h must be floating point.");
+
+        foreach (key, r; floatingRectangleLookupTable) {
+            RectangleType thisRect = RectangleType();
+            thisRect.x = r.x;
+            thisRect.y = r.y;
+            thisRect.w = r.w;
+            thisRect.h = r.h;
+            output[key] = thisRect;
+        }
+    }
         }
     }
 
