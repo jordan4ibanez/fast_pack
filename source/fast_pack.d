@@ -425,13 +425,13 @@ public:
     /// It will be within scale (0.0 - 1.0) of the atlas.
     /// Top to bottom, left to right.
     pragma(inline, true)
-    void extractTexturePointsIntegral(Vec2Type)(ref TexturePoints!Vec2Type[T] output) {
-        // This allows you to automatically downcast and insert into custom types.
-        static assert(is(typeof(Vec2Type.x) == float) || is(typeof(Vec2Type.x) == double), "x must be floating point.");
-        static assert(is(typeof(Vec2Type.y) == float) || is(typeof(Vec2Type.y) == double), "y must be floating point.");
+    void extractTexturePointsIntegral(Vec2TypeIntegral)(ref TexturePoints!Vec2TypeIntegral[T] output) {
+        // This allows you to automatically insert into custom types.
+        static assert(is(typeof(Vec2TypeIntegral.x) == int), "x must be integral.");
+        static assert(is(typeof(Vec2TypeIntegral.y) == int), "y must be integral.");
 
         foreach (key, thesePoints; floatingVec2LookupTable) {
-            TexturePoints!Vec2Type result;
+            TexturePoints!Vec2TypeIntegral result;
 
             result.topLeft.x = thesePoints.topLeft.x;
             result.topLeft.y = thesePoints.topLeft.y;
