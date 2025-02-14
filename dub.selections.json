@@ -1,7 +1,7 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"gamut": "3.1.5",
+		"gamut": "3.2.0",
 		"intel-intrinsics": "1.11.25",
 		"miniz": "0.0.1"
 	}

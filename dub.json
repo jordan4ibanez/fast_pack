@@ -4,8 +4,7 @@
 	],
 	"copyright": "Copyright © 2025, jordan4ibanez",
 	"dependencies": {
-		"intel-intrinsics": "~>1.11.25",
-		"miniz": "~>0.0.1"
+		"gamut": "~>3.2.0"
 	},
 	"description": "A fast texture packer for D.",
 	"license": "MIT",
