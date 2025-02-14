@@ -41,7 +41,7 @@ private struct Pixel {
     ubyte a = 0;
 }
 
-private struct FPVec2Floating {
+private struct FPFloatingVec2 {
     double x = 0;
     double y = 0;
 }
@@ -88,9 +88,10 @@ private:
 
     // This is used to get the data to texture map to the atlas.
     FloatingRectangle[T] floatingRectangleLookupTable;
-    TexturePoints!FPVec2Floating[T] floatingVec2LookupTable;
+    TexturePoints!FPFloatingVec2[T] floatingVec2LookupTable;
 
     IntegralRectangle[T] integralRectangleLookupTable;
+    // TexturePoints!
 
     // todo: maybe an integer lookup table if someone asks for it.
 
@@ -419,13 +420,13 @@ private:
 
             floatingRectangleLookupTable[thisKey] = thisFloatingRectangle;
 
-            floatingVec2LookupTable[thisKey] = TexturePoints!FPVec2Floating(
-                FPVec2Floating(thisFloatingRectangle.x, thisFloatingRectangle.y),
-                FPVec2Floating(thisFloatingRectangle.x, thisFloatingRectangle.y + thisFloatingRectangle
+            floatingVec2LookupTable[thisKey] = TexturePoints!FPFloatingVec2(
+                FPFloatingVec2(thisFloatingRectangle.x, thisFloatingRectangle.y),
+                FPFloatingVec2(thisFloatingRectangle.x, thisFloatingRectangle.y + thisFloatingRectangle
                     .h),
-                FPVec2Floating(thisFloatingRectangle.x + thisFloatingRectangle.w, thisFloatingRectangle.y +
+                FPFloatingVec2(thisFloatingRectangle.x + thisFloatingRectangle.w, thisFloatingRectangle.y +
                     thisFloatingRectangle.h),
-                FPVec2Floating(thisFloatingRectangle.x + thisFloatingRectangle.w, thisFloatingRectangle
+                FPFloatingVec2(thisFloatingRectangle.x + thisFloatingRectangle.w, thisFloatingRectangle
                     .y)
             );
 
