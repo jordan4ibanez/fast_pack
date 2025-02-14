@@ -83,6 +83,7 @@ private:
 
     // This is used to get the data to texture map to the atlas.
     FloatingRectangle[T] floatingLookupTable;
+
     IntegralRectangle[T] integralLookupTable;
 
     // todo: maybe an integer lookup table if someone asks for it.
@@ -249,6 +250,7 @@ public:
             output[k] = rectangle;
         }
     }
+
     //
 
     //* INTEGRAL:
