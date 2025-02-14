@@ -403,19 +403,15 @@ public:
     /// It will be within scale (0.0 - 1.0) of the atlas.
     /// Top to bottom, left to right.
     pragma(inline, true)
-    void extractRectanglesIntegral(RectangleType)(ref RectangleType[T] output) {
-        // This allows you to automatically downcast and insert into custom types.
-        static assert(is(typeof(RectangleType.x) == float) || is(typeof(RectangleType.x) == double),
-            "x must be floating point.");
-        static assert(is(typeof(RectangleType.y) == float) || is(typeof(RectangleType.y) == double),
-            "y must be floating point.");
-        static assert(is(typeof(RectangleType.w) == float) || is(typeof(RectangleType.w) == double),
-            "w must be floating point.");
-        static assert(is(typeof(RectangleType.h) == float) || is(typeof(RectangleType.h) == double),
-            "h must be floating point.");
+    void extractRectanglesIntegral(RectangleTypeIntegral)(ref RectangleTypeIntegral[T] output) {
+        // This allows you to automatically insert into custom types.
+        static assert(is(typeof(RectangleTypeIntegral.x) == int), "x must be integral.");
+        static assert(is(typeof(RectangleTypeIntegral.y) == int), "y must be integral.");
+        static assert(is(typeof(RectangleTypeIntegral.w) == int), "w must be integral.");
+        static assert(is(typeof(RectangleTypeIntegral.h) == int), "h must be integral.");
 
         foreach (key, r; floatingRectangleLookupTable) {
-            RectangleType thisRect = RectangleType();
+            RectangleTypeIntegral thisRect = RectangleTypeIntegral();
             thisRect.x = r.x;
             thisRect.y = r.y;
             thisRect.w = r.w;
