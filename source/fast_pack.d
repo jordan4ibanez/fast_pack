@@ -151,7 +151,11 @@ public:
         return (key in floatingLookupTable) ? true : false;
     }
 
+    //
+
     //* FLOATING POINT:
+
+    //
 
     /// This is getting raw xPos, yPos, width, height.
     /// RectangleType must implement (x,y,w,h) as (float or double).
@@ -233,7 +237,11 @@ public:
         referenceOutput = getTexturePoints!Vec2Type(key);
     }
 
+    //
+
     //* INTEGRAL:
+
+    //
 
     /// This is getting raw xPos, yPos, width, height.
     /// RectangleType must implement (x,y,w,h) as (float or double).
