@@ -9,9 +9,7 @@ Note: Image trimming has been removed in this version, I didn't use it, I don't 
 
 The implementation has been supercharged and simplified in this version.
 
-**Note:** Only works with PNG (for now).
-
-**NOTE: This is an experimental release!**
+Now uses gamut!
 
 The best way I can show you how to use this is by showing you the original unit test at this current point in time.
 
