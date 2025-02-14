@@ -287,7 +287,7 @@ public:
     /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
     /// Returns: TexturePoints!Vec2Type
-    TexturePoints!Vec2Type getTexturePoints(Vec2TypeIntegral)(immutable T key) {
+    TexturePoints!Vec2Type getTexturePointsIntegral(Vec2TypeIntegral)(immutable T key) {
         // This allows you to automatically downcast and insert into custom types.
         static assert(is(typeof(Vec2TypeIntegral.x) == int), "x must be floating point.");
         static assert(is(typeof(Vec2TypeIntegral.y) == int), "y must be floating point.");
@@ -315,8 +315,8 @@ public:
     /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
     /// Mutates the variable you give it as a ref.
-    void getTexturePoints(Vec2TypeIntegral)(immutable T key, ref TexturePoints!Vec2TypeIntegral referenceOutput) {
-        referenceOutput = getTexturePoints!Vec2TypeIntegral(key);
+    void getTexturePointsIntegral(Vec2TypeIntegral)(immutable T key, ref TexturePoints!Vec2TypeIntegral referenceOutput) {
+        referenceOutput = getTexturePointsIntegral!Vec2TypeIntegral(key);
     }
 
 private:
