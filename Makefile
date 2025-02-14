@@ -1,8 +1,8 @@
 default:
-	@dub run
+	@dub test
 
-fast:
-	@dub run --build=release
+#fast:
+#	@dub run --build=release
 
 clean:
 	dub clean
