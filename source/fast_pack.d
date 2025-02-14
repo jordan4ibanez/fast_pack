@@ -295,7 +295,7 @@ public:
         static assert(is(typeof(Vec2TypeIntegral.x) == int), "x must be floating point.");
         static assert(is(typeof(Vec2TypeIntegral.y) == int), "y must be floating point.");
 
-        const(IntegralRectangle)* thisRectangle = key in IntegralRectangle;
+        const(IntegralRectangle)* thisRectangle = key in integralLookupTable;
 
         if (!thisRectangle) {
             throw new Error("Key " ~ to!string(key) ~ " does not exist.");
