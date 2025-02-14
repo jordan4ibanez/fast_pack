@@ -1,7 +1,6 @@
 module fast_pack;
 
 import gamut;
-import gamut.plugins.png;
 import std.algorithm.comparison;
 import std.algorithm.sorting;
 import std.conv;
@@ -559,7 +558,7 @@ private:
 
         assert(atlas.isValid());
 
-        int flags = ENCODE_PNG_COMPRESSION_1 | ENCODE_PNG_FILTER_FAST;
+        int flags = ENCODE_PNG_COMPRESSION_FAST | ENCODE_PNG_FILTER_FAST;
 
         writeln(flags & ~ENCODE_PNG_FILTER_FAST);
         writeln(((flags & ENCODE_PNG_FILTER_FAST) == ENCODE_PNG_FILTER_FAST));
