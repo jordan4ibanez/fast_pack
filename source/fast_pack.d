@@ -98,6 +98,8 @@ public:
     pragma(inline, true)
     void pack(T key, string textureLocation) {
         this.uploadTexture(key, textureLocation);
+        //? Allows looking up if key in database.
+        floatingLookupTable[key] = FloatingRectangle();
     }
 
     /// Packs the textures into the atlas.
