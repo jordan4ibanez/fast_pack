@@ -638,6 +638,14 @@ unittest {
     TexturePoints!Vec2Integral test3 = packer.getTexturePointsIntegral!Vec2Integral("1");
     writeln(test3);
 
+    //? This should never compile.
+    // struct Vec2IntegralFailure {
+    //     int x = 0;
+    //     float y = 0;
+    // }
+    // TexturePoints!Vec2IntegralFailure test4 = packer.getTexturePointsIntegral!Vec2IntegralFailure("1");
+    // writeln(test4);
+
     //     //? Basically, these tests should look the same for all outputs.
 
     //     writeln("=== BEGIN OUTPUT STYLE ===");
