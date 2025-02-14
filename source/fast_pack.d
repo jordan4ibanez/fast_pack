@@ -84,7 +84,7 @@ private:
     // This is used to get the data to texture map to the atlas.
     FloatingRectangle[T] floatingRectangleLookupTable;
 
-    IntegralRectangle[T] integralLookupTable;
+    IntegralRectangle[T] integralRectangleLookupTable;
 
     // todo: maybe an integer lookup table if someone asks for it.
 
@@ -271,7 +271,7 @@ public:
         static assert(is(typeof(RectangleTypeIntegral.w) == int), "w must be floating point.");
         static assert(is(typeof(RectangleTypeIntegral.h) == int), "h must be floating point.");
 
-        const(IntegralRectangle)* thisRectangle = key in integralLookupTable;
+        const(IntegralRectangle)* thisRectangle = key in integralRectangleLookupTable;
 
         if (!thisRectangle) {
             throw new Error("Key " ~ to!string(key) ~ " does not exist.");
@@ -310,7 +310,7 @@ public:
         static assert(is(typeof(Vec2TypeIntegral.x) == int), "x must be floating point.");
         static assert(is(typeof(Vec2TypeIntegral.y) == int), "y must be floating point.");
 
-        const(IntegralRectangle)* thisRectangle = key in integralLookupTable;
+        const(IntegralRectangle)* thisRectangle = key in integralRectangleLookupTable;
 
         if (!thisRectangle) {
             throw new Error("Key " ~ to!string(key) ~ " does not exist.");
@@ -411,7 +411,7 @@ private:
                 cast(double) height / cast(double) this.atlasHeight
             );
 
-            integralLookupTable[thisKey] = IntegralRectangle(xPos, yPos, width, height);
+            integralRectangleLookupTable[thisKey] = IntegralRectangle(xPos, yPos, width, height);
 
             foreach (immutable int inImageY; 0 .. height) {
                 immutable int inAtlasY = inImageY + yPos;
