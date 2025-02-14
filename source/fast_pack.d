@@ -280,6 +280,30 @@ public:
             output[key] = thisRect;
         }
     }
+
+    /// Extract raw 2D points of a rectangle on the atlas into an associative array.
+    /// Vec2Type must implement this(x,y) as (float or double).
+    /// It will be within scale (0.0 - 1.0) of the atlas.
+    /// Top to bottom, left to right.
+    pragma(inline, true)
+    void extractTexturePoints(Vec2Type)(ref TexturePoints!Vec2Type[T] output) {
+        // This allows you to automatically downcast and insert into custom types.
+        static assert(is(typeof(Vec2Type.x) == float) || is(typeof(Vec2Type.x) == double), "x must be floating point.");
+        static assert(is(typeof(Vec2Type.y) == float) || is(typeof(Vec2Type.y) == double), "y must be floating point.");
+
+        foreach (key, thesePoints; floatingVec2LookupTable) {
+            TexturePoints!Vec2Type result;
+
+            result.topLeft.x = thesePoints.topLeft.x;
+            result.topLeft.y = thesePoints.topLeft.y;
+            result.bottomLeft.x = thesePoints.bottomLeft.x;
+            result.bottomLeft.y = thesePoints.bottomLeft.y;
+            result.bottomRight.x = thesePoints.bottomRight.x;
+            result.bottomRight.y = thesePoints.bottomRight.y;
+            result.topRight.x = thesePoints.topRight.x;
+            result.topRight.y = thesePoints.topRight.y;
+
+            output[key] = result;
         }
     }
 
