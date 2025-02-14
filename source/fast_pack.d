@@ -251,18 +251,10 @@ public:
     pragma(inline, true)
     RectangleType getRectangle(RectangleTypeIntegral)(immutable T key) {
         // This allows you to automatically downcast and insert into custom types.
-        static assert(is(typeof(RectangleTypeIntegral.x) == float) || is(
-                typeof(RectangleTypeIntegral.x) == double),
-            "x must be floating point.");
-        static assert(is(typeof(RectangleTypeIntegral.y) == float) || is(
-                typeof(RectangleTypeIntegral.y) == double),
-            "y must be floating point.");
-        static assert(is(typeof(RectangleTypeIntegral.w) == float) || is(
-                typeof(RectangleTypeIntegral.w) == double),
-            "w must be floating point.");
-        static assert(is(typeof(RectangleTypeIntegral.h) == float) || is(
-                typeof(RectangleTypeIntegral.h) == double),
-            "h must be floating point.");
+        static assert(is(typeof(RectangleTypeIntegral.x) == float), "x must be floating point.");
+        static assert(is(typeof(RectangleTypeIntegral.y) == float), "y must be floating point.");
+        static assert(is(typeof(RectangleTypeIntegral.w) == float), "w must be floating point.");
+        static assert(is(typeof(RectangleTypeIntegral.h) == float), "h must be floating point.");
 
         const(FloatingRectangle)* thisRectangle = key in floatingLookupTable;
 
@@ -297,10 +289,8 @@ public:
     /// Returns: TexturePoints!Vec2Type
     TexturePoints!Vec2Type getTexturePoints(Vec2TypeIntegral)(immutable T key) {
         // This allows you to automatically downcast and insert into custom types.
-        static assert(is(typeof(Vec2TypeIntegral.x) == float) || is(
-                typeof(Vec2TypeIntegral.x) == double), "x must be floating point.");
-        static assert(is(typeof(Vec2TypeIntegral.y) == float) || is(
-                typeof(Vec2TypeIntegral.y) == double), "y must be floating point.");
+        static assert(is(typeof(Vec2TypeIntegral.x) == float), "x must be floating point.");
+        static assert(is(typeof(Vec2TypeIntegral.y) == float), "y must be floating point.");
 
         const(FloatingRectangle)* thisRectangle = key in floatingLookupTable;
 
