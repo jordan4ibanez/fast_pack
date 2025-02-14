@@ -246,7 +246,7 @@ public:
     //
 
     /// This is getting raw xPos, yPos, width, height.
-    /// RectangleType must implement (x,y,w,h) as (int).
+    /// RectangleTypeIntegral must implement (x,y,w,h) as (int).
     /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
     /// Returns: RectangleTypeIntegral
@@ -275,7 +275,7 @@ public:
     }
 
     /// This is getting raw xPos, yPos, width, height.
-    /// RectangleType must implement (x,y,w,h) as (int).
+    /// RectangleTypeIntegral must implement (x,y,w,h) as (int).
     /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
     /// Mutates the variable you give it as a ref.
@@ -288,7 +288,7 @@ public:
     /// Vec2TypeIntegral must implement this(x,y) as (int).
     /// It will be literal pixel coordinate on the atlas.
     /// Top to bottom, left to right.
-    /// Returns: TexturePoints!Vec2Type
+    /// Returns: TexturePoints!Vec2TypeIntegral
     pragma(inline, true)
     TexturePoints!Vec2TypeIntegral getTexturePointsIntegral(Vec2TypeIntegral)(immutable T key) {
         // This allows you to automatically downcast and insert into custom types.
